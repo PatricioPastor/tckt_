@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { ThemeProvider } from "@/components/theme-provider";
-
+import { UserProvider } from "@/lib/providers/user-store";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -38,7 +38,9 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          {children}
+          <UserProvider>
+            {children}
+          </UserProvider>
         </ThemeProvider>
       </body>
     </html>

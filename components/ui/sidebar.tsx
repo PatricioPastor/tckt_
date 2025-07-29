@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
-import { VariantProps, cva } from "class-variance-authority"
+import { cva, VariantProps } from "class-variance-authority"
 import { PanelLeftIcon } from "lucide-react"
 
 import { useIsMobile } from "@/hooks/use-mobile"
@@ -24,6 +24,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { Avatar, AvatarFallback, AvatarImage } from "./avatar"
+import { User } from "@/lib/store/user-store"
 
 const SIDEBAR_COOKIE_NAME = "sidebar_state"
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7
@@ -152,7 +154,7 @@ function SidebarProvider({
 }
 
 function Sidebar({
-  side = "left",
+  side = "right",
   variant = "sidebar",
   collapsible = "offcanvas",
   className,
@@ -255,9 +257,13 @@ function Sidebar({
 
 function SidebarTrigger({
   className,
+  user,
   onClick,
   ...props
-}: React.ComponentProps<typeof Button>) {
+}: React.ComponentProps<typeof Button> & {
+  user: User | null
+  
+}) {
   const { toggleSidebar } = useSidebar()
 
   return (
@@ -273,7 +279,11 @@ function SidebarTrigger({
       }}
       {...props}
     >
-      <PanelLeftIcon />
+      <Avatar>
+        <AvatarImage src={user?.image || ""} />
+        <AvatarFallback>{user?.username?.[0].toUpperCase() || "NF"}</AvatarFallback>
+      </Avatar>
+      
       <span className="sr-only">Toggle Sidebar</span>
     </Button>
   )

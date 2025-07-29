@@ -48,7 +48,7 @@ export function LoginForm({
         /**
          * a url to redirect to after the user verifies their email (optional)
          */
-        callbackURL: "/dashboard",
+        callbackURL: "/",
         /**
          * remember the user session after the browser is closed.
          * @default true
@@ -60,8 +60,8 @@ export function LoginForm({
           setLoading(true);
         },
         onSuccess: (ctx) => {
-          // redirect to the dashboard
-          //alert("Logged in successfully");
+          console.log(ctx);
+          // alert("Logged in successfully");
         },
         onError: (ctx) => {
           // display the error message
