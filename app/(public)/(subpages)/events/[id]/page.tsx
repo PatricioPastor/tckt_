@@ -1,12 +1,11 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { useEventStore, EventWithDetails } from '@/lib/store/event-store';
-import { IconArrowLeft, IconShare, IconCalendar, IconMapPin, IconBuilding, IconChevronDown, IconPlus, IconMinus } from '@tabler/icons-react';
+import { useEventStore } from '@/lib/store/event-store';
 import Image from 'next/image';
 import { CtaButtons } from '@/components/cta-buttons/cta-buttons';
-import { Label } from '../../components/label/label';
+
 import { TicketCard } from './components/ticket/ticket-card';
 
 import { Calendar, Share06, Map01, MarkerPin01, ChevronLeft, ChevronDown  } from "@untitledui/icons";
