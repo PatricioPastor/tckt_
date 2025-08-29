@@ -177,8 +177,8 @@ export default function EventDetailPage() {
             </div>
 
             <div className="mb-4 space-y-3">
-              {items.map((item: CartItem) => (
-                  <div key={`${item.eventId}-${item.typeId}`} className="flex items-center justify-between">
+              {items.map((item) => (
+                  <div key={`${item.code}`} className="flex items-center justify-between">
                     <div>
                       <p className="font-medium text-neutral-100">
                         {item.label.toUpperCase()}
