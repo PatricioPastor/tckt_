@@ -35,11 +35,11 @@ export async function POST(req: NextRequest) {
       const tickets = [];
 
       for (const sel of selections) {
-        const tt = event.ticketTypes.find(t => t.type === sel.type);
+        const tt = event.ticketTypes.find(t => t.code === sel.type);
         if (!tt) throw new Error('Ticket type not found: ' + sel.type);
         
         // Ensure it's actually a free ticket
-        if (tt.price > 0) throw new Error('This endpoint only handles free tickets');
+        if (Number(tt.price) > 0) throw new Error('This endpoint only handles free tickets');
         
         if (tt.stockCurrent < sel.quantity) throw new Error('Insufficient stock for ' + sel.type);
         

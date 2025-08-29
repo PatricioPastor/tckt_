@@ -25,9 +25,9 @@ export async function PATCH(request: Request) {
     const validatedData = updateUserSchema.parse(body);
 
     // Convert birthDate string to Date if provided  
-    const updateData: typeof validatedData & { birthDate?: Date } = { ...validatedData };
+    const updateData: typeof validatedData & { birthDate?: string } = { ...validatedData };
     if (validatedData.birthDate) {
-      updateData.birthDate = new Date(validatedData.birthDate);
+      updateData.birthDate = validatedData.birthDate;
     }
 
     const updatedUser = await prisma.user.update({

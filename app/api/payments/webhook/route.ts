@@ -3,7 +3,7 @@ import { MercadoPagoConfig, Payment } from 'mercadopago'
 import prisma from '@/lib/prisma'
 import { sendTicketConfirmationEmail, sendPaymentFailureEmail } from '@/lib/email'
 import crypto from 'crypto'
-import { Prisma } from '@prisma/client'
+import { PaymentStatus, Prisma } from '@prisma/client'
 
 const client = new MercadoPagoConfig({ accessToken: process.env.MERCADOPAGO_ACCESS_TOKEN! })
 const mpPayment = new Payment(client)
@@ -159,7 +159,7 @@ async function processPaymentStatus(args: {
     await prisma.$transaction(async (tx) => {
       await tx.payment.update({
         where: { id: paymentRow.id },
-        data: { status: status as any, mpPaymentId }
+        data: { status: status as PaymentStatus, mpPaymentId }
       })
 
       
