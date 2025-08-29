@@ -71,8 +71,8 @@ export function SignupForm({
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
         <CardHeader>
-          <CardTitle>Create an account</CardTitle>
-          <CardDescription>Get started with your new account</CardDescription>
+          <CardTitle>Crea tu cuenta</CardTitle>
+          <CardDescription>Se parte de la comunidad</CardDescription>
         </CardHeader>
         <CardContent>
           {error && (
@@ -84,35 +84,35 @@ export function SignupForm({
           <form onSubmit={(e) => handleSubmit(e)}>
             <div className="flex flex-col gap-6">
               <div className="grid gap-3">
-                <Label htmlFor="email">Full Name</Label>
+                <Label htmlFor="email">Nombre</Label>
                 <Input
                   onChange={(e) => setFullname(e.target.value)}
                   value={fullname}
                   id="name"
                   type="text"
-                  placeholder="Achour Meguenni"
+                  placeholder="Patricio"
                   required
                 />
               </div>
               <div className="grid gap-3">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">Correo electrónico</Label>
                 <Input
                   onChange={(e) => setEmail(e.target.value)}
                   value={email}
                   id="email"
                   type="email"
-                  placeholder="me@example.com"
+                  placeholder="patricio@tckt.fun"
                   required
                 />
               </div>
               <div className="grid gap-3">
                 <div className="flex items-center">
-                  <Label htmlFor="password">Password</Label>
+                  <Label htmlFor="password">Contraseña</Label>
                   <a
                     href="#"
-                    className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
+                    className="ml-auto  inline-block text-sm underline-offset-4 hover:underline"
                   >
-                    Forgot your password?
+                    olvidaste tu contraseña?
                   </a>
                 </div>
                 <Input
@@ -120,6 +120,7 @@ export function SignupForm({
                   value={password}
                   id="password"
                   type="password"
+                  placeholder="********"
                   required
                 />
               </div>
@@ -128,18 +129,18 @@ export function SignupForm({
                   {loading ? (
                     <IconLoader className="animate-spin" stroke={2} />
                   ) : (
-                    "Sign Up"
+                    "Unirme"
                   )}
                 </Button>
-                <Button variant="outline" className="w-full">
+                {/* <Button variant="outline" className="w-full">
                   Sign Up with Google
-                </Button>
+                </Button> */}
               </div>
             </div>
             <div className="mt-4 text-center text-sm">
-              Already have an account?{" "}
+              Ya posees una cuenta?{" "}
               <a href="/login" className="underline underline-offset-4">
-                Login
+                Iniciar sesión
               </a>
             </div>
           </form>

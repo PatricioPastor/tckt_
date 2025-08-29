@@ -4,8 +4,9 @@ import prisma from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 import QRCode from 'qrcode'
 import { headers } from 'next/headers'
-import { TicketStatus } from '@prisma/client'
+import { TicketStatus, Prisma } from '@prisma/client'
 import { createPaymentPreference } from '@/lib/mercadopago'
+import { Decimal } from '@prisma/client/runtime/library'
 
 export async function POST(req: NextRequest) {
   const session = await auth.api.getSession({ headers: await headers() })
@@ -80,6 +81,7 @@ export async function POST(req: NextRequest) {
         const tt = event.ticketTypes.find(t => t.code === sel.code)
         if (!tt) throw new Error(`Ticket type not found: ${sel.code}`)
 
+
         // Límite por usuario (contando existentes)
         const existingUserTickets = await tx.ticket.count({
           where: { ownerId: session.user.id, typeId: tt.id }
@@ -102,7 +104,7 @@ export async function POST(req: NextRequest) {
         }
 
         // Agregar ítems de pago si corresponde
-        const unit = Number(tt.price) // Decimal -> number
+        const unit = Number(tt.price) * 1.09 // Decimal -> number
         if (unit > 0) {
           paymentItems.push({
             id: `ticket_${tt.id}`,
@@ -129,33 +131,71 @@ export async function POST(req: NextRequest) {
         }
       }
 
-      // Insertar tickets PENDING
-      if (ticketsToCreate.length > 0) {
-        await tx.ticket.createMany({ data: ticketsToCreate })
+      const externalReference = `order_${session.user.id}_${eventId}_${Date.now()}`
+      let paymentRecord = null;
+      let createdTickets: { id: number }[] = [];
+
+      // Crear payment record si hay monto a pagar
+      if (totalAmount > 0) {
+        paymentRecord = await tx.payment.create({
+          data: {
+            userId: session.user.id,
+            eventId,
+            status: 'pending',
+            amount: new Prisma.Decimal(totalAmount),
+            currency: 'ARS',
+            provider: 'mercadopago',
+            externalReference,
+            payerEmail: userInfo.email,
+            payerName: userInfo.name,
+          }
+        });
       }
 
-      // Obtener IDs creados (últimos segundos)
-      const createdTickets = await tx.ticket.findMany({
-        where: {
-          ownerId: session.user.id,
-          eventId,
-          status: 'pending',
-          createdAt: { gte: new Date(Date.now() - 10_000) }
-        },
-        select: { id: true }
-      })
+      // Insertar tickets PENDING con paymentId si corresponde
+      if (ticketsToCreate.length > 0) {
+        const ticketsData = ticketsToCreate.map(ticket => ({
+          ...ticket,
+          paymentId: paymentRecord?.id || null
+        }));
+        
+        await tx.ticket.createMany({ data: ticketsData });
 
-      const externalReference = `order_${session.user.id}_${eventId}_${Date.now()}`
+        // Obtener IDs creados (últimos segundos)
+        createdTickets = await tx.ticket.findMany({
+          where: {
+            ownerId: session.user.id,
+            eventId,
+            status: 'pending',
+            createdAt: { gte: new Date(Date.now() - 10_000) }
+          },
+          select: { id: true }
+        });
+      }
 
       await tx.log.create({
         data: {
           userId: session.user.id,
           action: 'payment_initiated',
-          details: { eventId, ticketCount: ticketsToCreate.length, totalAmount, externalReference }
+          details: { 
+            eventId, 
+            ticketCount: ticketsToCreate.length, 
+            totalAmount, 
+            externalReference,
+            paymentId: paymentRecord?.id 
+          }
         }
       })
 
-      return { createdTickets, paymentItems, userInfo, event, externalReference, totalAmount }
+      return { 
+        createdTickets, 
+        paymentItems, 
+        userInfo, 
+        event, 
+        externalReference, 
+        totalAmount,
+        paymentRecord 
+      }
     })
 
     // Si no hay monto (por si llega algo gratis acá), devolvemos éxito sin MP
@@ -191,11 +231,23 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Payment setup failed: ' + paymentPreference.error }, { status: 500 })
     }
 
+    // Actualizar payment record con preferenceId de MercadoPago
+    if (result.paymentRecord) {
+      await prisma.payment.update({
+        where: { id: result.paymentRecord.id },
+        data: { 
+          mpPreferenceId: paymentPreference.data!.id 
+        }
+      });
+    }
+
     return NextResponse.json({
       success: true,
       data: paymentPreference.data,
       ticketCount: result.createdTickets.length,
-      totalAmount: result.totalAmount
+      totalAmount: result.totalAmount,
+      paymentId: result.paymentRecord?.id,
+      externalReference: result.externalReference
     }, { status: 200 })
   } catch (error: unknown) {
     console.error(error)

@@ -64,7 +64,7 @@ export default function EventDetailPage() {
   if (loading) {
     return (
       <div className="flex h-screen items-center justify-center bg-black text-neutral-300">
-        Cargando evento…
+        docargan evento…
       </div>
     );
   }
@@ -284,27 +284,6 @@ export default function EventDetailPage() {
             </div>
           )}
 
-          {ticketTypes.length > 0 && (
-            <div className="rounded-xl border border-neutral-800 bg-[#0E0E0E] p-4">
-              <h3 className="mb-3 text-sm font-semibold text-white">
-                Precios disponibles
-              </h3>
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                {ticketTypes.map((tt) => (
-                  <div
-                    key={tt.id}
-                    className="flex items-center justify-between text-sm"
-                  >
-                    <span className="text-neutral-300">{tt.label.toUpperCase()}</span>
-                    <span className="font-medium text-neutral-100">
-                      ${Number(tt.price).toLocaleString("es-AR")}
-                    </span>
-
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
         </section>
       </div>
 
