@@ -1,5 +1,5 @@
 import { auth } from '@/lib/auth'
-import { Prisma, PrismaClient } from '@prisma/client'
+import { EventStatus, Prisma, PrismaClient } from '@prisma/client'
 import { headers } from 'next/headers'
 import { NextRequest } from 'next/server'
 
@@ -29,7 +29,7 @@ interface CreateEventRequest {
   location: string;
   description?: string;
   banner_url?: string;
-  status?: string;
+  status?: EventStatus;
   capacity_total?: number;
   is_rsvp_allowed?: boolean;
   event_genre?: string;
@@ -133,7 +133,7 @@ export async function POST(req: NextRequest) {
               name: art.name,
               bio: art.bio ?? null,
               imageUrl: art.image_url ?? null,
-              socialLinks: art.social_links ?? null
+              socialLinks: art.social_links ?? []
             }
           })
           resolvedArtists.push({
