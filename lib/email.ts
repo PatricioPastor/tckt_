@@ -14,7 +14,7 @@ export interface TicketEmailData {
   eventLocation: string;
   tickets: {
     id: number;
-    type: string;
+    name: string;
     code: string;
     qrCode: string; // base64 QR code
   }[];
@@ -123,7 +123,7 @@ function createTicketEmailTemplate(data: TicketEmailData): string {
           
           ${data.tickets.map(ticket => `
             <div class="ticket">
-              <div class="ticket-type">Ticket ${ticket.type.toUpperCase()}</div>
+              <div class="ticket-type">Ticket ${ticket.name.toUpperCase()}</div>
               <div class="qr-code">
                 <img src="cid:qr-${ticket.id}" alt="QR Code" width="150" height="150">
               </div>

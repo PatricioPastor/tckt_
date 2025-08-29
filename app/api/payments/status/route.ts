@@ -1,71 +1,49 @@
-import { NextRequest, NextResponse } from 'next/server';
-import prisma from '@/lib/prisma';
-import { auth } from '@/lib/auth';
-import { headers } from 'next/headers';
+import { NextRequest, NextResponse } from 'next/server'
+import prisma from '@/lib/prisma'
+import { auth } from '@/lib/auth'
+import { headers } from 'next/headers'
 
 export async function GET(req: NextRequest) {
-  const session = await auth.api.getSession({ 
-    headers: await headers() 
-  });
+  const session = await auth.api.getSession({ headers: await headers() })
+  if (!session?.user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const { searchParams } = new URL(req.url)
+  const paymentId = searchParams.get('payment_id')       // mpPaymentId
+  const externalRef = searchParams.get('external_ref')   // externalReference
+
+  if (!paymentId && !externalRef) {
+    return NextResponse.json({ error: 'Provide payment_id or external_ref' }, { status: 400 })
   }
 
-  const { searchParams } = new URL(req.url);
-  const paymentId = searchParams.get('payment_id');
-
-  if (!paymentId) {
-    return NextResponse.json({ error: 'Payment ID is required' }, { status: 400 });
-  }
-
-  try {
-    // Find the payment record
-    const payment = await prisma.payment.findFirst({
-      where: {
-        paymentId: paymentId,
-        userId: session.user.id
-      },
-      include: {
-        tickets: {
-          include: {
-            event: true,
-            type: true
-          }
+  const payment = await prisma.payment.findFirst({
+    where: {
+      userId: session.user.id,
+      ...(paymentId ? { mpPaymentId: paymentId } : {}),
+      ...(externalRef ? { externalReference: externalRef } : {})
+    },
+    include: {
+      tickets: {
+        include: {
+          event: true,
+          type: true
         }
       }
-    });
-
-    if (!payment) {
-      return NextResponse.json({ 
-        success: false, 
-        error: 'Payment not found' 
-      }, { status: 404 });
     }
+  })
 
-    // Return payment status and ticket information
-    return NextResponse.json({
-      success: true,
-      status: payment.status, // 'pending', 'approved', 'rejected'
-      paymentId: payment.paymentId,
-      transactionAmount: payment.amount,
-      tickets: payment.tickets.map(ticket => ({
-        id: ticket.id,
-        qrCode: ticket.qrCode,
-        event: {
-          name: ticket.event.name
-        },
-        type: {
-          type: ticket.type.type
-        }
-      }))
-    });
+  if (!payment) return NextResponse.json({ success: false, error: 'Payment not found' }, { status: 404 })
 
-  } catch (error: unknown) {
-    console.error('Payment status check error:', error);
-    return NextResponse.json({ 
-      success: false, 
-      error: 'Failed to check payment status' 
-    }, { status: 500 });
-  }
+  return NextResponse.json({
+    success: true,
+    status: payment.status,
+    paymentId: payment.mpPaymentId,
+    externalReference: payment.externalReference,
+    transactionAmount: Number(payment.amount),
+    tickets: payment.tickets.map(t => ({
+      id: t.id,
+      qrCode: t.qrCode,
+      event: { name: t.event.name },
+      type: { code: t.type.code, label: t.type.label, price: Number(t.type.price) }
+    }))
+  })
 }

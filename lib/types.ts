@@ -7,9 +7,11 @@ import {
   eventArtist as PrismaEventArtist,
   participant as PrismaParticipant,
   rrppAssignment as PrismaRrppAssignment,
+  payment as PrismaPayment,
   Role,
   EventStatus,
-  TicketStatus
+  TicketStatus,
+  PaymentStatus
 } from '@prisma/client';
 
 /**
@@ -37,16 +39,18 @@ export type EventWithDetails = PrismaEvent & {
   tickets?: PrismaTicket[];
   participants?: PrismaParticipant[];
   rrppAssignments?: PrismaRrppAssignment[];
+  payments?: PrismaPayment[];
 };
 
 /**
- * Ticket with related data (event, owner, type)
+ * Ticket with related data (event, owner, type, payment)
  */
 export type TicketWithDetails = PrismaTicket & {
   event: PrismaEvent;
   owner: PrismaUser;
   type: PrismaTicketType;
   transferredFrom?: PrismaUser | null;
+  payment?: PrismaPayment | null;
 };
 
 /**
@@ -70,6 +74,18 @@ export interface CartItem {
   eventName: string;
   eventDate: Date;
 }
+
+/**
+ * Payment with related data (user, event, tickets)
+ */
+export type PaymentWithDetails = PrismaPayment & {
+  user: PrismaUser;
+  event: PrismaEvent;
+  tickets: (PrismaTicket & {
+    type: PrismaTicketType;
+    owner: PrismaUser;
+  })[];
+};
 
 /**
  * Payment-related types
@@ -263,4 +279,4 @@ export interface QRScanResult {
 export type Optional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>;
 
 // Export Prisma enums for convenience
-export { Role, EventStatus, TicketStatus };
+export { Role, EventStatus, TicketStatus, PaymentStatus };

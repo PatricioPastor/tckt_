@@ -1,340 +1,234 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { MercadoPagoConfig, Payment } from 'mercadopago';
-import prisma from '@/lib/prisma';
-import { sendTicketConfirmationEmail, sendPaymentFailureEmail } from '@/lib/email';
-import crypto from 'crypto';
+import { NextRequest, NextResponse } from 'next/server'
+import { MercadoPagoConfig, Payment } from 'mercadopago'
+import prisma from '@/lib/prisma'
+import { sendTicketConfirmationEmail, sendPaymentFailureEmail } from '@/lib/email'
+import crypto from 'crypto'
+import { Prisma } from '@prisma/client'
 
-// Initialize MercadoPago client
-const client = new MercadoPagoConfig({
-  accessToken: process.env.MERCADOPAGO_ACCESS_TOKEN!,
-});
-
-const payment = new Payment(client);
+const client = new MercadoPagoConfig({ accessToken: process.env.MERCADOPAGO_ACCESS_TOKEN! })
+const mpPayment = new Payment(client)
 
 export async function POST(req: NextRequest) {
   try {
-    // Get raw body text for signature verification
-    const bodyText = await req.text();
-    const body = JSON.parse(bodyText);
-    
-    // Verify the webhook signature from MercadoPago
-    const signature = req.headers.get('x-signature');
-    const requestId = req.headers.get('x-request-id');
-    
+    const bodyText = await req.text()
+    const body = JSON.parse(bodyText)
+
+    const signature = req.headers.get('x-signature')
+    const requestId = req.headers.get('x-request-id')
     if (!verifyWebhookSignature(bodyText, signature, requestId)) {
-      console.error('Invalid webhook signature');
-      return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
+      return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
     }
-    
-    console.log('MercadoPago webhook received and verified:', body);
-    
-    // MercadoPago sends different types of notifications
-    if (body.type === 'payment') {
-      const paymentId = body.data?.id;
-      
-      if (!paymentId) {
-        return NextResponse.json({ error: 'No payment ID provided' }, { status: 400 });
-      }
-      
-      // Get payment details from MercadoPago
-      const paymentDetails = await payment.get({ id: paymentId });
-      
-      if (!paymentDetails) {
-        return NextResponse.json({ error: 'Payment not found' }, { status: 404 });
-      }
-      
-      const externalReference = paymentDetails.external_reference;
-      const status = paymentDetails.status || 'unknown';
-      
-      console.log(`Payment ${paymentId} status: ${status}, reference: ${externalReference}`);
-      
-      // Process the payment based on status
-      await processPaymentStatus(paymentDetails, externalReference!, status);
-      
-      return NextResponse.json({ message: 'Webhook processed successfully' });
+
+    if (body.type !== 'payment') {
+      return NextResponse.json({ message: 'Notification type not handled' })
     }
-    
-    // Handle other notification types if needed
-    return NextResponse.json({ message: 'Notification type not handled' });
-    
-  } catch (error) {
-    console.error('Webhook processing error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' }, 
-      { status: 500 }
-    );
+
+    const paymentId = body.data?.id
+    if (!paymentId) return NextResponse.json({ error: 'No payment ID' }, { status: 400 })
+
+    const pd = await mpPayment.get({ id: paymentId })
+    if (!pd) return NextResponse.json({ error: 'Payment not found' }, { status: 404 })
+
+    const externalReference = pd.external_reference ?? null
+    const status = pd.status ?? 'unknown'
+
+    await processPaymentStatus({
+      mpPaymentId: String(pd.id),
+      externalReference,
+      status,
+      amount: typeof pd.transaction_amount === 'number' ? pd.transaction_amount : null
+    })
+
+    return NextResponse.json({ ok: true })
+  } catch (e) {
+    console.error('Webhook error', e)
+    return NextResponse.json({ error: 'Internal error' }, { status: 500 })
   }
 }
 
-interface PaymentDetails {
-  id: string;
-  status?: string;
-  external_reference?: string;
-  transaction_amount?: number;
+export async function GET(req: NextRequest) {
+  const topic = req.nextUrl.searchParams.get('topic')
+  const id = req.nextUrl.searchParams.get('id')
+  if (topic === 'payment' && id) {
+    try {
+      const pd = await mpPayment.get({ id })
+      await processPaymentStatus({
+        mpPaymentId: String(pd.id),
+        externalReference: pd.external_reference ?? null,
+        status: pd.status ?? 'unknown',
+        amount: typeof pd.transaction_amount === 'number' ? pd.transaction_amount : null
+      })
+      return NextResponse.json({ ok: true })
+    } catch (e) {
+      console.error('GET webhook error', e)
+      return NextResponse.json({ error: 'Processing failed' }, { status: 500 })
+    }
+  }
+  return NextResponse.json({ message: 'Webhook alive' })
 }
 
-async function processPaymentStatus(paymentDetails: PaymentDetails, externalReference: string | null, status: string) {
+async function processPaymentStatus(args: {
+  mpPaymentId: string
+  externalReference: string | null
+  status: string
+  amount: number | null
+}) {
+  const { mpPaymentId, externalReference, status, amount } = args
   if (!externalReference) {
-    console.error('No external reference found in payment');
-    return;
+    console.error('Missing externalReference on webhook')
+    return
   }
-  
-  try {
-    // Parse external reference to get order info
-    // Format: order_{userId}_{eventId}_{timestamp}
-    const [, userId, eventId] = externalReference.split('_');
-    
-    if (!userId || !eventId) {
-      console.error('Invalid external reference format:', externalReference);
-      return;
-    }
-    
-    // Find the pending tickets for this order
-    const pendingTickets = await prisma.ticket.findMany({
-      where: {
-        ownerId: userId,
-        eventId: parseInt(eventId),
-        status: 'pending',
-        createdAt: {
-          // Look for tickets created in the last hour
-          gte: new Date(Date.now() - 60 * 60 * 1000)
-        }
-      },
-      include: {
-        owner: {
-          select: { name: true, email: true }
-        },
-        event: {
-          select: { name: true, date: true, location: true }
-        },
-        type: {
-          select: { type: true, price: true }
+
+  // Encontrar el pago por externalReference
+  const paymentRow = await prisma.payment.findUnique({
+    where: { externalReference },
+    include: {
+      tickets: {
+        include: {
+          type: { select: { id: true, code: true, label: true, price: true } },
+          owner: { select: { name: true, email: true } },
+          event: { select: { name: true, date: true, location: true, id: true } }
         }
       }
-    });
-    
-    if (pendingTickets.length === 0) {
-      console.log('No pending tickets found for reference:', externalReference);
-      return;
     }
-    
-    const user = pendingTickets[0].owner;
-    const event = pendingTickets[0].event;
-    
-    if (status === 'approved') {
-      // Payment successful - confirm tickets
-      await prisma.ticket.updateMany({
-        where: {
-          id: { in: pendingTickets.map(t => t.id) }
-        },
+  })
+  if (!paymentRow) {
+    console.warn('Payment not found for externalReference', externalReference)
+    return
+  }
+
+  const event = paymentRow.tickets[0]?.event
+  const user = paymentRow.tickets[0]?.owner
+
+  if (status === 'approved') {
+    await prisma.$transaction(async (tx) => {
+      await tx.payment.update({
+        where: { id: paymentRow.id },
         data: {
-          status: 'paid'
+          status: 'approved',
+          mpPaymentId,
+          amount: amount != null ? new Prisma.Decimal(amount) : paymentRow.amount
         }
-      });
-      
-      // Log successful payment
-      await prisma.log.create({
+      })
+
+      await tx.ticket.updateMany({
+        where: { paymentId: paymentRow.id },
+        data: { status: 'paid' }
+      })
+
+      await tx.log.create({
         data: {
-          userId,
+          userId: paymentRow.userId,
           action: 'payment_confirmed',
           details: {
-            paymentId: paymentDetails.id,
+            paymentId: mpPaymentId,
             externalReference,
-            ticketIds: pendingTickets.map(t => t.id),
-            amount: paymentDetails.transaction_amount
+            ticketIds: paymentRow.tickets.map(t => t.id),
+            amount: amount ?? paymentRow.amount
           }
         }
-      });
-      
-      // Send confirmation email (if email service is configured)
-      const totalAmount = pendingTickets.reduce((sum, ticket) => sum + +ticket.type.price, 0);
-      
-      const emailResult = await sendTicketConfirmationEmail({
+      })
+    })
+
+    if (user && event) {
+      const totalAmount = paymentRow.tickets.reduce(
+        (sum, t) => sum + Number(t.type.price),
+        0
+      )
+      await sendTicketConfirmationEmail({
         userEmail: user.email,
         userName: user.name || 'Usuario',
         eventName: event.name,
-        eventDate: new Date(event.date).toLocaleDateString('es-ES', {
-          weekday: 'long',
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit'
+        eventDate: new Date(event.date).toLocaleString('es-AR', {
+          weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+          hour: '2-digit', minute: '2-digit'
         }),
-        eventLocation: event.location || 'Por confirmar',
-        tickets: pendingTickets.map(ticket => ({
-          id: ticket.id,
-          type: ticket.type.type,
-          code: ticket.code!,
-          qrCode: ticket.qrCode
+        eventLocation: event.location ?? 'Por confirmar',
+        tickets: paymentRow.tickets.map(t => ({
+          id: t.id,
+          name: t.type.label, // Usamos label para el nombre del ticket en el mail
+          type: t.type.label,   // label para el mail
+          code: t.code!,
+          qrCode: t.qrCode
         })),
         totalAmount,
         orderReference: externalReference
-      });
-      
-      if (!emailResult.success) {
-        console.warn('Email sending failed:', emailResult.error);
-      }
-      
-      console.log(`Payment confirmed for ${pendingTickets.length} tickets`);
-      
-    } else if (status === 'rejected' || status === 'cancelled') {
-      // Payment failed - cancel tickets and restore stock
-      await prisma.$transaction(async (tx) => {
-        // Delete the failed tickets
+      }).catch(err => console.warn('Email confirm failed', err))
+    }
+  } else if (['rejected', 'cancelled'].includes(status)) {
+    await prisma.$transaction(async (tx) => {
+      await tx.payment.update({
+        where: { id: paymentRow.id },
+        data: { status: status as any, mpPaymentId }
+      })
+
+      // Borrar tickets pendientes y restaurar stock por typeId
+      const pending = paymentRow.tickets.filter(t => t.status === 'pending')
+      if (pending.length > 0) {
         await tx.ticket.deleteMany({
-          where: {
-            id: { in: pendingTickets.map(t => t.id) }
-          }
-        });
-        
-        // Restore stock for each ticket type
-        const stockUpdates = pendingTickets.reduce((acc, ticket) => {
-          const typeId = ticket.type.type;
-          acc[typeId] = (acc[typeId] || 0) + 1;
-          return acc;
-        }, {} as Record<string, number>);
-        
-        for (const [ticketType, quantity] of Object.entries(stockUpdates)) {
-          await tx.ticketType.updateMany({
-            where: {
-              eventId: parseInt(eventId),
-              code: ticketType
-            },
-            data: {
-              stockCurrent: {
-                increment: quantity
-              }
-            }
-          });
+          where: { id: { in: pending.map(t => t.id) } }
+        })
+
+        const byTypeId: Record<number, number> = {}
+        for (const t of pending) byTypeId[t.typeId] = (byTypeId[t.typeId] ?? 0) + 1
+
+        for (const [typeId, qty] of Object.entries(byTypeId)) {
+          await tx.ticketType.update({
+            where: { id: Number(typeId) },
+            data: { stockCurrent: { increment: qty } }
+          })
         }
-        
-        // Log failed payment
-        await tx.log.create({
-          data: {
-            userId,
-            action: 'payment_failed',
-            details: {
-              paymentId: paymentDetails.id,
-              externalReference,
-              status,
-              ticketCount: pendingTickets.length
-            }
+      }
+
+      await tx.log.create({
+        data: {
+          userId: paymentRow.userId,
+          action: 'payment_failed',
+          details: {
+            paymentId: mpPaymentId,
+            externalReference,
+            status,
+            ticketCount: paymentRow.tickets.length
           }
-        });
-      });
-      
-      // Send failure notification email (if configured)
-      const failureEmailResult = await sendPaymentFailureEmail(
-        user.email,
-        user.name || 'Usuario',
-        event.name,
-        externalReference
-      );
-      
-      if (!failureEmailResult.success) {
-        console.warn('Failure email sending failed:', failureEmailResult.error);
+        }
+      })
+    })
+
+    if (user && event) {
+      await sendPaymentFailureEmail(user.email, user.name || 'Usuario', event.name, externalReference)
+        .catch(err => console.warn('Email failure failed', err))
+    }
+  } else {
+    // Otros estados (pending/in_process) → solo reflejar
+    await prisma.payment.update({
+      where: { id: paymentRow.id },
+      data: {
+        status: (status === 'in_process' ? 'in_process' : 'pending'),
+        mpPaymentId
       }
-      
-      console.log(`Payment failed for ${pendingTickets.length} tickets, stock restored`);
-    }
-    
-  } catch (error) {
-    console.error('Error processing payment status:', error);
-    throw error;
+    })
   }
 }
 
-// Handle GET requests (MercadoPago sometimes sends GET for verification)
-export async function GET(req: NextRequest) {
-  const searchParams = req.nextUrl.searchParams;
-  const topic = searchParams.get('topic');
-  const id = searchParams.get('id');
-  
-  if (topic === 'payment' && id) {
-    // This is a GET notification, treat it like POST
-    try {
-      const paymentDetails = await payment.get({ id });
-      const externalReference = paymentDetails.external_reference;
-      const status = paymentDetails.status || 'unknown';
-      
-      await processPaymentStatus(paymentDetails, externalReference!, status);
-      
-      return NextResponse.json({ message: 'GET webhook processed successfully' });
-    } catch (error) {
-      console.error('GET webhook processing error:', error);
-      return NextResponse.json({ error: 'Processing failed' }, { status: 500 });
-    }
-  }
-  
-  return NextResponse.json({ message: 'Webhook endpoint active' });
-}
-
-/**
- * Verifies MercadoPago webhook signature
- */
+/** Verificación de firma MP (opcional en dev si no configurás el secreto) */
 function verifyWebhookSignature(body: string, signature: string | null, requestId: string | null): boolean {
-  const webhookSecret = process.env.MERCADOPAGO_WEBHOOK_SECRET;
-  
-  if (!webhookSecret) {
-    console.warn('MERCADOPAGO_WEBHOOK_SECRET not configured, skipping signature verification');
-    return true; // Allow webhook in development if secret not configured
-  }
-  
-  if (!signature || !requestId) {
-    console.error('Missing signature or request ID headers');
-    return false;
-  }
-  
+  const secret = process.env.MERCADOPAGO_WEBHOOK_SECRET
+  if (!secret) return true
+  if (!signature || !requestId) return false
+
   try {
-    // MercadoPago signature format: ts=timestamp,v1=signature
-    const parts = signature.split(',');
-    let timestamp = '';
-    let v1Signature = '';
-    
-    for (const part of parts) {
-      const [key, value] = part.split('=');
-      if (key.trim() === 'ts') {
-        timestamp = value;
-      } else if (key.trim() === 'v1') {
-        v1Signature = value;
-      }
+    const parts = signature.split(',')
+    let ts = '', v1 = ''
+    for (const p of parts) {
+      const [k, v] = p.split('=')
+      if (k.trim() === 'ts') ts = v
+      if (k.trim() === 'v1') v1 = v
     }
-    
-    if (!timestamp || !v1Signature) {
-      console.error('Invalid signature format');
-      return false;
-    }
-    
-    // MercadoPago uses this exact format for the payload
-    const dataId = JSON.parse(body).data?.id || '';
-    const signedPayload = `id:${dataId};request-id:${requestId};ts:${timestamp};`;
-    
-    // Generate HMAC SHA256 with the webhook secret
-    const expectedSignature = crypto
-      .createHmac('sha256', webhookSecret)
-      .update(signedPayload)
-      .digest('hex');
-    
-    // Compare signatures
-    const isValid = crypto.timingSafeEqual(
-      Buffer.from(v1Signature, 'hex'),
-      Buffer.from(expectedSignature, 'hex')
-    );
-    
-    if (!isValid) {
-      console.error('Signature mismatch');
-      console.error('Expected:', expectedSignature);
-      console.error('Received:', v1Signature);
-      console.error('Payload:', signedPayload);
-      console.error('DataId:', dataId);
-      console.error('RequestId:', requestId);
-      console.error('Timestamp:', timestamp);
-    }
-    
-    return isValid;
-  } catch (error) {
-    console.error('Error verifying webhook signature:', error);
-    return false;
+    const dataId = JSON.parse(body).data?.id || ''
+    const signedPayload = `id:${dataId};request-id:${requestId};ts:${ts};`
+    const expected = crypto.createHmac('sha256', secret).update(signedPayload).digest('hex')
+    return crypto.timingSafeEqual(Buffer.from(v1, 'hex'), Buffer.from(expected, 'hex'))
+  } catch {
+    return false
   }
 }
