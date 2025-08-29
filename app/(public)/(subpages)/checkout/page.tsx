@@ -1,73 +1,145 @@
 "use client";
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useCartStore } from '@/lib/store/cart-store';
-import { IconMinus, IconPlus } from '@tabler/icons-react';
-import Image from 'next/image';
-import { Subtotal } from './componentes/subtotal/subtotal';
-import { Button } from '@/components/ui/button';
-import { ChevronLeft } from '@untitledui/icons';
-import { ItemsCart } from './componentes/items-cart/items-cart';
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useCartStore } from "@/lib/store/cart-store";
+import { Button } from "@/components/ui/button";
+import { useUserStore } from "@/lib/store/user-store";
+import { authClient } from "@/lib/auth-client";
+import { ItemsCart } from "./components/items-cart/items-cart";
+import { Subtotal } from "./components/subtotal/subtotal";
+import { SlideToConfirm } from "@/components/ui/slide-to-confirm";
+import { BackHeader } from "@/components/back-header/back-header";
 
-export default function Page() {
+export default function CheckoutPage() {
   const router = useRouter();
-  const { eventId, items, getTotal, checkout } = useCartStore();
+  const { eventId, getTotal, checkout, checkoutFree, hasFreeTickets, hasPaidTickets } = useCartStore();
+  const { user } = useUserStore();
+  const { data: session, isPending } = authClient.useSession();
 
-  useEffect(() => {
-    if(getTotal() == 0){
-      router.push('/events/' + eventId);
-    }
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  const [showSlideConfirm, setShowSlideConfirm] = useState(false);
+  const [showEmailOption, setShowEmailOption] = useState(false);
+  const [sendEmail, setSendEmail] = useState(false);
 
-  }, [eventId, items]);
+  useEffect(() => { if (!isPending) setIsCheckingAuth(false); }, [isPending]);
 
-  if (!eventId) return <div className="flex justify-center items-center h-screen text-white">No event selected</div>;
-
+  if (!eventId) {
+    return <div className="flex h-screen items-center justify-center text-sm text-neutral-400 bg-[#0B0B0B]">No event selected</div>;
+  }
 
   const total = getTotal();
 
-
   const handleContinue = async () => {
-    // Stub: Create MP preference, redirect to init_point
-    // Pass selections { typeId, quantity } to /api/tickets/buy
-    await checkout()
-    // router.push('/payment/success'); // Or MP URL
+    if (!session?.user && !user) { router.push('/auth'); return; }
+    if (!hasPaidTickets() && hasFreeTickets()) { setShowEmailOption(true); return; }
+    setShowSlideConfirm(true);
   };
 
-  
-
-  const handleBack = () => {
-    if(eventId){
-      router.back();
-    }else{
-      router.push('/');
+  const handleSlideConfirm = async () => {
+    try {
+      if (hasFreeTickets()) {
+        const freeResult = await checkoutFree(sendEmail);
+        if (!freeResult.success) { console.error("Free checkout failed"); setShowSlideConfirm(false); return; }
+      }
+      if (hasPaidTickets()) {
+        const result = await checkout();
+        const data = result.data as { success: boolean; data?: { init_point: string } };
+        if (data.success && data.data?.init_point) {
+          setShowSlideConfirm(false);
+          router.push(`/payment/redirect?to=${encodeURIComponent(data.data.init_point)}`);
+        } else {
+          setShowSlideConfirm(false);
+        }
+      } else {
+        router.push("/payment/success");
+      }
+    } catch (e) {
+      console.error(e);
+      setShowSlideConfirm(false);
     }
+  };
+
+  const handleFreeCheckout = async () => {
+    try {
+      const r = await checkoutFree(sendEmail);
+      if (r.success) router.push("/tickets");
+    } catch (e) { console.error(e); }
   };
 
 
   return (
-    <div className="bg-black  min-h-screen text-white p-4">
-      <div className="mb-6">
-        <div className='flex items-center justify-start gap-2'>
-          <ChevronLeft size={20} onClick={handleBack}/>
-          <h3 className="text-lg tracking-tighter font-bold">Orden de compra</h3>
+    <div className="min-h-screen bg-[#0B0B0B]">
+      <BackHeader title="Checkout" className="border-b border-neutral-800 bg-[#0B0B0B]" />
+
+      <div className="mx-auto max-w-2xl px-4 py-6">
+        <div className="space-y-8">
+          <ItemsCart />
+          <Subtotal />
         </div>
       </div>
 
-      <ItemsCart />
+      <div className="sticky bottom-0 border-t border-neutral-800 bg-[#0B0B0B]/80 backdrop-blur supports-[backdrop-filter]:backdrop-blur">
+        <div className="mx-auto max-w-2xl px-4 py-4">
+          <div className="mb-3 flex items-center justify-between">
+            <div>
+              <p className="text-[11px] font-medium text-neutral-400">Total</p>
+              <p className="text-lg font-semibold text-neutral-100">${(total * 1.08).toLocaleString("es-AR") }</p>
+            </div>
+          </div>
 
-      <Subtotal />
+          {showEmailOption ? (
+            <div className="space-y-3">
+              <div className="text-center">
+                <p className="mb-1 text-sm font-medium text-neutral-100">Tickets gratuitos</p>
+                <p className="text-xs text-neutral-400">¿Querés recibir los QR por email?</p>
+              </div>
 
-      <div className="fixed bottom-0 left-0 right-0 bg-black p-4 flex justify-between items-center border-t border-neutral-800">
-        <div className='flex items-start flex-col justify-start'>
-          <span className="text-white/70 font-medium font-mono text-sm">t_tal</span>
-          <p className="text-white font-bold text-xl">${total.toLocaleString()}</p>
+              <label className="flex cursor-pointer items-center gap-2 rounded-md border border-neutral-800 bg-[#0E0E0E] p-3">
+                <input
+                  type="checkbox"
+                  checked={sendEmail}
+                  onChange={(e) => setSendEmail(e.target.checked)}
+                  className="h-4 w-4 rounded border-neutral-700 bg-transparent text-neutral-100 focus:ring-neutral-100"
+                />
+                <span className="text-xs text-neutral-300">Enviar QR codes por email</span>
+              </label>
+
+              <Button onClick={handleFreeCheckout} className="h-9 w-full rounded-md bg-neutral-100 text-sm font-medium text-black hover:bg-neutral-200">
+                Obtener tickets gratuitos
+              </Button>
+
+              <button onClick={() => setShowEmailOption(false)} className="w-full py-1 text-xs text-neutral-400 hover:text-neutral-300">
+                Volver
+              </button>
+            </div>
+          ) : showSlideConfirm ? (
+            <div className="space-y-3">
+              <p className="text-center text-xs text-neutral-400">Deslizá para confirmar tu compra</p>
+              <SlideToConfirm onConfirm={handleSlideConfirm} text="Deslizar para comprar" confirmText="Procesando..." />
+              <button onClick={() => setShowSlideConfirm(false)} className="w-full py-1 text-xs text-neutral-400 hover:text-neutral-300">
+                Cancelar
+              </button>
+            </div>
+          ) : (
+            <Button
+              onClick={handleContinue}
+              className="h-9 w-full rounded-md bg-neutral-100 text-sm font-medium text-black hover:bg-neutral-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={isCheckingAuth}
+            >
+              {isCheckingAuth ? (
+                <div className="flex items-center gap-2">
+                  <div className="h-3 w-3 animate-spin rounded-full border border-black/30 border-t-black" />
+                  <span className="text-xs">Verificando...</span>
+                </div>
+              ) : (
+                "Continuar al pago"
+              )}
+            </Button>
+          )}
         </div>
-        <Button onClick={handleContinue} size="lg" className="w-1/2  bg-white text-black font-semibold rounded-full backdrop-blur-lg border border-white/20 text-center">
-          Comprar
-        </Button>
       </div>
 
     </div>
-  )
+  );
 }

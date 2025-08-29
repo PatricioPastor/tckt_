@@ -2,11 +2,11 @@
 
 import { useEventStore } from "@/lib/store/event-store";
 import { useEffect } from "react";
-import { useRouter } from 'next/navigation';
+
 
 export default function Page() {
-  const router = useRouter();
-  const { events, loading, error, fetchEvents } = useEventStore();
+
+  const { loading, error, fetchEvents } = useEventStore();
 
   useEffect(() => {
     fetchEvents(); 
@@ -18,11 +18,11 @@ export default function Page() {
   return (
     <>
       <ul>
-        {(events && events.length > 0) ? events.map(event => (
+        {/* {(events && events.length > 0) ? events.map(event => (
           <li key={event.id} onClick={() => router.push(`/events/${event.id}`)} style={{ cursor: 'pointer' }}>
             {event.name} - Click to see details
           </li>
-        )) : <p>No events found</p>}
+        )) : <p>No events found</p>} */}
       </ul>
       {/* <SectionCards />
       <div className="px-4 lg:px-6">

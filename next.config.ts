@@ -7,6 +7,10 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "i.scdn.co",
       },
+      {
+        protocol: "https",
+        hostname: "yowafgrayhrihobmztpa.supabase.co",
+      },
     ],
   },
   /* config options here */

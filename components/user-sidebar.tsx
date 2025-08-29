@@ -1,192 +1,130 @@
 "use client";
 
-import * as React from "react";
-import {
-  IconCamera,
-  IconCopy,
-  IconDashboard,
-  IconFileAi,
-  IconFileDescription,
-  IconHome,
-  IconInnerShadowTop,
-  IconSettings,
-  IconUserCircle,
-} from "@tabler/icons-react";
-
-import { NavMain } from "@/components/nav-main";
-import { NavUser } from "@/components/nav-user";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   Sidebar,
+  SidebarHeader,
   SidebarContent,
   SidebarFooter,
-  SidebarHeader,
   SidebarMenu,
-  SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuButton,
 } from "@/components/ui/sidebar";
-import { SessionUser } from "@/lib/types";
-import { NavSecondary } from "./nav-secondary";
+import { NavMain } from "./nav-main";
+import { NavSecondary } from "./nav-secondary"; // si ya lo tenés
+import { NavUser } from "./nav-user"; // si ya lo tenés
+import { Calendar, Home01, Ticket01, User01 } from "@untitledui/icons";
+import { authClient } from "@/lib/auth-client";
+import { useEffect } from "react";
 import { User } from "@/lib/store/user-store";
-import { useRouter } from "next/navigation";
+
+
+type AppSidebarProps = React.ComponentProps<typeof Sidebar> & {
+  user?: User | null;
+};
 
 const data = {
   navMain: [
     {
-      title: "Dashboard",
-      url: "/dashboard",
-      icon: IconDashboard,
+      title: "Mis Tickets",
+      url: "/tickets",
+      icon: Ticket01,
     },
     {
-      title: "Account",
-      url: "/dashboard/account",
-      icon: IconUserCircle,
+      title: "Eventos",
+      url: "/events",
+      icon:  Calendar,
     },
     {
-      title: "Setting",
-      url: "/dashboard/setting",
-      icon: IconSettings,
-    },
-    // {
-    //   title: "Lifecycle",
-    //   url: "#",
-    //   icon: IconListDetails,
-    // },
-    // {
-    //   title: "Analytics",
-    //   url: "#",
-    //   icon: IconChartBar,
-    // },
-    // {
-    //   title: "Projects",
-    //   url: "#",
-    //   icon: IconFolder,
-    // },
-    // {
-    //   title: "Team",
-    //   url: "#",
-    //   icon: IconUsers,
-    // },
-  ],
-  navClouds: [
-    {
-      title: "Capture",
-      icon: IconCamera,
-      isActive: true,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Proposal",
-      icon: IconFileDescription,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Prompts",
-      icon: IconFileAi,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
+      title: "Mi Cuenta",
+      url: "/account",
+      icon: User01,
     },
   ],
   navSecondary: [
     {
-      title: "Home",
+      title: "Inicio",
       url: "/",
-      icon: IconHome,
+      icon: Home01,
     },
-    {
-      title: "Clone Repository",
-      url: "https://github.com/Achour/nextjs-better-auth",
-      icon: IconCopy,
-    },
-  ],
-  documents: [
-    // {
-    //   name: "Data Library",
-    //   url: "#",
-    //   icon: IconDatabase,
-    // },
-    // {
-    //   name: "Reports",
-    //   url: "#",
-    //   icon: IconReport,
-    // },
-    // {
-    //   name: "Word Assistant",
-    //   url: "#",
-    //   icon: IconFileWord,
-    // }, 
   ],
 };
 
-interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
-  user: User | null;
+
+function LogoMono() {
+  return (
+    <span className="font-mono text-[17px] font-semibold tracking-tight text-neutral-100">
+      tckt_
+    </span>
+  );
 }
 
 export function AppSidebar({ user, ...props }: AppSidebarProps) {
-
   const router = useRouter();
 
-  const handleLogin = () => {
-    router.push("/login");
-  };
+  const { data: session, isPending } = authClient.useSession();
+  user = user! || session!.user!;
+
+  useEffect(() => {
+    if (!isPending && !user) {
+      router.push("/login");
+    }
+
+  },[isPending])
+
+  const handleLogin = () => router.push("/login");
+
+
 
   return (
-    <Sidebar collapsible="offcanvas" {...props}>
-      <SidebarHeader>
+    <Sidebar
+      collapsible="offcanvas"
+      className="bg-[#0B0B0B] text-neutral-200 border-r border-neutral-800"
+      {...props}
+    >
+      {/* Header */}
+      <SidebarHeader className="border-b border-neutral-800">
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton
               asChild
-              className="data-[slot=sidebar-menu-button]:!p-1.5"
+              className="data-[slot=sidebar-menu-button]:!p-2 hover:bg-[#111] rounded-md"
             >
-              <a href="#">
-                <IconInnerShadowTop className="!size-5" />
-                <span onClick={handleLogin} className="text-base font-semibold">Inicia sesión</span>
-              </a>
+              <Link href="/" aria-label="Inicio">
+                <LogoMono />
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
 
-      {/* main */}
-      
-      <SidebarContent>
-        <NavMain items={data.navMain} />
-        {/* <NavDocuments items={data.documents} /> */}
+      {/* Content */}
+      <SidebarContent className="gap-3">
+        {user ? (
+          <NavMain items={data.navMain} />
+        ) : (
+          <div className="px-3 pt-3">
+            <div className="rounded-lg border border-neutral-800 bg-[#0E0E0E] p-4">
+              <p className="mb-3 text-sm text-neutral-400">
+                Iniciá sesión para ver tus tickets y eventos.
+              </p>
+              <button
+                onClick={handleLogin}
+                className="w-full h-10 rounded-md bg-neutral-100 text-sm font-medium text-black hover:bg-neutral-200 transition-colors"
+              >
+                Iniciar sesión
+              </button>
+            </div>
+          </div>
+        )}
+
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
 
-      {/* footer */}
-      <SidebarFooter>
-        <NavUser user={user} />
+      {/* Footer */}
+      <SidebarFooter className="border-t border-neutral-800">
+        <NavUser user={user!} />
       </SidebarFooter>
     </Sidebar>
   );

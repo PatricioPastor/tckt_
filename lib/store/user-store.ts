@@ -1,6 +1,5 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { auth } from '@/lib/auth'; // Better Auth client
 
 
 export type User = {

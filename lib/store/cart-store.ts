@@ -1,22 +1,30 @@
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { create } from 'zustand'
+import { persist } from 'zustand/middleware'
 
 export interface CartItem {
-  type: 'general' | 'vip' | 'ultra' | 'free';
-  quantity: number;
-  price: number;
-  maxStock: number;
+  code: string        // identificador lógico del ticketType (p.ej. "tier1")
+  label: string       // visible en UI (p.ej. "TIER 1")
+  price: number       // en ARS
+  quantity: number
+  maxStock: number    // stock disponible para este tipo
 }
 
 interface CartState {
-  eventId: number | null;
-  items: CartItem[];
-  addItem: (item: CartItem) => void;
-  updateQuantity: (type: CartItem['type'], newQty: number, price: number, maxStock: number) => void;
-  clearCart: () => void;
-  getTotal: () => number;
-  setEventId: (eventId: number) => void;
-  checkout: () => Promise<void>; // New: Save to DB
+  eventId: number | null
+  items: CartItem[]
+  addItem: (item: CartItem) => void
+  updateQuantity: (code: CartItem['code'], newQty: number, price: number, maxStock: number) => void
+  clearCart: () => void
+  getTotal: () => number
+  getFreeItems: () => CartItem[]
+  getPaidItems: () => CartItem[]
+  hasFreeTickets: () => boolean
+  hasPaidTickets: () => boolean
+  setEventId: (eventId: number) => void
+  checkout: () => Promise<{ success: boolean; data?: unknown; error?: string }>
+  checkoutFree: (sendEmail?: boolean) => Promise<{ success: boolean; data?: unknown; error?: string }>
+  persistToLocalStorage: () => void
+  loadFromLocalStorage: () => void
 }
 
 export const useCartStore = create<CartState>()(
@@ -24,61 +32,139 @@ export const useCartStore = create<CartState>()(
     (set, get) => ({
       eventId: null,
       items: [],
+
       addItem: (item) => {
-        const existing = get().items.find((i) => i.type === item.type);
-        if (existing) {
-          set({
-            items: get().items.map((i) =>
-              i.type === item.type ? { ...i, quantity: Math.min(i.quantity + item.quantity, item.maxStock) } : i
-            ),
-          });
+        const items = [...get().items]
+        const idx = items.findIndex(i => i.code === item.code)
+        if (idx > -1) {
+          const nextQty = Math.min(items[idx].quantity + item.quantity, item.maxStock)
+          items[idx] = { ...items[idx], quantity: nextQty, price: item.price, maxStock: item.maxStock }
         } else {
-          set({ items: [...get().items, { ...item, maxStock: item.maxStock }] });
+          items.push(item)
         }
+        set({ items })
       },
-      updateQuantity: (type, newQty, price, maxStock) => {
-        const items = [...get().items];
-        const index = items.findIndex((i) => i.type === type);
-        const clampedQty = Math.max(0, Math.min(newQty, maxStock));
 
-        if (index > -1) {
-          if (clampedQty === 0) {
-            items.splice(index, 1);
+      updateQuantity: (code, newQty, price, maxStock) => {
+        const items = [...get().items]
+        const idx = items.findIndex(i => i.code === code)
+        const clamped = Math.max(0, Math.min(newQty, maxStock))
+
+        if (idx > -1) {
+          if (clamped === 0) {
+            items.splice(idx, 1)
           } else {
-            items[index].quantity = clampedQty;
-            items[index].maxStock = maxStock;
+            items[idx] = { ...items[idx], quantity: clamped, price, maxStock }
           }
-        } else if (clampedQty > 0) {
-          items.push({ type, quantity: clampedQty, price, maxStock });
+        } else if (clamped > 0) {
+          // si no existía y hay qty>0, lo agregamos con label vacío (mejor pasar label real desde el caller)
+          items.push({ code, label: code, price, quantity: clamped, maxStock })
         }
 
-        set({ items });
+        set({ items })
       },
+
       clearCart: () => set({ items: [], eventId: null }),
+
       getTotal: () => get().items.reduce((sum, i) => sum + i.price * i.quantity, 0),
+
+      getFreeItems: () => get().items.filter(i => i.price === 0),
+      getPaidItems: () => get().items.filter(i => i.price > 0),
+
+      hasFreeTickets: () => get().items.some(i => i.price === 0),
+      hasPaidTickets: () => get().items.some(i => i.price > 0),
+
       setEventId: (eventId) => set({ eventId }),
+
+      // Compra paga: envía selections por code
       checkout: async () => {
-        const { eventId, items } = get();
-        if (!eventId || items.length === 0) return;
+        const { eventId, items } = get()
+        if (!eventId || items.length === 0) {
+          return { success: false, error: 'Cart is empty or no event selected' }
+        }
 
         try {
           const res = await fetch('/api/tickets/buy', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('token')}` },
-            body: JSON.stringify({ eventId, selections: items.map(item => ({
-              type: item.type,
-              quantity: item.quantity,
-            })) }),
-          });
-          if (!res.ok) throw new Error('Checkout failed');
-          const data = await res.json();
-          set({ items: [], eventId: null }); // Clear cart on success
-          // Redirect or handle data (e.g., MP init_point)
-        } catch (err) {
-          console.error(err);
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              eventId,
+              selections: items
+                .filter(i => i.price > 0)
+                .map(i => ({ code: i.code, quantity: i.quantity }))
+            })
+          })
+
+          if (!res.ok) {
+            const err = await res.json().catch(() => ({}))
+            throw new Error(err.error || 'Checkout failed')
+          }
+
+          const data = await res.json()
+          set({ items: [], eventId: null }) // limpiar carrito al éxito
+          return { success: true, data }
+        } catch (e) {
+          return { success: false, error: (e as Error).message }
         }
       },
+
+      // Solo tickets gratis
+      checkoutFree: async (sendEmail = false) => {
+        const { eventId, getFreeItems } = get()
+        const freeItems = getFreeItems()
+        if (!eventId || freeItems.length === 0) {
+          return { success: false, error: 'No free tickets in cart' }
+        }
+
+        try {
+          const res = await fetch('/api/tickets/buy-free', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              eventId,
+              sendEmail,
+              selections: freeItems.map(i => ({ code: i.code, quantity: i.quantity }))
+            })
+          })
+
+          if (!res.ok) {
+            const err = await res.json().catch(() => ({}))
+            throw new Error(err.error || 'Free checkout failed')
+          }
+
+          const data = await res.json()
+
+          // quitar solo los free del carrito
+          const remaining = get().items.filter(i => i.price > 0)
+          set({ items: remaining })
+
+          return { success: true, data }
+        } catch (e) {
+          return { success: false, error: (e as Error).message }
+        }
+      },
+
+      // helpers manuales (persist ya lo maneja igual)
+      persistToLocalStorage: () => {
+        const state = get()
+        localStorage.setItem('cart-storage', JSON.stringify({
+          state: { eventId: state.eventId, items: state.items },
+          version: 0
+        }))
+      },
+
+      loadFromLocalStorage: () => {
+        try {
+          const stored = localStorage.getItem('cart-storage')
+          if (stored) {
+            const { state } = JSON.parse(stored)
+            set({ eventId: state.eventId ?? null, items: state.items ?? [] })
+          }
+        } catch (err) {
+          console.error('Failed to load cart from localStorage:', err)
+        }
+      }
     }),
     { name: 'cart-storage' }
   )
-);
+)

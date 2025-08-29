@@ -1,59 +1,62 @@
 "use client";
 
-import { IconCirclePlusFilled, IconMail, type Icon } from "@tabler/icons-react";
-
-import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarMenu,
-  SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuButton,
 } from "@/components/ui/sidebar";
-import Link from "next/link";
 
-export function NavMain({
-  items,
-}: {
-  items: {
-    title: string;
-    url: string;
-    icon?: Icon;
-  }[];
-}) {
+type Item = { title: string; url: string; icon?: React.ElementType; badge?: string };
+
+export function NavMain({ items }: { items: Item[] }) {
+  const pathname = usePathname();
+
   return (
     <SidebarGroup>
-      <SidebarGroupContent className="flex flex-col gap-2">
+      <SidebarGroupContent>
         <SidebarMenu>
-          <SidebarMenuItem className="flex items-center gap-2">
-            <SidebarMenuButton
-              tooltip="Quick Create"
-              className="bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground min-w-8 duration-200 ease-linear"
-            >
-              <IconCirclePlusFilled />
-              <span>Quick Create</span>
-            </SidebarMenuButton>
-            <Button
-              size="icon"
-              className="size-8 group-data-[collapsible=icon]:opacity-0"
-              variant="outline"
-            >
-              <IconMail />
-              <span className="sr-only">Inbox</span>
-            </Button>
-          </SidebarMenuItem>
-        </SidebarMenu>
-        <SidebarMenu>
-          {items.map((item) => (
-            <SidebarMenuItem key={item.title}>
-              <Link href={item.url}>
-                <SidebarMenuButton tooltip={item.title}>
-                  {item.icon && <item.icon />}
-                  <span>{item.title}</span>
-                </SidebarMenuButton>
-              </Link>
-            </SidebarMenuItem>
-          ))}
+          {items.map((item) => {
+            const Icon = item.icon;
+            const active = pathname === item.url || pathname.startsWith(item.url + "/");
+
+            return (
+              <SidebarMenuItem key={item.title}>
+                <Link href={item.url} className="group">
+                  <SidebarMenuButton
+                    tooltip={item.title}
+                    data-state={active ? "active" : "inactive"}
+                    aria-current={active ? "page" : undefined}
+                    className={`
+                      rounded-md border border-transparent
+                      text-neutral-200
+                      h-10 px-3
+                      hover:bg-[#111] hover:border-neutral-800
+                      data-[state=active]:bg-[#121212] data-[state=active]:border-neutral-700
+                    `}
+                  >
+                    {Icon ? <Icon className="h-4 w-4" /> : null}
+                    <span className="truncate">{item.title}</span>
+
+                    {/* Badge opcional */}
+                    {item.badge ? (
+                      <span
+                        className="
+                          ml-auto rounded-full border border-neutral-700 bg-[#151515]
+                          px-2 py-0.5 text-[11px] leading-none text-neutral-300
+                        "
+                      >
+                        {item.badge}
+                      </span>
+                    ) : null}
+                  </SidebarMenuButton>
+                </Link>
+              </SidebarMenuItem>
+            );
+          })}
         </SidebarMenu>
       </SidebarGroupContent>
     </SidebarGroup>

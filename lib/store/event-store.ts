@@ -9,6 +9,7 @@ export interface EventCardData {
   labelName: string;
   location: string;
   imageUrl: string;
+  name:string;
 }
 
 // Usamos Prisma.eventGetPayload para derivar el tipo para la vista de detalle.
@@ -47,8 +48,9 @@ export const useEventStore = create<EventStore>((set) => ({
       if (!res.ok) throw new Error('La petición de eventos ha fallado');
       const { data }: { data: EventCardData[] } = await res.json();
       set({ events: data, loading: false });
-    } catch (err: any) {
-      set({ error: err.message, loading: false });
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch events';
+      set({ error: errorMessage, loading: false });
     }
   },
 
@@ -63,8 +65,9 @@ export const useEventStore = create<EventStore>((set) => ({
       }
       const data: EventWithDetails = await res.json();
       set({ selectedEvent: data, loading: false });
-    } catch (err: any) {
-      set({ error: err.message, loading: false });
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch event';
+      set({ error: errorMessage, loading: false });
     }
   },
   clearSelected: () => set({ selectedEvent: null }),

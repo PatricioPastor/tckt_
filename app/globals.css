@@ -130,3 +130,25 @@
 .gradient-bg {
   background: linear-gradient(90deg, #181818 10%, #320a0a 100%);
 }
+
+/* Custom animations for smooth UX */
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.5s ease-out forwards;
+  opacity: 0;
+}
+
+/* Smooth scroll behavior */
+html {
+  scroll-behavior: smooth;
+}

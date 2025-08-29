@@ -4,7 +4,6 @@ import {
   IconCreditCard,
   IconDotsVertical,
   IconLogout,
-  IconNotification,
   IconUserCircle,
 } from "@tabler/icons-react";
 
@@ -29,6 +28,25 @@ import LogoutButton from "./auth/logout-button";
 
 export function NavUser({ user }: { user: User | null }) {
   const { isMobile } = useSidebar();
+
+  if (!user) {
+    return (
+      <SidebarMenu>
+        <SidebarMenuItem>
+          <SidebarMenuButton size="lg" className="bg-muted/50">
+            <Avatar className="h-8 w-8 rounded-lg">
+              <AvatarFallback className="rounded-lg">
+                <IconUserCircle className="h-4 w-4" />
+              </AvatarFallback>
+            </Avatar>
+            <div className="grid flex-1 text-left text-sm leading-tight">
+              <span className="text-muted-foreground">Iniciar sesión</span>
+            </div>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+      </SidebarMenu>
+    );
+  }
 
   return (
     <SidebarMenu>
@@ -78,7 +96,11 @@ export function NavUser({ user }: { user: User | null }) {
             <DropdownMenuGroup>
               <DropdownMenuItem>
                 <IconUserCircle />
-                Account
+                Mi Cuenta
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <IconCreditCard />
+                Mis Tickets
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />

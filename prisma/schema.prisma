@@ -87,12 +87,6 @@ enum EventStatus {
   finished
 }
 
-enum TicketTypeEnum {
-  general
-  vip
-  ultra
-  free
-}
 
 enum TicketStatus {
   pending
@@ -144,31 +138,35 @@ model eventArtist {
 }
 
 model ticketType {
-  id              Int           @id @default(autoincrement())
+  id              Int      @id @default(autoincrement())
   eventId         Int
-  type            TicketTypeEnum
-  price           Decimal
+  code            String   // identificador lógico único por evento (p.ej. "tier1", "door")
+  label           String   // cómo lo ve el usuario (p.ej. "TIER 1", "EN PUERTA")
+  price           Decimal  @db.Decimal(12, 2)
   stockMax        Int
   stockCurrent    Int
-  userMaxPerType  Int           @default(5)
-  event           event         @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  userMaxPerType  Int      @default(5)
+  scanExpiration  DateTime?
+  event           event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
   tickets         ticket[]
 
-  @@unique([eventId, type])
+  @@unique([eventId, code])
 }
+
 
 model ticket {
   id                  Int           @id @default(autoincrement())
   eventId             Int
   ownerId             String
   typeId              Int
-  qrCode              String        @unique
+  qrCode              String       @unique 
+  code                String?       @unique
   status              TicketStatus  @default(pending)
   paymentId           String?
   transferredFromId   String?
   createdAt           DateTime      @default(now())
   event               event         @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  owner               user          @relation("ticketsToUser_ownerId", fields: [ownerId], references: [id], onDelete: SetNull)
+  owner               user          @relation("ticketsToUser_ownerId", fields: [ownerId], references: [id], onDelete: Restrict)
   type                ticketType    @relation(fields: [typeId], references: [id], onDelete: Cascade)
   transferredFrom     user?         @relation("ticketsToUser_transferredFromId", fields: [transferredFromId], references: [id])
 }

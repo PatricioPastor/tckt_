@@ -6,9 +6,9 @@ import prisma  from '@/lib/prisma';
 
 export async function GET() {
 
-    const session = await auth.api.getSession({
-        headers: await headers(),
-      });
+  const session = await auth.api.getSession({
+      headers: await headers(),
+    });
 
   if (!session?.user?.id) {
     return new Response('Unauthorized', { status: 401 });

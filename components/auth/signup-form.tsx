@@ -15,7 +15,7 @@ import { Label } from "@/components/ui/label";
 import { useRouter } from "next/navigation";
 
 import { authClient } from "@/lib/auth-client";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Terminal } from "lucide-react";
 
 import { IconLoader } from "@tabler/icons-react";
@@ -33,10 +33,10 @@ export function SignupForm({
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  async function handleSubmit(e: any) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
-    const { data, error } = await authClient.signUp.email(
+    const { error } = await authClient.signUp.email(
       {
         /**
          * The user email
@@ -53,16 +53,13 @@ export function SignupForm({
         name: fullname,
       },
       {
-        onRequest: (ctx) => {
+        onRequest: () => {
           setLoading(true);
         },
-        onSuccess: (ctx) => {
-          // redirect to the dashboard
-          //alert("Logged in successfully");
-          router.push("/dashboard");
+        onSuccess: () => {
+          router.push("/");
         },
         onError: (ctx) => {
-          // display the error message
           setError(ctx.error.message);
           setLoading(false);
         },

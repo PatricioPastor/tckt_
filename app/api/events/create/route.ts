@@ -1,81 +1,183 @@
-// app/api/events/create/route.ts
-import { auth } from '@/lib/auth'; // Better Auth config
-import { PrismaClient } from '@prisma/client';
-import { headers } from 'next/headers';
-import { NextRequest } from 'next/server';
+import { auth } from '@/lib/auth'
+import { Prisma, PrismaClient } from '@prisma/client'
+import { headers } from 'next/headers'
+import { NextRequest } from 'next/server'
 
-const prisma = new PrismaClient();
+interface TicketTypeRequest {
+  code: string;
+  label: string;
+  price: number | string;
+  stock_max: number;
+  stock_current?: number;
+  user_max_per_type?: number;
+}
+
+interface ArtistRequest {
+  id?: number;
+  name?: string;
+  bio?: string;
+  image_url?: string;
+  social_links?: string[];
+  order?: number;
+  slot_time?: string;
+  is_headliner?: boolean;
+}
+
+interface CreateEventRequest {
+  name: string;
+  date: string;
+  location: string;
+  description?: string;
+  banner_url?: string;
+  status?: string;
+  capacity_total?: number;
+  is_rsvp_allowed?: boolean;
+  event_genre?: string;
+  ticket_types: TicketTypeRequest[];
+  artists: ArtistRequest[];
+}
+
+const prisma = new PrismaClient()
 
 export async function POST(req: NextRequest) {
-  let session = await auth.api.getSession({
-    headers: await headers() 
-  })
+  const session = await auth.api.getSession({ headers: await headers() })
+  // Si querés exigir login:
+  if (!session) return Response.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const body = await req.json(); // JSON modificado
-  // Validation (simplified—add Zod for prod)
-  if (!body.name || !body.date || !body.location || body.ticket_types.length === 0 || body.artists.length === 0) {
-    return Response.json({ error: 'Missing required fields' }, { status: 400 });
+  const body = await req.json() as CreateEventRequest
+
+  // Validación mínima
+  if (
+    !body?.name ||
+    !body?.date ||
+    !body?.location ||
+    !Array.isArray(body?.ticket_types) || body.ticket_types.length === 0 ||
+    !Array.isArray(body?.artists) || body.artists.length === 0
+  ) {
+    return Response.json({ error: 'Missing required fields' }, { status: 400 })
   }
+
+  // Validar unicidad de códigos de ticket
+  const codes = body.ticket_types.map((t: TicketTypeRequest) => t.code)
+  const dup = codes.find((c: string, i: number) => codes.indexOf(c) !== i)
+  if (dup) return Response.json({ error: `Duplicated ticket code: ${dup}` }, { status: 400 })
 
   try {
     const [event] = await prisma.$transaction(async (tx) => {
-      // Create event
+      // Calcular capacidad desde tiers si no viene
+      const capacityFromTiers = body.ticket_types.reduce(
+        (sum: number, tt: TicketTypeRequest) => sum + Number(tt.stock_max || 0),
+        0
+      )
+
+      // Crear evento
       const newEvent = await tx.event.create({
         data: {
           name: body.name,
           date: new Date(body.date),
           location: body.location,
-          description: body.description,
-          bannerUrl: body.banner_url,
-          status: body.status,
-          producerId: 1, // Hardcode
-          capacityTotal: body.capacity_total || body.ticket_types.reduce((sum: number, tt: any) => sum + tt.stock_max, 0),
-          isRsvpAllowed: body.is_rsvp_allowed,
-          eventGenre: body.event_genre
+          description: body.description ?? null,
+          bannerUrl: body.banner_url ?? null,
+          status: body.status ?? 'published',
+          producerId: 1, // Hardcode por ahora
+          capacityTotal: body.capacity_total ?? capacityFromTiers,
+          isRsvpAllowed: body.is_rsvp_allowed ?? false,
+          eventGenre: body.event_genre ?? null
         }
-      });
+      })
 
-      // Ticket types
+      // Crear tipos de ticket dinámicos
       await tx.ticketType.createMany({
-        data: body.ticket_types.map((tt: any) => ({
+        data: body.ticket_types.map((tt: TicketTypeRequest) => ({
           eventId: newEvent.id,
-          type: tt.type,
-          price: tt.price,
+          code: tt.code,
+          label: tt.label,
+          price: new Prisma.Decimal(tt.price), // mejor mandar como string
           stockMax: tt.stock_max,
-          stockCurrent: tt.stock_current || tt.stock_max,
-          userMaxPerType: tt.user_max_per_type || 5
+          stockCurrent: tt.stock_current ?? tt.stock_max,
+          userMaxPerType: tt.user_max_per_type ?? 5,
+          // scanExpiration: tt.scan_expiration ? new Date(tt.scan_expiration) : null
         }))
-      });
+      })
 
-      // Artists by ID (no full data—assume IDs exist)
+      // Resolver artistas
+      const resolvedArtists: Array<{
+        id: number
+        order: number | null
+        slotTime: string | null
+        isHeadliner: boolean
+      }> = []
+      const missingIds: number[] = []
+
+      for (const art of body.artists) {
+        if (art.id) {
+          // Validar que exista
+          const exists = await tx.artist.findUnique({
+            where: { id: art.id },
+            select: { id: true }
+          })
+          if (!exists) {
+            missingIds.push(art.id)
+            continue
+          }
+          resolvedArtists.push({
+            id: art.id,
+            order: art.order ?? null,
+            slotTime: art.slot_time ?? null,
+            isHeadliner: !!art.is_headliner
+          })
+        } else if (art.name) {
+          // Crear artista nuevo
+          const created = await tx.artist.create({
+            data: {
+              name: art.name,
+              bio: art.bio ?? null,
+              imageUrl: art.image_url ?? null,
+              socialLinks: art.social_links ?? null
+            }
+          })
+          resolvedArtists.push({
+            id: created.id,
+            order: art.order ?? null,
+            slotTime: art.slot_time ?? null,
+            isHeadliner: !!art.is_headliner
+          })
+        } else {
+          throw new Error('Each artist must have either an id or a name')
+        }
+      }
+
+      if (missingIds.length) {
+        throw new Error(`Missing artist ids: ${missingIds.join(', ')}`)
+      }
+
       await tx.eventArtist.createMany({
-        data: body.artists.map((art: any) => ({
+        data: resolvedArtists.map((ra) => ({
           eventId: newEvent.id,
-          artistId: art.id,
-          order: art.order,
-          slotTime: art.slot_time,
-          isHeadliner: art.is_headliner
+          artistId: ra.id,
+          order: ra.order,
+          slotTime: ra.slotTime,
+          isHeadliner: ra.isHeadliner
         }))
-      });
+      })
 
-      // Log
+      
       await tx.log.create({
         data: {
-          userId: "h3RhJLjF2kCaBISUqLhBxHcVTQAJcZyj",
+          userId: session?.user?.id ?? 'system',
           action: 'event_created',
           details: { eventId: newEvent.id },
           timestamp: new Date()
         }
-      });
+      })
 
-      return [newEvent];
-    });
+      return [newEvent]
+    })
 
-    return Response.json({ event }, { status: 200 });
-  } catch (error) {
-    console.error(error);
-    return Response.json({ error: 'Create failed' }, { status: 500 });
+    return Response.json({ event }, { status: 200 })
+  } catch (err: unknown) {
+    console.error(err)
+    const errorMessage = err instanceof Error ? err.message : 'Create failed'
+    return Response.json({ error: errorMessage }, { status: 500 })
   }
 }
-
-

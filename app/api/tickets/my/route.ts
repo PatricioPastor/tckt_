@@ -20,7 +20,7 @@ export async function GET(req: NextRequest) {
   const role = user.role;
 
 
-  let whereClause: any = {};
+  let whereClause: { ownerId?: string; eventId?: { in: number[] } } = {};
 
   // Role-based filtering
   if (role === 'user') {

@@ -1,11 +1,7 @@
 import React from 'react';
 import Image from 'next/image';
-import { Label } from '../label/label';
-import { CalendarIcon, MapPinIcon, TicketIcon } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { useRouter } from 'next/navigation';
-import { CtaButtons } from '@/components/cta-buttons/cta-buttons';
-
 
 interface EventCardProps {
     artists: string[];
@@ -14,57 +10,80 @@ interface EventCardProps {
     location: string;
     imageUrl: string;
     eventId: number;
+    status?: string;
 }
 
-export const EventCard = ({ artists, date, labelName, location, imageUrl, eventId }: EventCardProps) => {
-    
+export const EventCard = ({ artists, date, labelName, location, imageUrl, eventId, status }: EventCardProps) => {
     const router = useRouter();
     
-    const buyEvent = () => {
+    const formatDate = (date: string) => {
+        const eventDate = new Date(date);
+        const options: Intl.DateTimeFormatOptions = { 
+            weekday: 'short',
+            day: 'numeric', 
+            month: 'short'
+        };
+        return eventDate.toLocaleDateString('es-AR', options);
+    };
+
+    const formatTime = (date: string) => {
+        const eventDate = new Date(date);
+        return eventDate.toLocaleTimeString('es-AR', { 
+            hour: '2-digit', 
+            minute: '2-digit',
+            hour12: false 
+        });
+    };
+
+    const handleClick = () => {
         router.push(`/events/${eventId}`);
-    }
+    };
 
     return (
-        <div className="relative rounded-2xl overflow-hidden w-full h-full mx-auto font-sans shadow-lg bg-black flex flex-col">
-            {/* Background image covers the entire card */}
-            <Image
-                src={imageUrl}
-                alt="Event Background"
-                layout="fill"
-                objectFit="cover"
-                className="absolute z-0"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/30 z-10"></div>
-            
-            {/* Content wrapper */}
-            <div className="relative z-20 flex flex-col h-full">
-                {/* Header section with artists */}
-                <div className="p-4">
-                    
+        <div 
+            onClick={handleClick}
+            className="group border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition-colors bg-neutral-900/50 cursor-pointer"
+        >
+            <div className="flex items-start gap-4">
+                {/* Imagen del evento */}
+                <div className="relative w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
+                    <Image
+                        src={imageUrl || '/placeholder-event.jpg'}
+                        alt={labelName}
+                        fill
+                        className="object-cover group-hover:scale-105 transition-transform duration-200"
+                    />
                 </div>
-                
-                {/* Middle section for tags and carousel */}
-                <div className="flex-grow p-4 gap-3 items-start flex flex-col justify-end">
-                    
-                    <div className="flex flex-col items-start justify-end gap-[6px]">
-                    {artists.map((artist, index) => (
-                        <h2 key={index} className="md:text-4xl text-2xl font-bold tracking-tighter uppercase leading-tight text-white">
-                            {artist}
-                        </h2>
-                    ))}
+
+                {/* Información del evento */}
+                <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between mb-2">
+                        <h3 className="text-white font-medium text-base leading-tight truncate">
+                            {labelName}
+                        </h3>
+                        {status && (
+                            <Badge className="ml-2 bg-neutral-800 text-neutral-300 border-neutral-700 text-xs">
+                                {status}
+                            </Badge>
+                        )}
                     </div>
                     
+                    <div className="flex items-center gap-2 text-sm text-neutral-400 mb-1">
+                        <span>{formatDate(date)}</span>
+                        <span>•</span>
+                        <span>{formatTime(date)}</span>
+                    </div>
                     
-                    <Label date={date} location={location} />
+                    <div className="text-sm text-neutral-500 mb-2 truncate">
+                        {location}
+                    </div>
+                    
+                    {artists.length > 0 && (
+                        <div className="text-sm text-neutral-400 truncate">
+                            {artists.join(', ')}
+                        </div>
+                    )}
                 </div>
-                
-                {/* Footer with CTAs */}
-                <CtaButtons 
-                  primaryAction={buyEvent} 
-                  secondaryAction={() => {}} 
-                  primaryActionText="Comprar ahora" 
-                  secondaryActionText="Referir evento" 
-                />
             </div>
         </div>
     );

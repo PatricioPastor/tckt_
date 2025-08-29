@@ -10,8 +10,14 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   const { fetchUser, user } = useUserStore();
 
   useEffect(() => {
-    if (!isPending && session?.user && !user) {
-      fetchUser(session.user);
+    if (!isPending) {
+      if (session?.user && !user) {
+        // User has session but no store user - fetch user data
+        fetchUser(session.user);
+      } else if (!session?.user && user) {
+        // User store has data but no session - clear store
+        useUserStore.getState().logout();
+      }
     }
   }, [isPending, session, user, fetchUser]);
 

@@ -1,84 +1,205 @@
-import { NextRequest, NextResponse } from 'next/server';
-import prisma from '@/lib/prisma';
-import { auth } from '@/lib/auth';
-import QRCode from 'qrcode';
-import { headers } from 'next/headers';
-import { TicketStatus } from '@prisma/client';
+// app/api/tickets/buy/route.ts
+import { NextRequest, NextResponse } from 'next/server'
+import prisma from '@/lib/prisma'
+import { auth } from '@/lib/auth'
+import QRCode from 'qrcode'
+import { headers } from 'next/headers'
+import { TicketStatus } from '@prisma/client'
+import { createPaymentPreference } from '@/lib/mercadopago'
 
 export async function POST(req: NextRequest) {
-  const session = await auth.api.getSession({ 
-    headers: await headers() 
-  });
-
-  if (!session?.user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
-  // Fetch user for role (since session lacks it)
-  const user = await prisma.user.findUnique({
-    where: { id: session.user.id },
-    select: { role: true },
-  });
-  if (!user || user.role !== 'user') {
-    return NextResponse.json({ error: 'Forbidden - Only user role can buy' }, { status: 403 });
+  const session = await auth.api.getSession({ headers: await headers() })
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const { eventId, selections } = await req.json(); // selections: [{type: 'general', quantity: 2}, ...]
-  if (!eventId || !selections?.length) return NextResponse.json({ error: 'Invalid request' }, { status: 400 });
+  // Solo rol user
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { role: true }
+  })
+  if (!user || user.role !== 'user') {
+    return NextResponse.json({ error: 'Forbidden - Only user role can buy' }, { status: 403 })
+  }
+
+  const { eventId, selections } = await req.json() as {
+    eventId: number
+    selections: Array<{ code: string; quantity: number }>
+  }
+
+  if (!eventId || !Array.isArray(selections) || selections.length === 0) {
+    return NextResponse.json({ error: 'Invalid request' }, { status: 400 })
+  }
+
+  // Validaciones básicas de payload
+  for (const s of selections) {
+    if (!s?.code || !Number.isInteger(s.quantity) || s.quantity <= 0) {
+      return NextResponse.json({ error: `Invalid selection: ${JSON.stringify(s)}` }, { status: 400 })
+    }
+  }
+  // evitar códigos duplicados en el mismo request
+  const codes = selections.map(s => s.code)
+  const dup = codes.find((c, i) => codes.indexOf(c) !== i)
+  if (dup) return NextResponse.json({ error: `Duplicated ticket code: ${dup}` }, { status: 400 })
 
   try {
     const result = await prisma.$transaction(async (tx) => {
-      const event = await tx.event.findUnique({ where: { id: eventId }, include: { ticketTypes: true } });
-      if (!event) throw new Error('Event not found');
+      const event = await tx.event.findUnique({
+        where: { id: eventId },
+        include: {
+          ticketTypes: {
+            select: {
+              id: true, code: true, label: true,
+              price: true, stockCurrent: true, userMaxPerType: true
+            }
+          }
+        }
+      })
+      if (!event) throw new Error('Event not found')
 
-      const tickets = [];
+      // Datos del payer
+      const userInfo = await tx.user.findUnique({
+        where: { id: session.user.id },
+        select: { name: true, email: true, dni: true }
+      })
+      if (!userInfo) throw new Error('User not found')
+
+      const ticketsToCreate: Array<{
+        eventId: number
+        ownerId: string
+        typeId: number
+        qrCode: string
+        code: string
+        status: TicketStatus
+        createdAt: Date
+      }> = []
+      const paymentItems: Array<{ id: string; title: string; quantity: number; unit_price: number }> = []
+      let totalAmount = 0
+
       for (const sel of selections) {
-        const tt = event.ticketTypes.find(t => t.type === sel.type);
-        if (!tt || tt.stockCurrent < sel.quantity) throw new Error('Insufficient stock for ' + sel.type);
-        const userTickets = await tx.ticket.count({ where: { ownerId: session.user.id, typeId: tt.id } });
-        if (userTickets + sel.quantity > tt.userMaxPerType) throw new Error('User limit exceeded for ' + sel.type);
+        const tt = event.ticketTypes.find(t => t.code === sel.code)
+        if (!tt) throw new Error(`Ticket type not found: ${sel.code}`)
 
-        // Generate unique QRs
+        // Límite por usuario (contando existentes)
+        const existingUserTickets = await tx.ticket.count({
+          where: { ownerId: session.user.id, typeId: tt.id }
+        })
+        if (existingUserTickets + sel.quantity > tt.userMaxPerType) {
+          throw new Error(`User limit exceeded for ${tt.label}`)
+        }
+
+        // Reserva de stock (atómico)
+        const updated = await tx.ticketType.updateMany({
+          where: {
+            id: tt.id,
+            eventId,
+            stockCurrent: { gte: sel.quantity }
+          },
+          data: { stockCurrent: { decrement: sel.quantity } }
+        })
+        if (updated.count === 0) {
+          throw new Error(`Insufficient stock for ${tt.label}`)
+        }
+
+        // Agregar ítems de pago si corresponde
+        const unit = Number(tt.price) // Decimal -> number
+        if (unit > 0) {
+          paymentItems.push({
+            id: `ticket_${tt.id}`,
+            title: `${event.name} - ${tt.label}`,
+            quantity: sel.quantity,
+            unit_price: unit
+          })
+          totalAmount += unit * sel.quantity
+        }
+
+        // Crear QRs (pendiente hasta pago)
         for (let i = 0; i < sel.quantity; i++) {
-          const qrData = `ticket_${eventId}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-          const qrCode = await QRCode.toDataURL(qrData); // Base64 QR
-          tickets.push({
+          const qrData = `ticket_${eventId}_${tt.id}_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`
+          const qrCode = await QRCode.toDataURL(qrData)
+          ticketsToCreate.push({
             eventId,
             ownerId: session.user.id,
             typeId: tt.id,
             qrCode,
-            status: 'pending' as TicketStatus,
-            createdAt: new Date(),
-          });
+            code: qrData,
+            status: 'pending',
+            createdAt: new Date()
+          })
         }
-
-        // Decrement stock
-        const updatedTicketType = await tx.ticketType.update({
-          where: { id: tt.id },
-          data: { stockCurrent: tt.stockCurrent - sel.quantity },
-          include: { event: true },
-        });
       }
 
-      // Insert tickets
-      await tx.ticket.createMany({ data: tickets });
+      // Insertar tickets PENDING
+      if (ticketsToCreate.length > 0) {
+        await tx.ticket.createMany({ data: ticketsToCreate })
+      }
 
-      // Log
+      // Obtener IDs creados (últimos segundos)
+      const createdTickets = await tx.ticket.findMany({
+        where: {
+          ownerId: session.user.id,
+          eventId,
+          status: 'pending',
+          createdAt: { gte: new Date(Date.now() - 10_000) }
+        },
+        select: { id: true }
+      })
+
+      const externalReference = `order_${session.user.id}_${eventId}_${Date.now()}`
+
       await tx.log.create({
-        data: { userId: session.user.id, action: 'tickets_purchased', details: { eventId, ticketCount: tickets.length } },
-      });
+        data: {
+          userId: session.user.id,
+          action: 'payment_initiated',
+          details: { eventId, ticketCount: ticketsToCreate.length, totalAmount, externalReference }
+        }
+      })
 
-      // We don't have IDs yet since we just created them
-      // Return the count instead of IDs
-      return { ticketCount: tickets.length };
-    });
+      return { createdTickets, paymentItems, userInfo, event, externalReference, totalAmount }
+    })
 
-    // Stub MP: Create preference here, return init_point
-    // const mp = new MercadoPago(...);
-    // const preference = await mp.preferences.create({...});
-    // return NextResponse.json({ init_point: preference.init_point }, { status: 200 });
+    // Si no hay monto (por si llega algo gratis acá), devolvemos éxito sin MP
+    if (result.totalAmount <= 0) {
+      return NextResponse.json({
+        success: true,
+        data: null,
+        ticketCount: result.createdTickets.length,
+        totalAmount: 0,
+        message: 'No payment required'
+      }, { status: 200 })
+    }
 
-    return NextResponse.json({ message: 'Tickets created', data: result }, { status: 200 });
-  } catch (error:any) {
-    console.error(error);
-    return NextResponse.json({ error: error.message }, { status: 400 });
+    // Crear preferencia de pago en MercadoPago
+    const paymentPreference = await createPaymentPreference({
+      items: result.paymentItems,
+      payer: {
+        name: result.userInfo.name?.split(' ')[0] || 'Usuario',
+        surname: result.userInfo.name?.split(' ').slice(1).join(' ') || '',
+        email: result.userInfo.email,
+        identification: result.userInfo.dni
+          ? { type: 'DNI', number: result.userInfo.dni }
+          : undefined
+      },
+      external_reference: result.externalReference
+      // notification_url: 'https://tusitio.com/api/mp/webhook'  // cuando lo tengas
+    })
+
+    if (!paymentPreference.success) {
+      console.error('MercadoPago preference creation failed:', paymentPreference.error)
+      console.error('Payment items:', result.paymentItems)
+      console.error('User info:', result.userInfo)
+      return NextResponse.json({ error: 'Payment setup failed: ' + paymentPreference.error }, { status: 500 })
+    }
+
+    return NextResponse.json({
+      success: true,
+      data: paymentPreference.data,
+      ticketCount: result.createdTickets.length,
+      totalAmount: result.totalAmount
+    }, { status: 200 })
+  } catch (error: unknown) {
+    console.error(error)
+    const errorMessage = error instanceof Error ? error.message : 'Buy failed'
+    return NextResponse.json({ error: errorMessage }, { status: 400 })
   }
 }

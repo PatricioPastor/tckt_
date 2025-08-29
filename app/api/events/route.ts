@@ -52,6 +52,7 @@ export async function GET() {
     labelName: event.eventGenre || 'NO LABEL', // Placeholder si no hay género
     location: event.location,
     imageUrl: event.bannerUrl,
+    name: event.name,
   }));
 
   return NextResponse.json({ data: formattedEvents, message: 'Eventos encontrados' }, { status: 200 });
