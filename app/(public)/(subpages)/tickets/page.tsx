@@ -69,10 +69,7 @@ export default function Page() {
           className="border-b border-neutral-800" 
         />
         <div className="flex justify-center items-center h-[70vh] text-white">
-          <div className="text-center space-y-3">
-            <div className="animate-spin h-8 w-8 border-2 border-white border-t-transparent rounded-full mx-auto"></div>
-            <p className="text-neutral-400">Cargando tickets...</p>
-          </div>
+          <div className=" w-full h-full relative flex items-center justify-center animate-pulse text-lg">docargan...</div>;
         </div>
       </div>
     );
@@ -86,23 +83,23 @@ export default function Page() {
         className="border-b border-neutral-800" 
       />
       
-      <TicketsHeader 
+      {/* <TicketsHeader 
         totalTickets={tickets.length}
         proximosCount={proximosTickets.length}
         terminadosCount={terminadosTickets.length}
         isRefreshing={refreshing || isLoading}
         onRefresh={handleRefresh}
-      />
+      /> */}
 
       {/* Error Toast */}
       {error && (
         <div className="mx-4 mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
-          <p className="text-red-300 text-sm">
+          <p className="text-red-400 text-sm">
             Error al cargar tickets: {error}
           </p>
           <button 
             onClick={clearError}
-            className="text-red-400 text-xs underline mt-1"
+            className="text-red-500 text-xs underline mt-1"
           >
             Cerrar
           </button>

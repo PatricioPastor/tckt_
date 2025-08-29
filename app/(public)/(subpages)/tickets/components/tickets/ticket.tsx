@@ -13,6 +13,18 @@ interface TicketCardProps {
     
 }
 
+export const mapTypePaid = (type:Ticket['status']) =>  {
+
+  switch(type) {
+    case 'paid': return 'Pagado';
+    case 'pending': return 'Pendiente';
+    case 'used': return 'Usado';
+    case 'transferred': return 'Transferido';
+    default: return type;
+  }
+
+}
+
 export const TicketCard = ({ticket}: TicketCardProps) => {
   const event = ticket.event;
   
@@ -45,7 +57,7 @@ export const TicketCard = ({ticket}: TicketCardProps) => {
           <div className="flex items-center gap-2 text-sm text-neutral-400">
             <span>{formatDate(event.date)}</span>
             <span>•</span>
-            <span>{formatTime(event.date)}</span>
+            <span className='font-medium'>{formatTime(event.date)}</span>
           </div>
         </div>
         <TicketDrawer ticket={ticket}/>
@@ -58,9 +70,9 @@ export const TicketCard = ({ticket}: TicketCardProps) => {
         <div className="flex items-center gap-2">
           <Badge 
             variant={getBadgeVariant(ticket.status)}
-            className="text-xs px-2 py-0.5 bg-neutral-800 text-neutral-300 border-neutral-700"
+            className="text-xs px-2 py-0.5 bg-green-300/40 text-neutral-300 border-green-700"
           >
-            {ticket.status}
+            {mapTypePaid(ticket.status)}
           </Badge>
         </div>
       </div>
@@ -100,13 +112,13 @@ export default function TicketDrawer({ ticket }: { ticket: Ticket }) {
               <div className="flex justify-center gap-2">
                 <Badge 
                   variant={getBadgeVariant(ticket.status)}
-                  className="bg-neutral-800 text-neutral-300 border-neutral-700"
+                  className="bg-green-300/40 text-neutral-300 border-green-700"
                 >
-                  {ticket.status}
+                  {mapTypePaid(ticket.status)}
                 </Badge>
-                <Badge className="bg-neutral-800 text-neutral-300 border-neutral-700">
-                  {ticket.type.type}
-                </Badge>
+                {/* <Badge className="bg-neutral-800 text-neutral-300 border-neutral-700">
+                  {ticket.type.}
+                </Badge> */}
               </div>
               
               <div className="text-sm text-neutral-500">

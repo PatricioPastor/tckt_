@@ -42,7 +42,7 @@ const prisma = new PrismaClient()
 export async function POST(req: NextRequest) {
   const session = await auth.api.getSession({ headers: await headers() })
   // Si querés exigir login:
-  if (!session) return Response.json({ error: 'Unauthorized' }, { status: 401 })
+  // if (!session) return Response.json({ error: 'Unauthorized' }, { status: 401 })
 
   const body = await req.json() as CreateEventRequest
 
@@ -162,14 +162,14 @@ export async function POST(req: NextRequest) {
       })
 
       
-      await tx.log.create({
-        data: {
-          userId: session?.user?.id ?? 'system',
-          action: 'event_created',
-          details: { eventId: newEvent.id },
-          timestamp: new Date()
-        }
-      })
+      // await tx.log.create({
+      //   data: {
+      //     userId: session?.user?.id ?? 'system',
+      //     action: 'event_created',
+      //     details: { eventId: newEvent.id },
+      //     timestamp: new Date()
+      //   }
+      // })
 
       return [newEvent]
     })

@@ -14,7 +14,10 @@
       "mcp__figma__get_image",
       "Bash(touch:*)",
       "WebFetch(domain:www.better-auth.com)",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "Bash(npx prisma migrate reset:*)",
+      "Bash(npx --env-file=.env.development prisma migrate reset --force)",
+      "Bash(npx dotenv -e .env.development -- prisma migrate reset:*)"
     ],
     "deny": []
   },

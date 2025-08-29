@@ -28,7 +28,19 @@ export default function CheckoutPage() {
     return <div className="flex h-screen items-center justify-center text-sm text-neutral-400 bg-[#0B0B0B]">No event selected</div>;
   }
 
-  const total = getTotal();
+  const subtotal = getTotal();
+  
+  // Calcular el total con todas las comisiones como en el componente Subtotal
+  const APP_FEE_RATE = 0.08;
+  const MP_FEE_RATE = Number(process.env.NEXT_PUBLIC_MP_FEE_RATE ?? "0.06");
+  const IIBB_RATE = Number(process.env.NEXT_PUBLIC_IIBB_LP_RATE ?? "0.025");
+  
+  const appFee = Math.round(subtotal * APP_FEE_RATE * 100) / 100;
+  const basePlusApp = subtotal + appFee;
+  const mpFee = Math.round(basePlusApp * MP_FEE_RATE * 100) / 100;
+  const basePlusAppAndMp = basePlusApp + mpFee;
+  const iibb = Math.round(basePlusAppAndMp * IIBB_RATE * 100) / 100;
+  const total = Math.round((subtotal + appFee + mpFee + iibb) * 100) / 100;
 
   const handleContinue = async () => {
     if (!session?.user && !user) { router.push('/auth'); return; }
@@ -84,7 +96,7 @@ export default function CheckoutPage() {
           <div className="mb-3 flex items-center justify-between">
             <div>
               <p className="text-[11px] font-medium text-neutral-400">Total</p>
-              <p className="text-lg font-semibold text-neutral-100">${(total * 1.08).toLocaleString("es-AR") }</p>
+              <p className="text-lg font-semibold text-neutral-100">${total.toLocaleString("es-AR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
             </div>
           </div>
 

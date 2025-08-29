@@ -19,6 +19,7 @@ import { Alert, AlertDescription } from "../ui/alert";
 import { Terminal } from "lucide-react";
 
 import { IconLoader } from "@tabler/icons-react";
+import { is, ro, se } from "date-fns/locale";
 
 export function LoginForm({
   className,
@@ -26,6 +27,19 @@ export function LoginForm({
 }: React.ComponentProps<"div">) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
+  const { data: session, isPending } = authClient.useSession();
+  
+  const router = useRouter();
+
+  if (isPending) {
+    return <div className=" w-full h-full relative flex items-center justify-center animate-pulse text-lg">docargan...</div>;
+  }
+
+  if( session?.user ){
+    
+    return router.push('/tickets');
+  }
 
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -54,12 +68,11 @@ export function LoginForm({
         rememberMe: false,
       },
       {
-        onRequest: (ctx) => {
+        onRequest: () => {
           setLoading(true);
         },
-        onSuccess: (ctx) => {
-          console.log(ctx);
-          // alert("Logged in successfully");
+        onSuccess: () => {
+         return router.push('/');
         },
         onError: (ctx) => {
           // display the error message
@@ -74,22 +87,22 @@ export function LoginForm({
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
         <CardHeader>
-          <CardTitle>Login to your account</CardTitle>
+          <CardTitle>hola de nuevo</CardTitle>
           <CardDescription>
-            Enter your email below to login to your account
+            ingresá con tu correo
           </CardDescription>
         </CardHeader>
         <CardContent>
           {error && (
             <Alert className="mb-4 border border-red-500" variant="destructive">
               <Terminal className="h-4 w-4" />
-              <AlertDescription>{error}</AlertDescription>
+              <AlertDescription>{error }</AlertDescription>
             </Alert>
           )}
           <form onSubmit={(e) => handleSubmit(e)}>
             <div className="flex flex-col gap-6">
               <div className="grid gap-3">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">Correo</Label>
                 <Input
                   onChange={(e) => setEmail(e.target.value)}
                   value={email}
@@ -101,12 +114,12 @@ export function LoginForm({
               </div>
               <div className="grid gap-3">
                 <div className="flex items-center">
-                  <Label htmlFor="password">Password</Label>
+                  <Label htmlFor="password">Contraseña</Label>
                   <a
                     href="#"
                     className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
                   >
-                    Forgot your password?
+                    olvidaste tú contraseña?
                   </a>
                 </div>
                 <Input
@@ -122,18 +135,18 @@ export function LoginForm({
                   {loading ? (
                     <IconLoader className="animate-spin" stroke={2} />
                   ) : (
-                    "Login"
+                    "Ingresar"
                   )}
                 </Button>
-                <Button variant="outline" className="w-full">
+                {/* <Button variant="outline" className="w-full">
                   Login with Google
-                </Button>
+                </Button> */}
               </div>
             </div>
             <div className="mt-4 text-center text-sm">
-              Don&apos;t have an account?{" "}
-              <a href="/signup" className="underline underline-offset-4">
-                Sign up
+              primera vez?  
+              <a href="/signup" className="underline ml-1 underline-offset-4">
+                 ingresá acá
               </a>
             </div>
           </form>

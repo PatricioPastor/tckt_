@@ -19,7 +19,7 @@ export default function Layout({
   const pathname = usePathname();
   
   if (isPending ){
-    return "docargan...."
+    return <div className=" w-full h-dvh relative flex items-center justify-center animate-pulse text-lg">docargan...</div>;
   }  
 
 

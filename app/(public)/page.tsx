@@ -91,7 +91,29 @@ export default function HomePage() {
   const { user } = useUserStore();
   const router = useRouter();
 
+  const [isDesktop, setIsDesktop] = useState(false);
   const [index, setIndex] = useState(0);
+
+  useEffect(() => {
+    const checkViewport = () => {
+      setIsDesktop(window.innerWidth > 500);
+    };
+    
+    checkViewport();
+    window.addEventListener("resize", checkViewport);
+    
+    return () => window.removeEventListener("resize", checkViewport);
+  }, []);
+
+  if (isDesktop) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-black px-4">
+        <div className="text-center text-white">
+          <p className="text-lg">Esta aplicación no soporta computadoras, ingrese desde el teléfono móvil</p>
+        </div>
+      </div>
+    );
+  }
 
   useEffect(() => {
     fetchEvents();
@@ -157,13 +179,9 @@ export default function HomePage() {
     return (
       <div className="relative min-h-screen w-full bg-black">
         <SiteHeader user={user} />
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="rounded-xl border border-neutral-800 bg-[#0E0E0E] px-4 py-3 text-sm text-neutral-300">
-            Cargando eventos…
-          </div>
-        </div>
+        <div className=" w-full h-full relative flex items-center justify-center animate-pulse text-lg">docargan...</div>
       </div>
-    );
+    )
   }
 
   if (error) {

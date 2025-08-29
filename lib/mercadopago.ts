@@ -81,6 +81,7 @@ export async function createPaymentPreference(data: PaymentPreferenceData) {
       external_reference: data.external_reference,
       notification_url: `${baseUrl}/api/payments/webhook`,
       statement_descriptor: 'NoTrip Tickets',
+      
       expires: true,
       expiration_date_from: new Date().toISOString(),
       expiration_date_to: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // 24 hours
