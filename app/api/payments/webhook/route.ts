@@ -162,7 +162,7 @@ async function processPaymentStatus(args: {
         data: { status: status as any, mpPaymentId }
       })
 
-      // Borrar tickets pendientes y restaurar stock por typeId
+      
       const pending = paymentRow.tickets.filter(t => t.status === 'pending')
       if (pending.length > 0) {
         await tx.ticket.deleteMany({
