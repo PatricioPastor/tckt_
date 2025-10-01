@@ -17,8 +17,44 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "tckt_",
-  description: "tckt",
+  title: {
+    default: "tckt_ - Tus eventos, tus entradas",
+    template: "%s | tckt_"
+  },
+  description: "Plataforma de venta de entradas para eventos. Comprá tus tickets de forma rápida y segura.",
+  keywords: ["tickets", "eventos", "entradas", "boletería", "espectáculos", "conciertos"],
+  authors: [{ name: "tckt_" }],
+  creator: "tckt_",
+  publisher: "tckt_",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'),
+  openGraph: {
+    title: "tckt_ - Tus eventos, tus entradas",
+    description: "Plataforma de venta de entradas para eventos. Comprá tus tickets de forma rápida y segura.",
+    url: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
+    siteName: "tckt_",
+    locale: "es_AR",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "tckt_ - Tus eventos, tus entradas",
+    description: "Plataforma de venta de entradas para eventos. Comprá tus tickets de forma rápida y segura.",
+    creator: "@tckt_",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  icons: {
+    apple: '/isotipo.svg',
+  },
 };
 
 export default function RootLayout({
