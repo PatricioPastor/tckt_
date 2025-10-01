@@ -68,7 +68,7 @@ export default function CheckoutPage() {
   const total = Math.round((subtotal + appFee) * 100) / 100;
 
   const handleContinue = async () => {
-    if (!session?.user && !user) { router.push('/auth'); return; }
+    if (!session?.user && !user) { router.push('/signup'); return; }
     if (!hasPaidTickets() && hasFreeTickets()) { setShowEmailOption(true); return; }
     setShowSlideConfirm(true);
   };
@@ -85,7 +85,7 @@ export default function CheckoutPage() {
           setIsProcessing(false);
           return;
         }
-        router.push("/tickets");
+        // router.push("/tickets");
         return;
       }
 
