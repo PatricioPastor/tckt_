@@ -21,7 +21,17 @@ function LogoMono() {
 export function SiteHeader({user}: SiteHeaderProps) {
   const router = useRouter();
   const showTickets = () => {
+    if (!user) {
+      router.push("/signup");
+      return;
+    }
     router.push("/tickets");
+  };
+
+  const handleSidebarClick = () => {
+    if (!user) {
+      router.push("/signup");
+    }
   };
 
   return (
@@ -43,7 +53,11 @@ export function SiteHeader({user}: SiteHeaderProps) {
           </button>
         </div>
         <div className="ml-auto flex items-center gap-2">
-          <SidebarTrigger user={user} className="text-neutral-400 hover:text-white hover:bg-neutral-800" />
+          <SidebarTrigger
+            user={user}
+            className="text-neutral-400 hover:text-white hover:bg-neutral-800"
+            onClick={handleSidebarClick}
+          />
         </div>
       </div>
     </header>

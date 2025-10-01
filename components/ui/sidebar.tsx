@@ -262,7 +262,7 @@ function SidebarTrigger({
   ...props
 }: React.ComponentProps<typeof Button> & {
   user: User | null
-  
+
 }) {
   const { toggleSidebar } = useSidebar()
 
@@ -275,7 +275,9 @@ function SidebarTrigger({
       className={cn("size-7", className)}
       onClick={(event) => {
         onClick?.(event)
-        toggleSidebar()
+        if (user) {
+          toggleSidebar()
+        }
       }}
       {...props}
     >
@@ -283,7 +285,7 @@ function SidebarTrigger({
         <AvatarImage src={user?.image || ""} />
         <AvatarFallback>{user?.username?.[0].toUpperCase() || "NF"}</AvatarFallback>
       </Avatar>
-      
+
       <span className="sr-only">Toggle Sidebar</span>
     </Button>
   )

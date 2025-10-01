@@ -57,7 +57,7 @@ export function SignupForm({
           setLoading(true);
         },
         onSuccess: () => {
-          router.push("/");
+          router.push("/events/1");
         },
         onError: (ctx) => {
           setError(ctx.error.message);

@@ -150,6 +150,10 @@ export default function HomePage() {
 
   const handleBuy = () => {
     if (!current) return;
+    if (!user) {
+      router.push('/signup');
+      return;
+    }
     router.push(`/events/${current.id}`);
   };
 
