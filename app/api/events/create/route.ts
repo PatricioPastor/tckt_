@@ -66,6 +66,7 @@ export async function POST(req: NextRequest) {
   if (dup) return Response.json({ error: `Duplicated ticket code: ${dup}` }, { status: 400 })
 
   try {
+    
     const [event] = await prisma.$transaction(async (tx) => {
       // Calcular capacidad desde tiers si no viene
       const capacityFromTiers = body.ticket_types.reduce(

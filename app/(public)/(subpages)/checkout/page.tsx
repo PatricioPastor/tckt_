@@ -57,15 +57,15 @@ export default function CheckoutPage() {
   
   // Calcular el total con todas las comisiones como en el componente Subtotal
   const APP_FEE_RATE = 0.08;
-  const MP_FEE_RATE = Number(process.env.NEXT_PUBLIC_MP_FEE_RATE ?? "0.06");
-  const IIBB_RATE = Number(process.env.NEXT_PUBLIC_IIBB_LP_RATE ?? "0.025");
+  // const MP_FEE_RATE = Number(process.env.NEXT_PUBLIC_MP_FEE_RATE ?? "0.06");
+  // const IIBB_RATE = Number(process.env.NEXT_PUBLIC_IIBB_LP_RATE ?? "0.025");
   
   const appFee = Math.round(subtotal * APP_FEE_RATE * 100) / 100;
   const basePlusApp = subtotal + appFee;
-  const mpFee = Math.round(basePlusApp * MP_FEE_RATE * 100) / 100;
-  const basePlusAppAndMp = basePlusApp + mpFee;
-  const iibb = Math.round(basePlusAppAndMp * IIBB_RATE * 100) / 100;
-  const total = Math.round((subtotal + appFee + mpFee + iibb) * 100) / 100;
+  // const mpFee = Math.round(basePlusApp * MP_FEE_RATE * 100) / 100;
+  // const basePlusAppAndMp = basePlusApp + mpFee;
+  // const iibb = Math.round(basePlusAppAndMp * IIBB_RATE * 100) / 100;
+  const total = Math.round((subtotal + appFee) * 100) / 100;
 
   const handleContinue = async () => {
     if (!session?.user && !user) { router.push('/auth'); return; }

@@ -27,11 +27,14 @@ interface CartState {
   loadFromLocalStorage: () => void
 }
 
-const cartStore = (set: any, get: any) => ({
+const cartStore = (
+  set: (partial: Partial<CartState> | ((state: CartState) => Partial<CartState>)) => void,
+  get: () => CartState
+): CartState => ({
   eventId: null,
   items: [],
 
-      addItem: (item) => {
+      addItem: (item: CartItem) => {
         const items = [...get().items]
         const idx = items.findIndex(i => i.code === item.code)
         if (idx > -1) {
@@ -43,7 +46,7 @@ const cartStore = (set: any, get: any) => ({
         set({ items })
       },
 
-      updateQuantity: (code, newQty, price, maxStock) => {
+      updateQuantity: (code: string, newQty: number, price: number, maxStock: number) => {
         const items = [...get().items]
         const idx = items.findIndex(i => i.code === code)
         const clamped = Math.max(0, Math.min(newQty, maxStock))
@@ -72,7 +75,7 @@ const cartStore = (set: any, get: any) => ({
       hasFreeTickets: () => get().items.some(i => i.price === 0),
       hasPaidTickets: () => get().items.some(i => i.price > 0),
 
-      setEventId: (eventId) => set({ eventId }),
+      setEventId: (eventId: number) => set({ eventId }),
 
       // Compra paga: envía selections por code
       checkout: async () => {
@@ -165,7 +168,7 @@ const cartStore = (set: any, get: any) => ({
     })
 
 export const useCartStore = create<CartState>()(
-  persist(cartStore, {
+  persist(cartStore as any, {
     name: 'cart-storage',
     // Evita hydration mismatch: solo hidrata después del montaje en cliente
     skipHydration: typeof window === 'undefined',

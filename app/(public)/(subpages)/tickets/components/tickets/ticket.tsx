@@ -16,7 +16,7 @@ interface TicketCardProps {
 export const mapTypePaid = (type:Ticket['status']) =>  {
 
   switch(type) {
-    case 'paid': return 'Pagado';
+    case 'paid': return 'Pago';
     case 'pending': return 'Pendiente';
     case 'used': return 'Usado';
     case 'transferred': return 'Transferido';

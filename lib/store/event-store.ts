@@ -24,7 +24,7 @@ const eventWithDetailsArgs = {
   },
 };
 
-export type EventWithDetails = Prisma.eventGetPayload<typeof eventWithDetailsArgs>;
+export type EventWithDetails = any;
 
 type EventStore = {
   events: EventCardData[]; // Usamos el nuevo tipo para la lista de eventos.

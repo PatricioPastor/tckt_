@@ -5,13 +5,28 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 
 const {
+  PrismaClientKnownRequestError,
+  PrismaClientUnknownRequestError,
+  PrismaClientRustPanicError,
+  PrismaClientInitializationError,
+  PrismaClientValidationError,
+  getPrismaClient,
+  sqltag,
+  empty,
+  join,
+  raw,
+  skip,
   Decimal,
+  Debug,
   objectEnumValues,
   makeStrictEnum,
+  Extensions,
+  warnOnce,
+  defineDmmfProperty,
   Public,
   getRuntime,
-  skip
-} = require('./runtime/index-browser.js')
+  createParam,
+} = require('./runtime/wasm-engine-edge.js')
 
 
 const Prisma = {}
@@ -20,79 +35,35 @@ exports.Prisma = Prisma
 exports.$Enums = {}
 
 /**
- * Prisma Client JS version: 6.13.0
- * Query Engine version: 361e86d0ea4987e9f53a565309b3eed797a6bcbd
+ * Prisma Client JS version: 6.16.3
+ * Query Engine version: bb420e667c1820a8c05a38023385f6cc7ef8e83a
  */
 Prisma.prismaVersion = {
-  client: "6.13.0",
-  engine: "361e86d0ea4987e9f53a565309b3eed797a6bcbd"
+  client: "6.16.3",
+  engine: "bb420e667c1820a8c05a38023385f6cc7ef8e83a"
 }
 
-Prisma.PrismaClientKnownRequestError = () => {
-  const runtimeName = getRuntime().prettyName;
-  throw new Error(`PrismaClientKnownRequestError is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
-In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
-)};
-Prisma.PrismaClientUnknownRequestError = () => {
-  const runtimeName = getRuntime().prettyName;
-  throw new Error(`PrismaClientUnknownRequestError is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
-In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
-)}
-Prisma.PrismaClientRustPanicError = () => {
-  const runtimeName = getRuntime().prettyName;
-  throw new Error(`PrismaClientRustPanicError is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
-In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
-)}
-Prisma.PrismaClientInitializationError = () => {
-  const runtimeName = getRuntime().prettyName;
-  throw new Error(`PrismaClientInitializationError is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
-In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
-)}
-Prisma.PrismaClientValidationError = () => {
-  const runtimeName = getRuntime().prettyName;
-  throw new Error(`PrismaClientValidationError is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
-In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
-)}
+Prisma.PrismaClientKnownRequestError = PrismaClientKnownRequestError;
+Prisma.PrismaClientUnknownRequestError = PrismaClientUnknownRequestError
+Prisma.PrismaClientRustPanicError = PrismaClientRustPanicError
+Prisma.PrismaClientInitializationError = PrismaClientInitializationError
+Prisma.PrismaClientValidationError = PrismaClientValidationError
 Prisma.Decimal = Decimal
 
 /**
  * Re-export of sql-template-tag
  */
-Prisma.sql = () => {
-  const runtimeName = getRuntime().prettyName;
-  throw new Error(`sqltag is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
-In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
-)}
-Prisma.empty = () => {
-  const runtimeName = getRuntime().prettyName;
-  throw new Error(`empty is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
-In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
-)}
-Prisma.join = () => {
-  const runtimeName = getRuntime().prettyName;
-  throw new Error(`join is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
-In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
-)}
-Prisma.raw = () => {
-  const runtimeName = getRuntime().prettyName;
-  throw new Error(`raw is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
-In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
-)}
+Prisma.sql = sqltag
+Prisma.empty = empty
+Prisma.join = join
+Prisma.raw = raw
 Prisma.validator = Public.validator
 
 /**
 * Extensions
 */
-Prisma.getExtensionContext = () => {
-  const runtimeName = getRuntime().prettyName;
-  throw new Error(`Extensions.getExtensionContext is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
-In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
-)}
-Prisma.defineExtension = () => {
-  const runtimeName = getRuntime().prettyName;
-  throw new Error(`Extensions.defineExtension is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
-In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
-)}
+Prisma.getExtensionContext = Extensions.getExtensionContext
+Prisma.defineExtension = Extensions.defineExtension
 
 /**
  * Shorthand utilities for JSON filtering
@@ -109,10 +80,11 @@ Prisma.NullTypes = {
 
 
 
+
+
 /**
  * Enums
  */
-
 exports.Prisma.TransactionIsolationLevel = makeStrictEnum({
   ReadUncommitted: 'ReadUncommitted',
   ReadCommitted: 'ReadCommitted',
@@ -310,15 +282,6 @@ exports.Role = exports.$Enums.Role = {
   user: 'user'
 };
 
-exports.PaymentStatus = exports.$Enums.PaymentStatus = {
-  pending: 'pending',
-  approved: 'approved',
-  rejected: 'rejected',
-  cancelled: 'cancelled',
-  refunded: 'refunded',
-  in_process: 'in_process'
-};
-
 exports.EventStatus = exports.$Enums.EventStatus = {
   draft: 'draft',
   published: 'published',
@@ -331,6 +294,15 @@ exports.TicketStatus = exports.$Enums.TicketStatus = {
   used: 'used',
   transferred: 'transferred',
   refunded: 'refunded'
+};
+
+exports.PaymentStatus = exports.$Enums.PaymentStatus = {
+  pending: 'pending',
+  approved: 'approved',
+  rejected: 'rejected',
+  cancelled: 'cancelled',
+  refunded: 'refunded',
+  in_process: 'in_process'
 };
 
 exports.Prisma.ModelName = {
@@ -349,34 +321,83 @@ exports.Prisma.ModelName = {
   log: 'log',
   message: 'message'
 };
-
 /**
- * This is a stub Prisma Client that will error at runtime if called.
+ * Create the Client
  */
-class PrismaClient {
-  constructor() {
-    return new Proxy(this, {
-      get(target, prop) {
-        let message
-        const runtime = getRuntime()
-        if (runtime.isEdge) {
-          message = `PrismaClient is not configured to run in ${runtime.prettyName}. In order to run Prisma Client on edge runtime, either:
-- Use Prisma Accelerate: https://pris.ly/d/accelerate
-- Use Driver Adapters: https://pris.ly/d/driver-adapters
-`;
-        } else {
-          message = 'PrismaClient is unable to run in this browser environment, or has been bundled for the browser (running in `' + runtime.prettyName + '`).'
-        }
-
-        message += `
-If this is unexpected, please open an issue: https://pris.ly/prisma-prisma-bug-report`
-
-        throw new Error(message)
+const config = {
+  "generator": {
+    "name": "client",
+    "provider": {
+      "fromEnvVar": null,
+      "value": "prisma-client-js"
+    },
+    "output": {
+      "value": "C:\\Users\\patri\\Dev\\main\\NoTrip\\tckt\\web-app\\app\\generated\\prisma",
+      "fromEnvVar": null
+    },
+    "config": {
+      "engineType": "library"
+    },
+    "binaryTargets": [
+      {
+        "fromEnvVar": null,
+        "value": "windows",
+        "native": true
       }
-    })
+    ],
+    "previewFeatures": [],
+    "sourceFilePath": "C:\\Users\\patri\\Dev\\main\\NoTrip\\tckt\\web-app\\prisma\\schema.prisma",
+    "isCustomOutput": true
+  },
+  "relativeEnvPaths": {
+    "rootEnvPath": null,
+    "schemaEnvPath": "../../../.env"
+  },
+  "relativePath": "../../../prisma",
+  "clientVersion": "6.16.3",
+  "engineVersion": "bb420e667c1820a8c05a38023385f6cc7ef8e83a",
+  "datasourceNames": [
+    "db"
+  ],
+  "activeProvider": "postgresql",
+  "postinstall": false,
+  "inlineDatasources": {
+    "db": {
+      "url": {
+        "fromEnvVar": "DATABASE_URL",
+        "value": null
+      }
+    }
+  },
+  "inlineSchema": "// schema.prisma (Extended with App Models)\n\ngenerator client {\n  provider = \"prisma-client-js\"\n  output   = \"../app/generated/prisma\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n  url      = env(\"DATABASE_URL\")\n}\n\n// Auth Models (Generated by Better Auth)\nmodel account {\n  id                    String    @id\n  accountId             String\n  providerId            String\n  userId                String\n  accessToken           String?\n  refreshToken          String?\n  idToken               String?\n  accessTokenExpiresAt  DateTime?\n  refreshTokenExpiresAt DateTime?\n  scope                 String?\n  password              String?\n  createdAt             DateTime\n  updatedAt             DateTime\n  user                  user      @relation(fields: [userId], references: [id], onDelete: Cascade)\n}\n\nmodel session {\n  id        String   @id\n  expiresAt DateTime\n  token     String   @unique\n  createdAt DateTime\n  updatedAt DateTime\n  ipAddress String?\n  userAgent String?\n  userId    String\n  user      user     @relation(fields: [userId], references: [id], onDelete: Cascade)\n}\n\nmodel user {\n  id            String   @id\n  name          String\n  email         String   @unique\n  emailVerified Boolean\n  image         String?\n  createdAt     DateTime\n  updatedAt     DateTime\n\n  username           String?          @unique\n  dni                String?\n  birthDate          DateTime?\n  role               Role             @default(user)\n  tickets            ticket[]         @relation(\"ticketsToUser_ownerId\")\n  transferredTickets ticket[]         @relation(\"ticketsToUser_transferredFromId\")\n  participants       participant[]\n  rrppAssignments    rrppAssignment[]\n  account            account[]\n  session            session[]\n  logs               log[]\n  sentMessages       message[]        @relation(\"messagesToUser_senderId\")\n  receivedMessages   message[]        @relation(\"messagesToUser_receiverId\")\n  payments           payment[]\n}\n\nmodel verification {\n  id         String    @id\n  identifier String\n  value      String\n  expiresAt  DateTime\n  createdAt  DateTime?\n  updatedAt  DateTime?\n}\n\n// Enums for App\nenum Role {\n  superadmin\n  head_producer\n  rrpp\n  qr_scanner\n  user\n}\n\nenum EventStatus {\n  draft\n  published\n  finished\n}\n\nenum TicketStatus {\n  pending\n  paid\n  used\n  transferred\n  refunded\n}\n\nenum PaymentStatus {\n  pending\n  approved\n  rejected\n  cancelled\n  refunded\n  in_process\n}\n\nmodel payment {\n  id       Int           @id @default(autoincrement())\n  userId   String        @map(\"user_id\")\n  eventId  Int           @map(\"event_id\")\n  status   PaymentStatus @default(pending)\n  amount   Decimal       @db.Decimal(12, 2)\n  currency String        @default(\"ARS\")\n  provider String        @default(\"mercadopago\")\n\n  externalReference String  @unique @map(\"external_reference\")\n  mpPreferenceId    String? @map(\"mp_preference_id\")\n  mpPaymentId       String? @unique @map(\"mp_payment_id\")\n\n  payerEmail String? @map(\"payer_email\")\n  payerName  String? @map(\"payer_name\")\n\n  createdAt DateTime @default(now()) @map(\"created_at\")\n  updatedAt DateTime @updatedAt @map(\"updated_at\")\n\n  user    user     @relation(fields: [userId], references: [id], onDelete: Cascade)\n  event   event    @relation(fields: [eventId], references: [id], onDelete: Cascade)\n  tickets ticket[]\n}\n\n// App Models\nmodel event {\n  id                   Int              @id @default(autoincrement())\n  name                 String\n  date                 DateTime\n  location             String\n  description          String?\n  bannerUrl            String?          @map(\"banner_url\")\n  status               EventStatus      @default(draft)\n  producerId           Int              @default(1) @map(\"producer_id\")\n  capacityTotal        Int?             @map(\"capacity_total\")\n  isRsvpAllowed        Boolean          @default(true) @map(\"is_rsvp_allowed\")\n  eventGenre           String?          @map(\"event_genre\")\n  showRemainingTickets Boolean          @default(true) @map(\"show_remaining_tickets\")\n  createdAt            DateTime         @default(now()) @map(\"created_at\")\n  ticketTypes          ticketType[]\n  eventArtists         eventArtist[]\n  tickets              ticket[]\n  participants         participant[]\n  rrppAssignments      rrppAssignment[]\n  payments             payment[]\n}\n\nmodel artist {\n  id           Int           @id @default(autoincrement())\n  name         String\n  bio          String?\n  imageUrl     String?       @map(\"image_url\")\n  socialLinks  Json?         @map(\"social_links\")\n  eventArtists eventArtist[]\n}\n\nmodel eventArtist {\n  eventId     Int     @map(\"event_id\")\n  artistId    Int     @map(\"artist_id\")\n  order       Int?\n  slotTime    String? @map(\"slot_time\")\n  isHeadliner Boolean @default(false) @map(\"is_headliner\")\n  artist      artist  @relation(fields: [artistId], references: [id], onDelete: Cascade)\n  event       event   @relation(fields: [eventId], references: [id], onDelete: Cascade)\n\n  @@id([eventId, artistId])\n  @@map(\"event_artist\")\n}\n\nmodel ticketType {\n  id             Int       @id @default(autoincrement())\n  eventId        Int       @map(\"event_id\")\n  code           String\n  label          String\n  price          Decimal   @db.Decimal(12, 2)\n  stockMax       Int       @map(\"stock_max\")\n  stockCurrent   Int       @map(\"stock_current\")\n  userMaxPerType Int       @default(5) @map(\"user_max_per_type\")\n  scanExpiration DateTime? @map(\"scan_expiration\")\n  isVisible      Boolean   @default(true) @map(\"is_visible\")\n  isDisabled     Boolean   @default(false) @map(\"is_disabled\")\n  event          event     @relation(fields: [eventId], references: [id], onDelete: Cascade)\n  tickets        ticket[]\n\n  @@unique([eventId, code])\n  @@map(\"ticket_type\")\n}\n\nmodel ticket {\n  id                Int          @id @default(autoincrement())\n  eventId           Int          @map(\"event_id\")\n  ownerId           String       @map(\"owner_id\")\n  typeId            Int          @map(\"type_id\")\n  paymentId         Int?         @map(\"payment_id\")\n  qrCode            String       @unique @map(\"qr_code\")\n  code              String?      @unique\n  status            TicketStatus @default(pending)\n  transferredFromId String?      @map(\"transferred_from_id\")\n  createdAt         DateTime     @default(now()) @map(\"created_at\")\n  event             event        @relation(fields: [eventId], references: [id], onDelete: Cascade)\n  owner             user         @relation(\"ticketsToUser_ownerId\", fields: [ownerId], references: [id], onDelete: Restrict)\n  type              ticketType   @relation(fields: [typeId], references: [id], onDelete: Cascade)\n  transferredFrom   user?        @relation(\"ticketsToUser_transferredFromId\", fields: [transferredFromId], references: [id])\n  payment           payment?     @relation(fields: [paymentId], references: [id], onDelete: SetNull)\n}\n\nmodel rrppAssignment {\n  rrppUserId     String  @map(\"rrpp_user_id\")\n  eventId        Int     @map(\"event_id\")\n  commissionRate Decimal @default(0.10) @map(\"commission_rate\")\n  freesGranted   Int     @default(0) @map(\"frees_granted\")\n  rrppUser       user    @relation(fields: [rrppUserId], references: [id], onDelete: Cascade)\n  event          event   @relation(fields: [eventId], references: [id], onDelete: Cascade)\n\n  @@id([rrppUserId, eventId])\n  @@map(\"rrpp_assignment\")\n}\n\nmodel participant {\n  userId  String  @map(\"user_id\")\n  eventId Int     @map(\"event_id\")\n  viaRsvp Boolean @default(false) @map(\"via_rsvp\")\n  qrCode  String? @map(\"qr_code\")\n  user    user    @relation(fields: [userId], references: [id], onDelete: Cascade)\n  event   event   @relation(fields: [eventId], references: [id], onDelete: Cascade)\n\n  @@id([userId, eventId])\n}\n\nmodel log {\n  id        Int      @id @default(autoincrement())\n  userId    String?  @map(\"user_id\")\n  action    String\n  timestamp DateTime @default(now())\n  details   Json?\n  user      user?    @relation(fields: [userId], references: [id])\n}\n\nmodel message {\n  id         Int      @id @default(autoincrement())\n  senderId   String   @map(\"sender_id\")\n  receiverId String   @map(\"receiver_id\")\n  message    String\n  timestamp  DateTime @default(now())\n  readStatus Boolean  @default(false) @map(\"read_status\")\n  sender     user     @relation(\"messagesToUser_senderId\", fields: [senderId], references: [id], onDelete: Cascade)\n  receiver   user     @relation(\"messagesToUser_receiverId\", fields: [receiverId], references: [id], onDelete: Cascade)\n}\n",
+  "inlineSchemaHash": "81acab407a2f0ffebc3d7a9e1f3db4a7f1767d1082ab21826d960ed3ef5eb04d",
+  "copyEngine": true
+}
+config.dirname = '/'
+
+config.runtimeDataModel = JSON.parse("{\"models\":{\"account\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"accountId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"providerId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"userId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"accessToken\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"refreshToken\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"idToken\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"accessTokenExpiresAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"refreshTokenExpiresAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"scope\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"password\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"user\",\"kind\":\"object\",\"type\":\"user\",\"relationName\":\"accountTouser\"}],\"dbName\":null},\"session\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"expiresAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"token\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"ipAddress\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"userAgent\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"userId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"user\",\"kind\":\"object\",\"type\":\"user\",\"relationName\":\"sessionTouser\"}],\"dbName\":null},\"user\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"name\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"email\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"emailVerified\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"image\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"username\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"dni\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"birthDate\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"role\",\"kind\":\"enum\",\"type\":\"Role\"},{\"name\":\"tickets\",\"kind\":\"object\",\"type\":\"ticket\",\"relationName\":\"ticketsToUser_ownerId\"},{\"name\":\"transferredTickets\",\"kind\":\"object\",\"type\":\"ticket\",\"relationName\":\"ticketsToUser_transferredFromId\"},{\"name\":\"participants\",\"kind\":\"object\",\"type\":\"participant\",\"relationName\":\"participantTouser\"},{\"name\":\"rrppAssignments\",\"kind\":\"object\",\"type\":\"rrppAssignment\",\"relationName\":\"rrppAssignmentTouser\"},{\"name\":\"account\",\"kind\":\"object\",\"type\":\"account\",\"relationName\":\"accountTouser\"},{\"name\":\"session\",\"kind\":\"object\",\"type\":\"session\",\"relationName\":\"sessionTouser\"},{\"name\":\"logs\",\"kind\":\"object\",\"type\":\"log\",\"relationName\":\"logTouser\"},{\"name\":\"sentMessages\",\"kind\":\"object\",\"type\":\"message\",\"relationName\":\"messagesToUser_senderId\"},{\"name\":\"receivedMessages\",\"kind\":\"object\",\"type\":\"message\",\"relationName\":\"messagesToUser_receiverId\"},{\"name\":\"payments\",\"kind\":\"object\",\"type\":\"payment\",\"relationName\":\"paymentTouser\"}],\"dbName\":null},\"verification\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"identifier\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"value\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"expiresAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":null},\"payment\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"userId\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"user_id\"},{\"name\":\"eventId\",\"kind\":\"scalar\",\"type\":\"Int\",\"dbName\":\"event_id\"},{\"name\":\"status\",\"kind\":\"enum\",\"type\":\"PaymentStatus\"},{\"name\":\"amount\",\"kind\":\"scalar\",\"type\":\"Decimal\"},{\"name\":\"currency\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"provider\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"externalReference\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"external_reference\"},{\"name\":\"mpPreferenceId\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"mp_preference_id\"},{\"name\":\"mpPaymentId\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"mp_payment_id\"},{\"name\":\"payerEmail\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"payer_email\"},{\"name\":\"payerName\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"payer_name\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"created_at\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"updated_at\"},{\"name\":\"user\",\"kind\":\"object\",\"type\":\"user\",\"relationName\":\"paymentTouser\"},{\"name\":\"event\",\"kind\":\"object\",\"type\":\"event\",\"relationName\":\"eventTopayment\"},{\"name\":\"tickets\",\"kind\":\"object\",\"type\":\"ticket\",\"relationName\":\"paymentToticket\"}],\"dbName\":null},\"event\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"name\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"date\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"location\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"description\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"bannerUrl\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"banner_url\"},{\"name\":\"status\",\"kind\":\"enum\",\"type\":\"EventStatus\"},{\"name\":\"producerId\",\"kind\":\"scalar\",\"type\":\"Int\",\"dbName\":\"producer_id\"},{\"name\":\"capacityTotal\",\"kind\":\"scalar\",\"type\":\"Int\",\"dbName\":\"capacity_total\"},{\"name\":\"isRsvpAllowed\",\"kind\":\"scalar\",\"type\":\"Boolean\",\"dbName\":\"is_rsvp_allowed\"},{\"name\":\"eventGenre\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"event_genre\"},{\"name\":\"showRemainingTickets\",\"kind\":\"scalar\",\"type\":\"Boolean\",\"dbName\":\"show_remaining_tickets\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"created_at\"},{\"name\":\"ticketTypes\",\"kind\":\"object\",\"type\":\"ticketType\",\"relationName\":\"eventToticketType\"},{\"name\":\"eventArtists\",\"kind\":\"object\",\"type\":\"eventArtist\",\"relationName\":\"eventToeventArtist\"},{\"name\":\"tickets\",\"kind\":\"object\",\"type\":\"ticket\",\"relationName\":\"eventToticket\"},{\"name\":\"participants\",\"kind\":\"object\",\"type\":\"participant\",\"relationName\":\"eventToparticipant\"},{\"name\":\"rrppAssignments\",\"kind\":\"object\",\"type\":\"rrppAssignment\",\"relationName\":\"eventTorrppAssignment\"},{\"name\":\"payments\",\"kind\":\"object\",\"type\":\"payment\",\"relationName\":\"eventTopayment\"}],\"dbName\":null},\"artist\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"name\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"bio\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"imageUrl\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"image_url\"},{\"name\":\"socialLinks\",\"kind\":\"scalar\",\"type\":\"Json\",\"dbName\":\"social_links\"},{\"name\":\"eventArtists\",\"kind\":\"object\",\"type\":\"eventArtist\",\"relationName\":\"artistToeventArtist\"}],\"dbName\":null},\"eventArtist\":{\"fields\":[{\"name\":\"eventId\",\"kind\":\"scalar\",\"type\":\"Int\",\"dbName\":\"event_id\"},{\"name\":\"artistId\",\"kind\":\"scalar\",\"type\":\"Int\",\"dbName\":\"artist_id\"},{\"name\":\"order\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"slotTime\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"slot_time\"},{\"name\":\"isHeadliner\",\"kind\":\"scalar\",\"type\":\"Boolean\",\"dbName\":\"is_headliner\"},{\"name\":\"artist\",\"kind\":\"object\",\"type\":\"artist\",\"relationName\":\"artistToeventArtist\"},{\"name\":\"event\",\"kind\":\"object\",\"type\":\"event\",\"relationName\":\"eventToeventArtist\"}],\"dbName\":\"event_artist\"},\"ticketType\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"eventId\",\"kind\":\"scalar\",\"type\":\"Int\",\"dbName\":\"event_id\"},{\"name\":\"code\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"label\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"price\",\"kind\":\"scalar\",\"type\":\"Decimal\"},{\"name\":\"stockMax\",\"kind\":\"scalar\",\"type\":\"Int\",\"dbName\":\"stock_max\"},{\"name\":\"stockCurrent\",\"kind\":\"scalar\",\"type\":\"Int\",\"dbName\":\"stock_current\"},{\"name\":\"userMaxPerType\",\"kind\":\"scalar\",\"type\":\"Int\",\"dbName\":\"user_max_per_type\"},{\"name\":\"scanExpiration\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"scan_expiration\"},{\"name\":\"isVisible\",\"kind\":\"scalar\",\"type\":\"Boolean\",\"dbName\":\"is_visible\"},{\"name\":\"isDisabled\",\"kind\":\"scalar\",\"type\":\"Boolean\",\"dbName\":\"is_disabled\"},{\"name\":\"event\",\"kind\":\"object\",\"type\":\"event\",\"relationName\":\"eventToticketType\"},{\"name\":\"tickets\",\"kind\":\"object\",\"type\":\"ticket\",\"relationName\":\"ticketToticketType\"}],\"dbName\":\"ticket_type\"},\"ticket\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"eventId\",\"kind\":\"scalar\",\"type\":\"Int\",\"dbName\":\"event_id\"},{\"name\":\"ownerId\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"owner_id\"},{\"name\":\"typeId\",\"kind\":\"scalar\",\"type\":\"Int\",\"dbName\":\"type_id\"},{\"name\":\"paymentId\",\"kind\":\"scalar\",\"type\":\"Int\",\"dbName\":\"payment_id\"},{\"name\":\"qrCode\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"qr_code\"},{\"name\":\"code\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"status\",\"kind\":\"enum\",\"type\":\"TicketStatus\"},{\"name\":\"transferredFromId\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"transferred_from_id\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"created_at\"},{\"name\":\"event\",\"kind\":\"object\",\"type\":\"event\",\"relationName\":\"eventToticket\"},{\"name\":\"owner\",\"kind\":\"object\",\"type\":\"user\",\"relationName\":\"ticketsToUser_ownerId\"},{\"name\":\"type\",\"kind\":\"object\",\"type\":\"ticketType\",\"relationName\":\"ticketToticketType\"},{\"name\":\"transferredFrom\",\"kind\":\"object\",\"type\":\"user\",\"relationName\":\"ticketsToUser_transferredFromId\"},{\"name\":\"payment\",\"kind\":\"object\",\"type\":\"payment\",\"relationName\":\"paymentToticket\"}],\"dbName\":null},\"rrppAssignment\":{\"fields\":[{\"name\":\"rrppUserId\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"rrpp_user_id\"},{\"name\":\"eventId\",\"kind\":\"scalar\",\"type\":\"Int\",\"dbName\":\"event_id\"},{\"name\":\"commissionRate\",\"kind\":\"scalar\",\"type\":\"Decimal\",\"dbName\":\"commission_rate\"},{\"name\":\"freesGranted\",\"kind\":\"scalar\",\"type\":\"Int\",\"dbName\":\"frees_granted\"},{\"name\":\"rrppUser\",\"kind\":\"object\",\"type\":\"user\",\"relationName\":\"rrppAssignmentTouser\"},{\"name\":\"event\",\"kind\":\"object\",\"type\":\"event\",\"relationName\":\"eventTorrppAssignment\"}],\"dbName\":\"rrpp_assignment\"},\"participant\":{\"fields\":[{\"name\":\"userId\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"user_id\"},{\"name\":\"eventId\",\"kind\":\"scalar\",\"type\":\"Int\",\"dbName\":\"event_id\"},{\"name\":\"viaRsvp\",\"kind\":\"scalar\",\"type\":\"Boolean\",\"dbName\":\"via_rsvp\"},{\"name\":\"qrCode\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"qr_code\"},{\"name\":\"user\",\"kind\":\"object\",\"type\":\"user\",\"relationName\":\"participantTouser\"},{\"name\":\"event\",\"kind\":\"object\",\"type\":\"event\",\"relationName\":\"eventToparticipant\"}],\"dbName\":null},\"log\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"userId\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"user_id\"},{\"name\":\"action\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"timestamp\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"details\",\"kind\":\"scalar\",\"type\":\"Json\"},{\"name\":\"user\",\"kind\":\"object\",\"type\":\"user\",\"relationName\":\"logTouser\"}],\"dbName\":null},\"message\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"senderId\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"sender_id\"},{\"name\":\"receiverId\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"receiver_id\"},{\"name\":\"message\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"timestamp\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"readStatus\",\"kind\":\"scalar\",\"type\":\"Boolean\",\"dbName\":\"read_status\"},{\"name\":\"sender\",\"kind\":\"object\",\"type\":\"user\",\"relationName\":\"messagesToUser_senderId\"},{\"name\":\"receiver\",\"kind\":\"object\",\"type\":\"user\",\"relationName\":\"messagesToUser_receiverId\"}],\"dbName\":null}},\"enums\":{},\"types\":{}}")
+defineDmmfProperty(exports.Prisma, config.runtimeDataModel)
+config.engineWasm = {
+  getRuntime: async () => require('./query_engine_bg.js'),
+  getQueryEngineWasmModule: async () => {
+    const loader = (await import('#wasm-engine-loader')).default
+    const engine = (await loader).default
+    return engine
   }
 }
+config.compilerWasm = undefined
 
+config.injectableEdgeEnv = () => ({
+  parsed: {
+    DATABASE_URL: typeof globalThis !== 'undefined' && globalThis['DATABASE_URL'] || typeof process !== 'undefined' && process.env && process.env.DATABASE_URL || undefined
+  }
+})
+
+if (typeof globalThis !== 'undefined' && globalThis['DEBUG'] || typeof process !== 'undefined' && process.env && process.env.DEBUG || undefined) {
+  Debug.enable(typeof globalThis !== 'undefined' && globalThis['DEBUG'] || typeof process !== 'undefined' && process.env && process.env.DEBUG || undefined)
+}
+
+const PrismaClient = getPrismaClient(config)
 exports.PrismaClient = PrismaClient
-
 Object.assign(exports, Prisma)
+

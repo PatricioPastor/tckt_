@@ -53,9 +53,9 @@ const userStore = (set: any) => ({
 })
 
 export const useUserStore = create<UserStore>()(
-  persist(userStore, {
+  persist(userStore as any, {
     name: 'user-storage',
-    // Evita hydration mismatch: solo hidrata después del montaje en cliente
+    
     skipHydration: typeof window === 'undefined',
   })
 );

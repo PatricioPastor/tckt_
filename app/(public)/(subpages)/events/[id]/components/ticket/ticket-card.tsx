@@ -3,7 +3,7 @@
 import { Minus, Plus, Ticket01, InfoCircle } from "@untitledui/icons";
 import { useCartStore } from "@/lib/store/cart-store";
 import { cn } from "@/lib/utils";
-import { type ticketType as PrismaTicketType } from "@prisma/client";
+
 
 type TicketType = {
   id:             number;
@@ -25,14 +25,15 @@ export function TicketCard({ ticketType }: { ticketType: TicketType }) {
   const quantity = items.find((i) => i.code === ticketType.code)?.quantity || 0;
 
   const isOutOfStock = ticketType.stockCurrent <= 0;
-  const disabledDec = quantity <= 0;
+  const isDisabled = ticketType.isDisabled;
+  const disabledDec = quantity <= 0 || isDisabled;
   const disabledInc =
-    quantity >= ticketType.userMaxPerType || quantity >= ticketType.stockCurrent;
+    quantity >= ticketType.userMaxPerType || quantity >= ticketType.stockCurrent || isDisabled;
 
   const isSelected = quantity > 0;
 
   const inc = () => {
-    if (!disabledInc && !isOutOfStock) {
+    if (!disabledInc && !isOutOfStock && !isDisabled) {
       updateQuantity(
         ticketType.code,
         quantity + 1,
@@ -42,7 +43,7 @@ export function TicketCard({ ticketType }: { ticketType: TicketType }) {
     }
   };
   const dec = () => {
-    if (!disabledDec) {
+    if (!disabledDec && !isDisabled) {
       updateQuantity(
         ticketType.code,
         quantity - 1,
@@ -51,6 +52,32 @@ export function TicketCard({ ticketType }: { ticketType: TicketType }) {
       );
     }
   };
+
+  if (isDisabled) {
+    return (
+      <div className="w-full rounded-xl border border-neutral-800 bg-[#0E0E0E] p-4 opacity-60">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#141414]">
+              <Ticket01 className="size-5 text-neutral-500" />
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold tracking-tight text-neutral-400">
+                {ticketType.label.toUpperCase()}
+              </h3>
+              <p className="text-xs text-neutral-500">Desactivado</p>
+            </div>
+          </div>
+          <div className="text-right">
+            <p className="font-mono text-sm font-semibold text-neutral-500">
+              ${Number(ticketType.price).toLocaleString("es-AR")}
+            </p>
+            <p className="mt-1 text-xs text-neutral-600">No disponible</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (isOutOfStock) {
     return (

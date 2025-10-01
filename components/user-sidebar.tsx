@@ -12,13 +12,13 @@ import {
   SidebarMenuButton,
 } from "@/components/ui/sidebar";
 import { NavMain } from "./nav-main";
-import { NavSecondary } from "./nav-secondary"; // si ya lo tenés
-import { NavUser } from "./nav-user"; // si ya lo tenés
+import { NavSecondary } from "./nav-secondary";
+import { NavUser } from "./nav-user";
 import { Calendar, Home01, Ticket01, User01 } from "@untitledui/icons";
 import { authClient } from "@/lib/auth-client";
 import { useEffect } from "react";
 import { User } from "@/lib/store/user-store";
-
+import Image from "next/image";
 
 type AppSidebarProps = React.ComponentProps<typeof Sidebar> & {
   user?: User | null;
@@ -34,7 +34,7 @@ const data = {
     {
       title: "Eventos",
       url: "/events",
-      icon:  Calendar,
+      icon: Calendar,
     },
     {
       title: "Mi Cuenta",
@@ -51,31 +51,28 @@ const data = {
   ],
 };
 
-
 function LogoMono() {
-  return (
-    <span className="font-mono text-[17px] font-semibold tracking-tight text-neutral-100">
-      tckt_
-    </span>
-  );
+  return <Image src="/isotipo.svg" alt="tckt_" width={120} height={50} />;
 }
 
-export function AppSidebar({ user, ...props }: AppSidebarProps) {
+export function AppSidebar({ user: propUser, ...props }: AppSidebarProps) {
   const router = useRouter();
-
   const { data: session, isPending } = authClient.useSession();
-  user = user! || session!.user!;
+
+  // Use session.user if propUser is not provided
+  const resolvedUser = propUser || session?.user;
 
   useEffect(() => {
-    if (!isPending && !user) {
+    if (!isPending && !resolvedUser) {
       router.push("/login");
     }
-
-  },[isPending])
+  }, [isPending, resolvedUser, router]);
 
   const handleLogin = () => router.push("/login");
 
-
+  if (isPending) {
+    return <></>
+  }
 
   return (
     <Sidebar
@@ -101,7 +98,7 @@ export function AppSidebar({ user, ...props }: AppSidebarProps) {
 
       {/* Content */}
       <SidebarContent className="gap-3">
-        {user ? (
+        {resolvedUser ? (
           <NavMain items={data.navMain} />
         ) : (
           <div className="px-3 pt-3">
@@ -124,7 +121,7 @@ export function AppSidebar({ user, ...props }: AppSidebarProps) {
 
       {/* Footer */}
       <SidebarFooter className="border-t border-neutral-800">
-        <NavUser user={user!} />
+        {resolvedUser ? <NavUser user={resolvedUser as any} /> : null}
       </SidebarFooter>
     </Sidebar>
   );

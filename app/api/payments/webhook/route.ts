@@ -2,8 +2,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { MercadoPagoConfig, Payment } from "mercadopago";
 import prisma from "@/lib/prisma";
-import { PaymentStatus, TicketStatus } from "@prisma/client";
+
 import crypto from "crypto";
+import { PaymentStatus, TicketStatus } from "@/app/generated/prisma";
 
 const client = new MercadoPagoConfig({
   accessToken: process.env.MERCADOPAGO_ACCESS_TOKEN!,
@@ -96,6 +97,7 @@ async function updateFromPaymentId(paymentId: string) {
   console.log(`Processing payment ${paymentId}: MP status '${pd.status}' -> Payment: '${paymentStatus}', Tickets: '${ticketStatus}'`);
 
   // 2) Buscar fila local por externalReference
+  
   const paymentRow = await prisma.payment.findUnique({
     where: { externalReference: extRef },
     include: {
@@ -118,6 +120,7 @@ async function updateFromPaymentId(paymentId: string) {
   console.log(`[Webhook] Found local payment: ${paymentRow.id}, current status: ${paymentRow.status}, tickets: ${paymentRow.tickets.length}`);
 
   // 3) Actualizar payment + tickets con tipos correctos
+  
   await prisma.$transaction(async (tx) => {
     // Actualizar payment
     await tx.payment.update({

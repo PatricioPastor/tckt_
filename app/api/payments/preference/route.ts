@@ -19,6 +19,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Obtener información del payment y tickets
+    
     const payment = await prisma.payment.findUnique({
       where: { id: paymentId },
       include: {

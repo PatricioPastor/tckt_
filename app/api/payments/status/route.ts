@@ -15,6 +15,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Provide payment_id or external_ref' }, { status: 400 })
   }
 
+  
   const payment = await prisma.payment.findFirst({
     where: {
       userId: session.user.id,

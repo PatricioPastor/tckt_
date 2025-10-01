@@ -4,7 +4,8 @@ import { MercadoPagoConfig, Payment } from 'mercadopago';
 import prisma from '@/lib/prisma';
 import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
-import { PaymentStatus, TicketStatus } from '@prisma/client';
+import { PaymentStatus, TicketStatus } from '@/app/generated/prisma';
+
 
 const client = new MercadoPagoConfig({
   accessToken: process.env.MERCADOPAGO_ACCESS_TOKEN!,
@@ -21,6 +22,7 @@ export async function POST(req: NextRequest) {
     const { paymentId, token, installments, issuerId, paymentMethodId } = await req.json();
 
     // Validar que el payment exista y pertenezca al usuario
+    
     const paymentRecord = await prisma.payment.findUnique({
       where: { id: paymentId },
       include: {
@@ -92,7 +94,8 @@ export async function POST(req: NextRequest) {
     const ticketStatus = mpResponse.status === 'approved' ? TicketStatus.paid : TicketStatus.pending;
 
     // Actualizar payment y tickets
-    await prisma.$transaction(async (tx) => {
+    
+    await prisma.$transaction(async (tx:any) => {
       await tx.payment.update({
         where: { id: paymentRecord.id },
         data: {

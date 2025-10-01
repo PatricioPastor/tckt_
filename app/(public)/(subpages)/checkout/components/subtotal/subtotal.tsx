@@ -18,16 +18,16 @@ export const Subtotal = () => {
   // ---- Comisión unificada de la app (8%) ----
   const appFee = round2(subtotal * APP_FEE_RATE);
 
-  // ---- Comisión MP (sobre subtotal + 8% app) ----
-  const basePlusApp = subtotal + appFee;
-  const mpFee = round2(basePlusApp * MP_FEE_RATE);
+  // // ---- Comisión MP (sobre subtotal + 8% app) ----
+  // const basePlusApp = subtotal + appFee;
+  // const mpFee = round2(basePlusApp * MP_FEE_RATE);
 
-  // ---- IIBB La Pampa (sobre subtotal + app + mp) ----
-  const basePlusAppAndMp = basePlusApp + mpFee;
-  const iibb = round2(basePlusAppAndMp * IIBB_RATE);
+  // // ---- IIBB La Pampa (sobre subtotal + app + mp) ----
+  // const basePlusAppAndMp = basePlusApp + mpFee;
+  // const iibb = round2(basePlusAppAndMp * IIBB_RATE);
 
   // ---- Total que paga el usuario ----
-  const total = round2(subtotal + appFee + mpFee + iibb);
+  const total = round2(subtotal + appFee );
 
   return (
     <div className="flex flex-col gap-8 text-neutral-200">
@@ -46,8 +46,8 @@ export const Subtotal = () => {
         <div className="rounded-lg border border-neutral-800 bg-[#0E0E0E] p-4">
           <Row label="Subtotal" value={subtotal} />
           <Row label={`Comisión de la app (${(APP_FEE_RATE * 100).toFixed(0)}%)`} value={appFee} />
-          <Row label={`Comisión Mercado Pago (${(MP_FEE_RATE * 100).toFixed(1)}%)`} value={mpFee} />
-          <Row label={`IIBB La Pampa (${(IIBB_RATE * 100).toFixed(1)}%)`} value={iibb} />
+          {/* <Row label={`Comisión Mercado Pago (${(MP_FEE_RATE * 100).toFixed(1)}%)`} value={mpFee} /> */}
+          {/* <Row label={`IIBB La Pampa (${(IIBB_RATE * 100).toFixed(1)}%)`} value={iibb} /> */}
 
           <div className="my-2 border-t border-neutral-800" />
 
@@ -55,7 +55,7 @@ export const Subtotal = () => {
         </div>
 
         <p className="text-[11px] leading-4 text-neutral-500">
-          El total ya incluye tarifa de la aplicación (8%), comisión de Mercado Pago e IIBB La Pampa.
+          El total ya incluye tarifa de la aplicación (8%), comisión de Mercado Pago (impuestos en responsabiliadad de MercadoPago).
         </p>
       </section>
     </div>

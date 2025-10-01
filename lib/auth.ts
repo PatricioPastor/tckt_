@@ -8,12 +8,12 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
   },
-  // session:{
-  //   expiresIn: 60 * 60 * 24 * 30, // 30 days
-  // },
+  session:{
+    expiresIn: 60 * 60 * 24 * 30, // 30 days
+  },
   database: prismaAdapter(prisma, {
-    provider: "postgresql", 
+    provider: "postgresql",
   }),
-  plugins: [nextCookies()]
-  
+  plugins: [nextCookies()],
+  trustedOrigins: ["*"], // Permite cualquier origen
 });

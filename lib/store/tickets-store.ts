@@ -73,7 +73,7 @@ const ticketsStore = (set: any, get: any) => ({
 })
 
 export const useTicketsStore = create<TicketsStore>()(
-  persist(ticketsStore, {
+  persist(ticketsStore as any, {
     name: 'tickets-storage',
     partialize: (state) => ({
       tickets: state.tickets,

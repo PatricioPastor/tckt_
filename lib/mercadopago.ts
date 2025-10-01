@@ -139,7 +139,7 @@ export async function createPaymentPreference(data: PaymentPreferenceData) {
       externalRef: preferenceData.external_reference
     });
 
-    const result = await preference.create({ body: preferenceData });
+    const result = await preference.create({ body: preferenceData as any});
 
     console.log('[MP Preference] Created successfully:', {
       id: result.id,
@@ -160,7 +160,6 @@ export async function createPaymentPreference(data: PaymentPreferenceData) {
     console.error('[MP Preference] Error details:', {
       message: error instanceof Error ? error.message : 'Unknown error',
       stack: error instanceof Error ? error.stack : undefined,
-      // @ts-expect-error - MercadoPago error object may have response property
       response: error?.response?.data || error?.response || 'No response data'
     });
 

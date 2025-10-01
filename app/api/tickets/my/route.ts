@@ -12,6 +12,7 @@ export async function GET(req: NextRequest) {
   const limit = parseInt(url.searchParams.get('limit') || '50', 10);
   const offset = (page - 1) * limit;
 
+  
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
     select: { role: true },
@@ -28,6 +29,7 @@ export async function GET(req: NextRequest) {
     whereClause = { ownerId: session.user.id };
   } else if (role === 'rrpp' || role === 'qr_scanner') {
     // For RRPP or scanner roles, show tickets for their assigned events
+    
     const assignedEvents = await prisma.rrppAssignment.findMany({
       where: { rrppUserId: session.user.id },
       select: { eventId: true },
@@ -37,6 +39,7 @@ export async function GET(req: NextRequest) {
   // For superadmin/head_producer we don't filter by anything - they see all tickets
 
   try {
+    
     const tickets = await prisma.ticket.findMany({
       where: whereClause,
       include: {
@@ -49,6 +52,7 @@ export async function GET(req: NextRequest) {
       orderBy: { createdAt: 'desc' },
     });
 
+    
     const total = await prisma.ticket.count({ where: whereClause });
     const pages = Math.ceil(total / limit);
 

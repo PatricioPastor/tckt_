@@ -24,7 +24,11 @@
       "Bash(bunx prisma:*)",
       "Bash(npx prisma db pull:*)",
       "Bash(npx prisma:*)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(bun run:*)",
+      "Bash(for:*)",
+      "Bash(do sed -i 's|//@ts-expect-error.*||g' \"$file\")",
+      "Bash(done)"
     ],
     "deny": []
   },

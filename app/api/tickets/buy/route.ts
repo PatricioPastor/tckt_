@@ -4,9 +4,9 @@ import prisma from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 import QRCode from 'qrcode'
 import { headers } from 'next/headers'
-import { TicketStatus, Prisma } from '@prisma/client'
 import { createPaymentPreference } from '@/lib/mercadopago'
-import { Decimal } from '@prisma/client/runtime/library'
+import { TicketStatus } from '@/app/generated/prisma'
+import { Decimal } from '@/app/generated/prisma/runtime/library'
 
 const APP_FEE_RATE = 0.08;                       // 8% tuyo
 const MP_FEE_RATE = Number(process.env.MP_FEE_RATE ?? '0.06');   // Comisión MP (6% por defecto)
@@ -21,6 +21,7 @@ export async function POST(req: NextRequest) {
   }
 
   // Solo rol user
+  
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
     select: { role: true }
@@ -50,7 +51,8 @@ export async function POST(req: NextRequest) {
   if (dup) return NextResponse.json({ error: `Duplicated ticket code: ${dup}` }, { status: 400 })
 
   try {
-    const result = await prisma.$transaction(async (tx) => {
+    
+    const result:any = await prisma.$transaction(async (tx:any) => {
       const event = await tx.event.findUnique({
         where: { id: eventId },
         include: {
@@ -151,7 +153,7 @@ export async function POST(req: NextRequest) {
             userId: session.user.id,
             eventId,
             status: 'pending',
-            amount: new Prisma.Decimal(totalAmount),
+            amount: Decimal(totalAmount),
             currency: 'ARS',
             provider: 'mercadopago',
             externalReference,

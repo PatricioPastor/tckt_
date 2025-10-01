@@ -23,14 +23,14 @@ export default function Page() {
   const { proximosTickets, terminadosTickets } = useMemo(() => {
     const now = new Date();
     
-    const proximos = tickets.filter(ticket => {
+    const proximos = tickets.filter((ticket:any) => {
       const eventDate = new Date(ticket.event.date);
       const isPendingOrPaid = [TicketStatus.Pending, TicketStatus.Paid].includes(ticket.status);
       const isUpcoming = eventDate > now;
       return isPendingOrPaid && isUpcoming;
     });
 
-    const terminados = tickets.filter(ticket => {
+    const terminados = tickets.filter((ticket:any) => {
       const eventDate = new Date(ticket.event.date);
       const isUsedOrPast = ticket.status === TicketStatus.Used || eventDate <= now;
       return isUsedOrPast;

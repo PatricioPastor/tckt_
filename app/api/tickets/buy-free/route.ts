@@ -3,7 +3,7 @@ import prisma from '@/lib/prisma';
 import { auth } from '@/lib/auth';
 import QRCode from 'qrcode';
 import { headers } from 'next/headers';
-import { TicketStatus } from '@prisma/client';
+import { TicketStatus } from '@/app/generated/prisma'
 
 export async function POST(req: NextRequest) {
   const session = await auth.api.getSession({ 
@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
 
   if (!session?.user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  // Fetch user for role validation
+  
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
     select: { role: true },
@@ -25,7 +25,8 @@ export async function POST(req: NextRequest) {
   if (!eventId || !selections?.length) return NextResponse.json({ error: 'Invalid request' }, { status: 400 });
 
   try {
-    const result = await prisma.$transaction(async (tx) => {
+    
+    const result:any = await prisma.$transaction(async (tx:any) => {
       const event = await tx.event.findUnique({ 
         where: { id: eventId }, 
         include: { ticketTypes: true } 

@@ -21,6 +21,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, error: 'Code is required' }, { status: 400 });
     }
 
+    
     const ticket = await prisma.ticket.findUnique({
       where: { code },
       include: { event: true, owner: true, type: true }, // Incluye type para scanExpiration

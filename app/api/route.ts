@@ -10,6 +10,7 @@ export async function GET() {
   if (!session?.user) {
     return NextResponse.json("Unauthorized", { status: 401 });
   }     
+  
   const users = await prisma.user.findMany();
   return NextResponse.json(session);
 }
