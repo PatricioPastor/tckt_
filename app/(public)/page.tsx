@@ -140,10 +140,24 @@ export default function HomePage() {
 
   const handleShare = () => {
     if (!current) return;
-    const url = `${window.location.origin}/events/${current.id}`;
+
+    // URL específica del evento
+    const url = `https://www.tckt.fun/events/${current.id}`;
+
+    // Texto descriptivo con artistas y ubicación
+    const artistsText = current.artists?.length > 0
+      ? ` - ${current.artists.join(", ")}`
+      : "";
+    const text = `🎟️ ${current.name}${artistsText}\n📅 ${current.date}\n📍 ${current.location}`;
+
     if (navigator.share) {
-      navigator.share({ title: current.labelName, url }).catch(() => {});
+      navigator.share({
+        title: `🎟️ ${current.name}`,
+        text: text,
+        url: url
+      }).catch(() => {});
     } else {
+      // Fallback: copiar URL al portapapeles
       navigator.clipboard.writeText(url);
     }
   };

@@ -28,7 +28,8 @@
       "Bash(bun run:*)",
       "Bash(for:*)",
       "Bash(do sed -i 's|//@ts-expect-error.*||g' \"$file\")",
-      "Bash(done)"
+      "Bash(done)",
+      "Bash(ls:*)"
     ],
     "deny": []
   },
