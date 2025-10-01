@@ -8,6 +8,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { TicketsList } from './components/tickets/tickets-list';
 import { BackHeader } from '@/components/back-header/back-header';
 import { TicketsHeader } from './components/tickets-header';
+import { useHydration } from '@/lib/hooks/use-hydration';
 
 import { Ticket, TicketStatus, useTicketsStore } from '@/lib/store/tickets-store';
 
@@ -15,6 +16,7 @@ import { Ticket, TicketStatus, useTicketsStore } from '@/lib/store/tickets-store
 
 export default function Page() {
   const { tickets, isLoading, error, findTickets, refreshTickets, clearError } = useTicketsStore();
+  const isHydrated = useHydration();
   const [refreshing, setRefreshing] = useState(false);
 
   // Memoize ticket categorization to prevent unnecessary re-renders
@@ -61,15 +63,34 @@ export default function Page() {
     }
   }, [error, clearError]);
 
+  // Renderizado consistente durante hydration
+  if (!isHydrated) {
+    return (
+      <div className="bg-black min-h-screen text-white">
+        <BackHeader
+          title="Mis tickets"
+          className="border-b border-neutral-800"
+        />
+        <div className="flex justify-center items-center h-[70vh] text-white">
+          <div className="w-full h-full relative flex items-center justify-center animate-pulse text-lg text-neutral-400">
+            cargando...
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (isLoading && tickets.length === 0) {
     return (
       <div className="bg-black min-h-screen text-white">
-        <BackHeader 
-          title="Mis tickets" 
-          className="border-b border-neutral-800" 
+        <BackHeader
+          title="Mis tickets"
+          className="border-b border-neutral-800"
         />
         <div className="flex justify-center items-center h-[70vh] text-white">
-          <div className=" w-full h-full relative flex items-center justify-center animate-pulse text-lg">docargan...</div>;
+          <div className="w-full h-full relative flex items-center justify-center animate-pulse text-lg text-neutral-400">
+            cargando tickets...
+          </div>
         </div>
       </div>
     );

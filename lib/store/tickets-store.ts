@@ -13,74 +13,75 @@ export type TicketsStore = {
   updateTicketStatus: (ticketId: number, status: TicketStatus) => void;
 };
 
+const ticketsStore = (set: any, get: any) => ({
+  tickets: [],
+  isLoading: false,
+  error: null,
+  lastUpdated: null,
+  getTicketsByStatus: (...statuses: TicketStatus[]) => {
+    return get().tickets.filter((ticket: Ticket) => statuses.includes(ticket.status));
+  },
+  findTickets: async () => {
+    const currentTime = Date.now();
+    const { lastUpdated } = get();
+
+    // Skip if we just fetched (less than 30 seconds ago)
+    if (lastUpdated && currentTime - lastUpdated < 30000) {
+      return;
+    }
+
+    set({ isLoading: true, error: null });
+    try {
+      const res = await fetch('/api/tickets/my', {
+        headers: {
+          'Cache-Control': 'no-cache',
+        },
+      });
+
+      if (!res.ok) {
+        throw new Error('Failed to fetch tickets');
+      }
+
+      const {data}: {data: Ticket[]} = await res.json();
+      set({
+        tickets: data || [],
+        lastUpdated: currentTime,
+        error: null
+      });
+
+    } catch (err) {
+      console.error('Error fetching tickets:', err);
+      set({ error: (err as Error).message });
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+  refreshTickets: async () => {
+    set({ lastUpdated: null }); // Force refresh
+    await get().findTickets();
+  },
+  clearError: () => {
+    set({ error: null });
+  },
+  updateTicketStatus: (ticketId: number, status: TicketStatus) => {
+    const { tickets } = get();
+    const updatedTickets = tickets.map((ticket: Ticket) =>
+      ticket.id === ticketId ? { ...ticket, status } : ticket
+    );
+    set({ tickets: updatedTickets });
+  },
+})
+
 export const useTicketsStore = create<TicketsStore>()(
-  persist(
-    (set, get) => ({
-      tickets: [],
-      isLoading: false,
-      error: null,
-      lastUpdated: null,
-      getTicketsByStatus: (...statuses: TicketStatus[]) => {
-        return get().tickets.filter(ticket => statuses.includes(ticket.status));
-      },
-      findTickets: async () => {
-        const currentTime = Date.now();
-        const { lastUpdated } = get();
-        
-        // Skip if we just fetched (less than 30 seconds ago)
-        if (lastUpdated && currentTime - lastUpdated < 30000) {
-          return;
-        }
-
-        set({ isLoading: true, error: null });
-        try {
-          const res = await fetch('/api/tickets/my', {
-            headers: {
-              'Cache-Control': 'no-cache',
-            },
-          });
-          
-          if (!res.ok) {
-            throw new Error('Failed to fetch tickets');
-          }
-          
-          const {data}: {data: Ticket[]} = await res.json();
-          set({ 
-            tickets: data || [], 
-            lastUpdated: currentTime,
-            error: null
-          });
-
-        } catch (err) {
-          console.error('Error fetching tickets:', err);
-          set({ error: (err as Error).message });
-        } finally {
-          set({ isLoading: false });
-        }
-      },
-      refreshTickets: async () => {
-        set({ lastUpdated: null }); // Force refresh
-        await get().findTickets();
-      },
-      clearError: () => {
-        set({ error: null });
-      },
-      updateTicketStatus: (ticketId: number, status: TicketStatus) => {
-        const { tickets } = get();
-        const updatedTickets = tickets.map(ticket => 
-          ticket.id === ticketId ? { ...ticket, status } : ticket
-        );
-        set({ tickets: updatedTickets });
-      },
+  persist(ticketsStore, {
+    name: 'tickets-storage',
+    partialize: (state) => ({
+      tickets: state.tickets,
+      lastUpdated: state.lastUpdated
     }),
-    { 
-      name: 'tickets-storage',
-      partialize: (state) => ({ 
-        tickets: state.tickets,
-        lastUpdated: state.lastUpdated 
-      }),
-    } 
-  )
+    // Evita hydration mismatch: solo hidrata después del montaje en cliente
+    skipHydration: typeof window === 'undefined',
+  })
 );
 
 

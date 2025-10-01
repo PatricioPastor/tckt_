@@ -27,11 +27,9 @@ interface CartState {
   loadFromLocalStorage: () => void
 }
 
-export const useCartStore = create<CartState>()(
-  persist(
-    (set, get) => ({
-      eventId: null,
-      items: [],
+const cartStore = (set: any, get: any) => ({
+  eventId: null,
+  items: [],
 
       addItem: (item) => {
         const items = [...get().items]
@@ -164,7 +162,12 @@ export const useCartStore = create<CartState>()(
           console.error('Failed to load cart from localStorage:', err)
         }
       }
-    }),
-    { name: 'cart-storage' }
-  )
+    })
+
+export const useCartStore = create<CartState>()(
+  persist(cartStore, {
+    name: 'cart-storage',
+    // Evita hydration mismatch: solo hidrata después del montaje en cliente
+    skipHydration: typeof window === 'undefined',
+  })
 )

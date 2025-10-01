@@ -93,8 +93,7 @@ export default function EventDetailPage() {
       <div className="relative h-80 w-full sm:h-96">
         <Image
           src={
-            bannerUrl ||
-            "https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?auto=format&fit=crop&w=1600&q=80"
+            "/background.jpg" 
           }
           alt={name}
           fill
@@ -267,7 +266,7 @@ export default function EventDetailPage() {
                 className="animate-[fadeInUp_300ms_ease] [animation-delay:var(--d)]"
                 style={{ "--d": `${i * 80}ms` } as React.CSSProperties}
               >
-                <TicketCard ticketType={tt} />
+                <TicketCard ticketType={tt as any} />
               </div>
             ))}
           </div>

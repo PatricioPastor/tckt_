@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useCartStore } from "@/lib/store/cart-store";
 import { Button } from "@/components/ui/button";
 import { useUserStore } from "@/lib/store/user-store";
+import { useHydration } from "@/lib/hooks/use-hydration";
 import { authClient } from "@/lib/auth-client";
 import { ItemsCart } from "./components/items-cart/items-cart";
 import { Subtotal } from "./components/subtotal/subtotal";
@@ -16,6 +17,7 @@ export default function CheckoutPage() {
   const { eventId, getTotal, checkout, checkoutFree, hasFreeTickets, hasPaidTickets } = useCartStore();
   const { user } = useUserStore();
   const { data: session, isPending } = authClient.useSession();
+  const isHydrated = useHydration();
 
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [showSlideConfirm, setShowSlideConfirm] = useState(false);
@@ -25,8 +27,30 @@ export default function CheckoutPage() {
 
   useEffect(() => { if (!isPending) setIsCheckingAuth(false); }, [isPending]);
 
+  // Renderizado consistente durante hydration
+  if (!isHydrated) {
+    return (
+      <div className="min-h-screen bg-[#0B0B0B]">
+        <BackHeader title="Checkout" className="border-b border-neutral-800 bg-[#0B0B0B]" />
+        <div className="flex h-[calc(100vh-64px)] items-center justify-center">
+          <div className="text-center space-y-2">
+            <div className="h-8 w-8 mx-auto animate-spin rounded-full border-2 border-neutral-800 border-t-neutral-100" />
+            <p className="text-sm text-neutral-400">Cargando carrito...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (!eventId) {
-    return <div className="flex h-screen items-center justify-center text-sm text-neutral-400 bg-[#0B0B0B]">No event selected</div>;
+    return (
+      <div className="min-h-screen bg-[#0B0B0B]">
+        <BackHeader title="Checkout" className="border-b border-neutral-800 bg-[#0B0B0B]" />
+        <div className="flex h-[calc(100vh-64px)] items-center justify-center text-sm text-neutral-400">
+          No hay eventos seleccionados
+        </div>
+      </div>
+    );
   }
 
   const subtotal = getTotal();

@@ -5,7 +5,20 @@ import { useCartStore } from "@/lib/store/cart-store";
 import { cn } from "@/lib/utils";
 import { type ticketType as PrismaTicketType } from "@prisma/client";
 
-type TicketType = Pick<PrismaTicketType, 'id' | 'code' | 'label' | 'price' | 'userMaxPerType' | 'stockCurrent'>;
+type TicketType = {
+  id:             number;
+  eventId:        number;
+  code:           string;
+  label:          string;
+  price:          string;
+  stockMax:       number;
+  stockCurrent:   number;
+  userMaxPerType: number;
+  scanExpiration: null;
+  isVisible:      boolean;
+  isDisabled:     boolean;
+}
+
 
 export function TicketCard({ ticketType }: { ticketType: TicketType }) {
   const { items, updateQuantity } = useCartStore();
@@ -77,7 +90,7 @@ export function TicketCard({ ticketType }: { ticketType: TicketType }) {
       <div className="flex items-center justify-between gap-4">
         {/* Info */}
         <div className="flex min-w-0 flex-1 items-center gap-3">
-          <div
+          {/* <div
             className={cn(
               "flex h-10 w-10 items-center justify-center rounded-lg transition-colors",
               isSelected ? "bg-neutral-100" : "bg-[#141414]"
@@ -89,14 +102,15 @@ export function TicketCard({ ticketType }: { ticketType: TicketType }) {
                 isSelected ? "text-black" : "text-neutral-400"
               )}
             />
-          </div>
+          </div> */}
           <div className="min-w-0 flex-1">
             <h3 className="text-sm font-semibold tracking-tight text-neutral-100">
               {ticketType.label.toUpperCase()}
             </h3>
-            <p className="truncate text-xs text-neutral-400">
+            {/* <p className="truncate text-xs text-neutral-400">
               Recibís un QR válido hasta las 02:00
             </p>
+            */}
             <div className="mt-1 flex items-center gap-2">
               <span className="text-xs text-neutral-500">
                 Disponibles: {ticketType.stockCurrent}
@@ -106,7 +120,7 @@ export function TicketCard({ ticketType }: { ticketType: TicketType }) {
                   • Máx: {ticketType.userMaxPerType}
                 </span>
               ) : null}
-            </div>
+            </div> 
           </div>
         </div>
 

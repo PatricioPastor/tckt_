@@ -23,12 +23,15 @@
       "Bash(npx prisma generate:*)",
       "Bash(bunx prisma:*)",
       "Bash(npx prisma db pull:*)",
-      "Bash(npx prisma:*)"
+      "Bash(npx prisma:*)",
+      "Bash(cat:*)"
     ],
     "deny": []
   },
   "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [
-    "notionApi"
+    "postgres",
+    "context7",
+    "mercadopago-mcp-server"
   ]
 }

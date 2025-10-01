@@ -5,20 +5,56 @@ export async function middleware(request: NextRequest) {
   const sessionCookie = getSessionCookie(request);
   const { pathname } = request.nextUrl;
 
-  // Define authentication routes that don't require authentication check
+  // Rutas de autenticación (login/signup)
   const authRoutes = ["/login", "/signup"];
 
-  // Redirect authenticated users away from login/signup pages
+  // Rutas públicas (no requieren autenticación)
+  const publicRoutes = [
+    "/",
+    "/events",
+    "/checkout",
+    "/payment",
+  ];
+
+  // Rutas protegidas (requieren autenticación)
+  const protectedRoutes = [
+    "/dashboard",
+    "/admin",
+    "/scanner",
+    "/tickets",
+  ];
+
+  // Helper: verifica si la ruta actual coincide con algún patrón
+  const matchesRoute = (routes: string[]) => {
+    return routes.some(route => {
+      if (route === pathname) return true;
+      // Permite subrutas (ej: /events/123, /payment/success)
+      if (pathname.startsWith(route + "/")) return true;
+      return false;
+    });
+  };
+
+  // 1. Usuarios autenticados intentando acceder a login/signup → redirigir a home
   if (sessionCookie && authRoutes.includes(pathname)) {
     return NextResponse.redirect(new URL("/", request.url));
   }
 
-  // Redirect ALL unauthenticated users to signup (except those already on auth pages)
-  if (!sessionCookie && !authRoutes.includes(pathname)) {
-    return NextResponse.redirect(new URL("/signup", request.url));
+  // 2. Rutas públicas → permitir acceso a todos (autenticados o no)
+  if (matchesRoute(publicRoutes)) {
+    return NextResponse.next();
   }
 
-  // Allow authenticated users and auth pages
+  // 3. Rutas de autenticación → permitir acceso a todos
+  if (authRoutes.includes(pathname)) {
+    return NextResponse.next();
+  }
+
+  // 4. Rutas protegidas sin autenticación → redirigir a login
+  if (!sessionCookie && matchesRoute(protectedRoutes)) {
+    return NextResponse.redirect(new URL("/login", request.url));
+  }
+
+  // 5. Todo lo demás → permitir
   return NextResponse.next();
 }
 

@@ -332,7 +332,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "c:\\Users\\patri\\Dev\\NoTrip\\tckt_\\app\\generated\\prisma",
+      "value": "C:\\Users\\patri\\Dev\\main\\NoTrip\\tckt\\web-app\\app\\generated\\prisma",
       "fromEnvVar": null
     },
     "config": {
@@ -346,7 +346,7 @@ const config = {
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "c:\\Users\\patri\\Dev\\NoTrip\\tckt_\\prisma\\schema.prisma",
+    "sourceFilePath": "C:\\Users\\patri\\Dev\\main\\NoTrip\\tckt\\web-app\\prisma\\schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
@@ -360,6 +360,7 @@ const config = {
     "db"
   ],
   "activeProvider": "postgresql",
+  "postinstall": false,
   "inlineDatasources": {
     "db": {
       "url": {

@@ -14,8 +14,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `npm run "db init"` - Generate Prisma client
 - `npm run "db studio"` - Open Prisma Studio
 - `npm run "db seed"` - Seed database
-- `npx prisma migrate dev` - Run database migrations
-- `npx prisma generate` - Generate Prisma client
+- `bunx prisma migrate dev` - Run database migrations
+- `bunx prisma generate` - Generate Prisma client
 
 ## Architecture
 
@@ -81,3 +81,6 @@ The app is a ticket booking platform with these key entities:
 - Tickets have unique QR codes and tracking codes
 - Events support multiple ticket types with individual capacity limits
 - Comprehensive audit logging through the `log` model
+
+## Tool Preferences
+- **ALWAYS use `bunx` instead of `npx`** for executing packages

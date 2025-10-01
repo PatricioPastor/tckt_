@@ -8,6 +8,7 @@ import { es } from "date-fns/locale";
 
 import { useEventStore } from "@/lib/store/event-store";
 import { useUserStore } from "@/lib/store/user-store";
+import { useHydration } from "@/lib/hooks/use-hydration";
 
 import { SiteHeader } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
@@ -90,11 +91,12 @@ export default function HomePage() {
   const { events, loading, error, fetchEvents } = useEventStore();
   const { user } = useUserStore();
   const router = useRouter();
+  const isHydrated = useHydration();
 
   const [isDesktop, setIsDesktop] = useState(false);
   const [index, setIndex] = useState(0);
 
-  // Hook 1: detectar viewport
+  // Hook 1: detectar viewport - DESPUÉS del montaje para evitar hydration mismatch
   useEffect(() => {
     const checkViewport = () => setIsDesktop(window.innerWidth > 500);
     checkViewport();
@@ -157,7 +159,19 @@ export default function HomePage() {
     setIndex(((next % len) + len) % len);
   };
 
-  // A partir de acá, **recién** usamos returns condicionales
+  // Renderizado consistente durante hydration
+  if (!isHydrated) {
+    return (
+      <div className="relative min-h-screen w-full bg-black">
+        <SiteHeader user={null} />
+        <div className="w-full h-full relative flex items-center justify-center animate-pulse text-lg text-neutral-400">
+          cargando...
+        </div>
+      </div>
+    );
+  }
+
+  // A partir de acá, **recién** usamos returns condicionales basados en cliente
   if (isDesktop) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-black px-4">
@@ -231,8 +245,8 @@ export default function HomePage() {
         <div className="relative h-full w-full">
           <Image
             src={
-              current?.imageUrl ||
-              "https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?auto=format&fit=crop&w=1600&q=80"
+              "/background.jpg" 
+              
             }
             alt={current?.labelName || "Evento"}
             fill

@@ -1,103 +1,20 @@
-"use client";
+import { PublicLayoutClient } from "./layout-client";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 
-import { SiteHeader } from "@/components/site-header";
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/user-sidebar";
-import { useUserStore } from "@/lib/store/user-store";
-import { authClient } from "@/lib/auth-client";
-import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-
-export default function Layout({
+export default async function Layout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const { user } = useUserStore();
-  const { data: session, isPending } = authClient.useSession();
-  const router = useRouter();
-  const pathname = usePathname();
-  const [isClient, setIsClient] = useState(false);
+  // Obtener sesión en el servidor
+  const headersList = await headers();
+  const sessionData = await auth.api.getSession({
+    headers: headersList,
+  });
 
-  // Evitar hydration mismatch esperando el cliente
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
+  const user = sessionData?.user ?? null;
 
-  // Redirigir sin autenticación SOLO en el cliente
-  useEffect(() => {
-    if (!isPending && !session && isClient) {
-      router.push('/login');
-    }
-  }, [isPending, session, router, isClient]);
-
-  // Loading state - mantener estructura HTML consistente
-  if (isPending || !isClient) {
-    return (
-      <div className="w-full h-dvh relative flex items-center justify-center animate-pulse text-lg text-neutral-400">
-        docargan...
-      </div>
-    );
-  }
-
-  // Si no hay sesión, mostrar loading mientras redirige
-  if (!session) {
-    return (
-      <div className="w-full h-dvh relative flex items-center justify-center text-neutral-400">
-        dirigiendo-reeeeee...
-      </div>
-    );
-  }
-
-  const currentUser = { ...session.user, ...user };
-  const isHomePage = pathname === '/';
-
-  if (isHomePage) {
-    return (
-      <SidebarProvider
-        style={
-          {
-            "--sidebar-width": "calc(var(--spacing) * 72)",
-            "--header-height": "calc(var(--spacing) * 12)",
-          } as React.CSSProperties
-        }
-      >
-        <AppSidebar user={currentUser as any} variant="floating" side="right" />
-        <div className="min-h-screen bg-black w-full">
-          {children}
-        </div>
-      </SidebarProvider>
-    );
-  }
-
-  return (
-    <>
-      <SidebarProvider
-        style={
-          {
-            "--sidebar-width": "calc(var(--spacing) * 72)",
-            "--header-height": "calc(var(--spacing) * 12)",
-          } as React.CSSProperties
-        }
-      >
-        <AppSidebar user={currentUser as any} variant="floating" side="right" />
-
-        <SidebarInset>
-          <div
-            className="
-              relative flex flex-1 flex-col md:static
-              min-h-[100svh]      
-              max-h-[100dvh]          /* svh = viewport real en mobile */
-              overflow-x-hidden overflow-y-auto
-              supports-[height:100dvh]:min-h-[100dvh]  /* fallback moderno */
-            "
-          >
-            <SiteHeader user={currentUser as any} />
-            {children}
-          </div>
-        </SidebarInset>
-
-      </SidebarProvider>
-    </>
-  );
+  // Pasar datos al Client Component
+  return <PublicLayoutClient user={user}>{children}</PublicLayoutClient>;
 }

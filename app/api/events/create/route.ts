@@ -1,5 +1,8 @@
+import { EventStatus } from '@/app/generated/prisma';
+import { Decimal } from '@/app/generated/prisma/runtime/library';
 import { auth } from '@/lib/auth'
-import { EventStatus, Prisma, PrismaClient } from '@prisma/client'
+import prisma from '@/lib/prisma';
+
 import { headers } from 'next/headers'
 import { NextRequest } from 'next/server'
 
@@ -37,7 +40,7 @@ interface CreateEventRequest {
   artists: ArtistRequest[];
 }
 
-const prisma = new PrismaClient()
+
 
 export async function POST(req: NextRequest) {
   const session = await auth.api.getSession({ headers: await headers() })
@@ -92,7 +95,7 @@ export async function POST(req: NextRequest) {
           eventId: newEvent.id,
           code: tt.code,
           label: tt.label,
-          price: new Prisma.Decimal(tt.price), // mejor mandar como string
+          price: Decimal(tt.price), // mejor mandar como string
           stockMax: tt.stock_max,
           stockCurrent: tt.stock_current ?? tt.stock_max,
           userMaxPerType: tt.user_max_per_type ?? 5,
