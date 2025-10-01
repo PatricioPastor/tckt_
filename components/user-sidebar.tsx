@@ -31,16 +31,16 @@ const data = {
       url: "/tickets",
       icon: Ticket01,
     },
-    {
-      title: "Eventos",
-      url: "/events",
-      icon: Calendar,
-    },
-    {
-      title: "Mi Cuenta",
-      url: "/account",
-      icon: User01,
-    },
+    // {
+    //   title: "Eventos",
+    //   url: "/events",
+    //   icon: Calendar,
+    // },
+    // {
+    //   title: "Mi Cuenta",
+    //   url: "/account",
+    //   icon: User01,
+    // },
   ],
   navSecondary: [
     {
@@ -52,7 +52,7 @@ const data = {
 };
 
 function LogoMono() {
-  return <Image src="/isotipo.svg" alt="tckt_" width={120} height={50} />;
+  return <Image src="/isotipo.svg" alt="tckt_" width={100} height={80} />;
 }
 
 export function AppSidebar({ user: propUser, ...props }: AppSidebarProps) {

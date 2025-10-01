@@ -102,7 +102,9 @@ const cartStore = (
           }
 
           const data = await res.json()
-          set({ items: [], eventId: null }) // limpiar carrito al éxito
+          // NO limpiar el carrito aquí si hay initPoint (redirección a MP pendiente)
+          // El carrito se limpiará cuando el usuario regrese exitosamente desde MP
+          // set({ items: [], eventId: null })
           return { success: true, data }
         } catch (e) {
           return { success: false, error: (e as Error).message }

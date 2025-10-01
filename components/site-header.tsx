@@ -5,6 +5,7 @@ import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { User } from "@/lib/store/user-store";
 import { Ticket01 } from "@untitledui/icons";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -13,6 +14,9 @@ interface SiteHeaderProps {
   user: User | null;
 }
 
+function LogoMono() {
+  return <Image src="/isotipo.svg" alt="tckt_" width={80} height={40} />;
+}
 
 export function SiteHeader({user}: SiteHeaderProps) {
   const router = useRouter();
@@ -24,7 +28,7 @@ export function SiteHeader({user}: SiteHeaderProps) {
     <header className="flex sticky top-0 z-50 shrink-0 items-center gap-2 border-b border-neutral-800 bg-black/80 backdrop-blur-sm transition-[width,height] ease-linear">
       <div className="flex w-full items-center gap-4 px-4 py-3">
         <Link href="/">
-          <h1  className="text-lg font-medium text-white">tckt_</h1>
+          <LogoMono />
         </Link>
         <Separator
           orientation="vertical"

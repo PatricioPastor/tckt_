@@ -107,7 +107,9 @@ export default function CheckoutPage() {
             ? data.initPoint
             : (data.sandboxInitPoint || data.initPoint);
 
+          // Mantener el estado de procesamiento hasta que se complete la redirección
           window.location.href = redirectUrl!;
+          // NO resetear isProcessing aquí, la página se descargará
         } else {
           console.error("Failed to create payment preference");
           setShowSlideConfirm(false);

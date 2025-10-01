@@ -3,6 +3,7 @@
 import { Minus, Plus, Ticket01, InfoCircle } from "@untitledui/icons";
 import { useCartStore } from "@/lib/store/cart-store";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 
 type TicketType = {
@@ -33,14 +34,26 @@ export function TicketCard({ ticketType }: { ticketType: TicketType }) {
   const isSelected = quantity > 0;
 
   const inc = () => {
-    if (!disabledInc && !isOutOfStock && !isDisabled) {
-      updateQuantity(
-        ticketType.code,
-        quantity + 1,
-        Number(ticketType.price),
-        ticketType.stockCurrent
-      );
+    if (isDisabled || isOutOfStock) return;
+
+    // Validar máximo por usuario
+    if (quantity >= ticketType.userMaxPerType) {
+      toast.error(`Máximo permitido: ${ticketType.userMaxPerType} tickets por usuario`);
+      return;
     }
+
+    // Validar stock disponible
+    if (quantity >= ticketType.stockCurrent) {
+      toast.error("No hay más stock disponible");
+      return;
+    }
+
+    updateQuantity(
+      ticketType.code,
+      quantity + 1,
+      Number(ticketType.price),
+      ticketType.stockCurrent
+    );
   };
   const dec = () => {
     if (!disabledDec && !isDisabled) {
