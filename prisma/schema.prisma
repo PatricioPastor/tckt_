@@ -2,6 +2,7 @@
 
 generator client {
   provider = "prisma-client-js"
+  output   = "../app/generated/prisma"
 }
 
 datasource db {
@@ -88,12 +89,12 @@ enum EventStatus {
   finished
 }
 
-
 enum TicketStatus {
   pending
   paid
   used
   transferred
+  refunded
 }
 
 enum PaymentStatus {
@@ -107,22 +108,22 @@ enum PaymentStatus {
 
 model payment {
   id                Int            @id @default(autoincrement())
-  userId            String
-  eventId           Int
+  userId            String         @map("user_id")
+  eventId           Int            @map("event_id")
   status            PaymentStatus  @default(pending)
   amount            Decimal        @db.Decimal(12, 2)
   currency          String         @default("ARS")
   provider          String         @default("mercadopago")
 
-  externalReference String         @unique   // ej: order_<userId>_<eventId>_<ts>
-  mpPreferenceId    String?                    // ID de preferencia
-  mpPaymentId       String?        @unique     // ID de pago (cuando exista)
+  externalReference String         @unique @map("external_reference")
+  mpPreferenceId    String?        @map("mp_preference_id")
+  mpPaymentId       String?        @unique @map("mp_payment_id")
 
-  payerEmail        String?
-  payerName         String?
+  payerEmail        String?        @map("payer_email")
+  payerName         String?        @map("payer_name")
 
-  createdAt         DateTime       @default(now())
-  updatedAt         DateTime       @updatedAt
+  createdAt         DateTime       @default(now()) @map("created_at")
+  updatedAt         DateTime       @updatedAt @map("updated_at")
 
   user   user   @relation(fields: [userId], references: [id], onDelete: Cascade)
   event  event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
@@ -131,75 +132,79 @@ model payment {
 
 // App Models
 model event {
-  id               Int           @id @default(autoincrement())
-  name             String
-  date             DateTime
-  location         String
-  description      String?
-  bannerUrl        String?
-  status           EventStatus   @default(draft)
-  producerId       Int           @default(1) // Hardcode single
-  capacityTotal    Int?
-  isRsvpAllowed    Boolean       @default(true)
-  eventGenre       String?
-  createdAt        DateTime      @default(now())
-  ticketTypes      ticketType[]
-  eventArtists     eventArtist[]
-  tickets          ticket[]
-  participants     participant[]
-  rrppAssignments  rrppAssignment[]
-  payments         payment[]
+  id                     Int           @id @default(autoincrement())
+  name                   String
+  date                   DateTime
+  location               String
+  description            String?
+  bannerUrl              String?       @map("banner_url")
+  status                 EventStatus   @default(draft)
+  producerId             Int           @default(1) @map("producer_id")
+  capacityTotal          Int?          @map("capacity_total")
+  isRsvpAllowed          Boolean       @default(true) @map("is_rsvp_allowed")
+  eventGenre             String?       @map("event_genre")
+  showRemainingTickets   Boolean       @default(true) @map("show_remaining_tickets")
+  createdAt              DateTime      @default(now()) @map("created_at")
+  ticketTypes            ticketType[]
+  eventArtists           eventArtist[]
+  tickets                ticket[]
+  participants           participant[]
+  rrppAssignments        rrppAssignment[]
+  payments               payment[]
 }
 
 model artist {
   id           Int           @id @default(autoincrement())
   name         String
   bio          String?
-  imageUrl     String?
-  socialLinks  Json?         // Array of strings
+  imageUrl     String?       @map("image_url")
+  socialLinks  Json?         @map("social_links")
   eventArtists eventArtist[]
 }
 
 model eventArtist {
-  eventId     Int
-  artistId    Int
+  eventId     Int           @map("event_id")
+  artistId    Int           @map("artist_id")
   order       Int?
-  slotTime    String?
-  isHeadliner Boolean       @default(false)
+  slotTime    String?       @map("slot_time")
+  isHeadliner Boolean       @default(false) @map("is_headliner")
   artist      artist        @relation(fields: [artistId], references: [id], onDelete: Cascade)
   event       event         @relation(fields: [eventId], references: [id], onDelete: Cascade)
 
   @@id([eventId, artistId])
+  @@map("event_artist")
 }
 
 model ticketType {
   id              Int      @id @default(autoincrement())
-  eventId         Int
-  code            String   // identificador lógico único por evento (p.ej. "tier1", "door")
-  label           String   // cómo lo ve el usuario (p.ej. "TIER 1", "EN PUERTA")
+  eventId         Int      @map("event_id")
+  code            String
+  label           String
   price           Decimal  @db.Decimal(12, 2)
-  stockMax        Int
-  stockCurrent    Int
-  userMaxPerType  Int      @default(5)
-  scanExpiration  DateTime?
+  stockMax        Int      @map("stock_max")
+  stockCurrent    Int      @map("stock_current")
+  userMaxPerType  Int      @default(5) @map("user_max_per_type")
+  scanExpiration  DateTime? @map("scan_expiration")
+  isVisible       Boolean  @default(true) @map("is_visible")
+  isDisabled      Boolean  @default(false) @map("is_disabled")
   event           event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
   tickets         ticket[]
 
   @@unique([eventId, code])
+  @@map("ticket_type")
 }
-
 
 model ticket {
   id                  Int           @id @default(autoincrement())
-  eventId             Int
-  ownerId             String
-  typeId              Int
-  paymentId           Int?          // Foreign key to payment
-  qrCode              String       @unique 
+  eventId             Int           @map("event_id")
+  ownerId             String        @map("owner_id")
+  typeId              Int           @map("type_id")
+  paymentId           Int?          @map("payment_id")
+  qrCode              String        @unique @map("qr_code")
   code                String?       @unique
   status              TicketStatus  @default(pending)
-  transferredFromId   String?
-  createdAt           DateTime      @default(now())
+  transferredFromId   String?       @map("transferred_from_id")
+  createdAt           DateTime      @default(now()) @map("created_at")
   event               event         @relation(fields: [eventId], references: [id], onDelete: Cascade)
   owner               user          @relation("ticketsToUser_ownerId", fields: [ownerId], references: [id], onDelete: Restrict)
   type                ticketType    @relation(fields: [typeId], references: [id], onDelete: Cascade)
@@ -208,21 +213,22 @@ model ticket {
 }
 
 model rrppAssignment {
-  rrppUserId     String
-  eventId        Int
-  commissionRate Decimal       @default(0.10)
-  freesGranted   Int           @default(0)
+  rrppUserId     String        @map("rrpp_user_id")
+  eventId        Int           @map("event_id")
+  commissionRate Decimal       @default(0.10) @map("commission_rate")
+  freesGranted   Int           @default(0) @map("frees_granted")
   rrppUser       user          @relation(fields: [rrppUserId], references: [id], onDelete: Cascade)
   event          event         @relation(fields: [eventId], references: [id], onDelete: Cascade)
 
   @@id([rrppUserId, eventId])
+  @@map("rrpp_assignment")
 }
 
 model participant {
-  userId     String
-  eventId    Int
-  viaRsvp    Boolean       @default(false)
-  qrCode     String?
+  userId     String        @map("user_id")
+  eventId    Int           @map("event_id")
+  viaRsvp    Boolean       @default(false) @map("via_rsvp")
+  qrCode     String?       @map("qr_code")
   user       user          @relation(fields: [userId], references: [id], onDelete: Cascade)
   event      event         @relation(fields: [eventId], references: [id], onDelete: Cascade)
 
@@ -231,7 +237,7 @@ model participant {
 
 model log {
   id        Int      @id @default(autoincrement())
-  userId    String?
+  userId    String?  @map("user_id")
   action    String
   timestamp DateTime @default(now())
   details   Json?
@@ -240,11 +246,11 @@ model log {
 
 model message {
   id          Int      @id @default(autoincrement())
-  senderId    String
-  receiverId  String
+  senderId    String   @map("sender_id")
+  receiverId  String   @map("receiver_id")
   message     String
   timestamp   DateTime @default(now())
-  readStatus  Boolean  @default(false)
+  readStatus  Boolean  @default(false) @map("read_status")
   sender      user     @relation("messagesToUser_senderId", fields: [senderId], references: [id], onDelete: Cascade)
   receiver    user     @relation("messagesToUser_receiverId", fields: [receiverId], references: [id], onDelete: Cascade)
 }

@@ -6,7 +6,7 @@ import { AppSidebar } from "@/components/user-sidebar";
 import { useUserStore } from "@/lib/store/user-store";
 import { authClient } from "@/lib/auth-client";
 import { usePathname, useRouter } from "next/navigation";
-import { is } from "date-fns/locale";
+import { useEffect, useState } from "react";
 
 export default function Layout({
   children,
@@ -17,21 +17,39 @@ export default function Layout({
   const { data: session, isPending } = authClient.useSession();
   const router = useRouter();
   const pathname = usePathname();
-  
-  if (isPending ){
-    return <div className=" w-full h-dvh relative flex items-center justify-center animate-pulse text-lg">docargan...</div>;
-  }  
+  const [isClient, setIsClient] = useState(false);
 
+  // Evitar hydration mismatch esperando el cliente
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
-  if ( !session ) {
-    return router.push('/login');
+  // Redirigir sin autenticación SOLO en el cliente
+  useEffect(() => {
+    if (!isPending && !session && isClient) {
+      router.push('/login');
+    }
+  }, [isPending, session, router, isClient]);
+
+  // Loading state - mantener estructura HTML consistente
+  if (isPending || !isClient) {
+    return (
+      <div className="w-full h-dvh relative flex items-center justify-center animate-pulse text-lg text-neutral-400">
+        docargan...
+      </div>
+    );
   }
 
-  
-  
-  const currentUser =  {...session!.user, ...user!};
-  
-  
+  // Si no hay sesión, mostrar loading mientras redirige
+  if (!session) {
+    return (
+      <div className="w-full h-dvh relative flex items-center justify-center text-neutral-400">
+        dirigiendo-reeeeee...
+      </div>
+    );
+  }
+
+  const currentUser = { ...session.user, ...user };
   const isHomePage = pathname === '/';
 
   if (isHomePage) {
@@ -44,7 +62,7 @@ export default function Layout({
           } as React.CSSProperties
         }
       >
-        <AppSidebar user={currentUser} variant="floating" side="right" />
+        <AppSidebar user={currentUser as any} variant="floating" side="right" />
         <div className="min-h-screen bg-black w-full">
           {children}
         </div>
@@ -62,7 +80,7 @@ export default function Layout({
           } as React.CSSProperties
         }
       >
-        <AppSidebar user={currentUser} variant="floating" side="right" />
+        <AppSidebar user={currentUser as any} variant="floating" side="right" />
 
         <SidebarInset>
           <div
@@ -74,7 +92,7 @@ export default function Layout({
               supports-[height:100dvh]:min-h-[100dvh]  /* fallback moderno */
             "
           >
-            <SiteHeader user={currentUser} />
+            <SiteHeader user={currentUser as any} />
             {children}
           </div>
         </SidebarInset>

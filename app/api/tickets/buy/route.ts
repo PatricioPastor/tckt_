@@ -218,45 +218,47 @@ export async function POST(req: NextRequest) {
       }, { status: 200 })
     }
 
-    // Crear preferencia de pago en MercadoPago
-    const paymentPreference = await createPaymentPreference({
+    // Crear preferencia de Checkout Pro
+    const preferenceResult = await createPaymentPreference({
       items: result.paymentItems,
       payer: {
-        name: result.userInfo.name?.split(' ')[0] || 'Usuario',
+        name: result.userInfo.name?.split(' ')[0] || '',
         surname: result.userInfo.name?.split(' ').slice(1).join(' ') || '',
         email: result.userInfo.email,
-        identification: result.userInfo.dni
-          ? { type: 'DNI', number: result.userInfo.dni }
-          : undefined
+        identification: result.userInfo.dni ? {
+          type: 'DNI',
+          number: result.userInfo.dni
+        } : undefined
       },
-      external_reference: result.externalReference
-      // notification_url: 'https://tusitio.com/api/mp/webhook'  // cuando lo tengas
-    })
+      external_reference: result.externalReference,
+      metadata: {
+        payment_id: result.paymentRecord?.id,
+        event_id: result.event.id,
+        user_id: session.user.id
+      }
+    });
 
-    if (!paymentPreference.success) {
-      console.error('MercadoPago preference creation failed:', paymentPreference.error)
-      console.error('Payment items:', result.paymentItems)
-      console.error('User info:', result.userInfo)
-      return NextResponse.json({ error: 'Payment setup failed: ' + paymentPreference.error }, { status: 500 })
+    if (!preferenceResult.success || !preferenceResult.data) {
+      throw new Error('Failed to create MercadoPago preference');
     }
 
-    // Actualizar payment record con preferenceId de MercadoPago
-    if (result.paymentRecord) {
-      await prisma.payment.update({
-        where: { id: result.paymentRecord.id },
-        data: { 
-          mpPreferenceId: paymentPreference.data!.id 
-        }
-      });
-    }
+    // Actualizar payment con preferenceId
+    await prisma.payment.update({
+      where: { id: result.paymentRecord?.id },
+      data: { mpPreferenceId: preferenceResult.data.id }
+    });
 
+    // Devolver URL de redirección a Checkout Pro
     return NextResponse.json({
       success: true,
-      data: paymentPreference.data,
       ticketCount: result.createdTickets.length,
       totalAmount: result.totalAmount,
       paymentId: result.paymentRecord?.id,
-      externalReference: result.externalReference
+      externalReference: result.externalReference,
+      preferenceId: preferenceResult.data.id,
+      initPoint: preferenceResult.data.init_point,
+      sandboxInitPoint: preferenceResult.data.sandbox_init_point,
+      message: 'Preference created, redirect to MercadoPago'
     }, { status: 200 })
   } catch (error: unknown) {
     console.error(error)

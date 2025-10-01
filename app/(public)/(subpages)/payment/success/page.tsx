@@ -4,18 +4,23 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useCartStore } from '@/lib/store/cart-store';
 
 export default function PaymentSuccessPage() {
   const router = useRouter();
+  const { clearCart } = useCartStore();
 
   useEffect(() => {
+    // Limpiar carrito al llegar a success
+    clearCart();
+
     // Auto-redirect to tickets page after 3 seconds
     const timer = setTimeout(() => {
       router.push('/tickets');
     }, 3000);
 
     return () => clearTimeout(timer);
-  }, [router]);
+  }, [router, clearCart]);
 
   const handleGoToTickets = () => {
     router.push('/tickets');

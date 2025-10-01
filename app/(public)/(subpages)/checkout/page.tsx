@@ -21,6 +21,7 @@ export default function CheckoutPage() {
   const [showSlideConfirm, setShowSlideConfirm] = useState(false);
   const [showEmailOption, setShowEmailOption] = useState(false);
   const [sendEmail, setSendEmail] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => { if (!isPending) setIsCheckingAuth(false); }, [isPending]);
 
@@ -49,26 +50,50 @@ export default function CheckoutPage() {
   };
 
   const handleSlideConfirm = async () => {
+    setIsProcessing(true);
     try {
-      if (hasFreeTickets()) {
+      // Si solo hay tickets gratis
+      if (hasFreeTickets() && !hasPaidTickets()) {
         const freeResult = await checkoutFree(sendEmail);
-        if (!freeResult.success) { console.error("Free checkout failed"); setShowSlideConfirm(false); return; }
+        if (!freeResult.success) {
+          console.error("Free checkout failed");
+          setShowSlideConfirm(false);
+          setIsProcessing(false);
+          return;
+        }
+        router.push("/tickets");
+        return;
       }
+
+      // Si hay tickets pagos
       if (hasPaidTickets()) {
         const result = await checkout();
-        const data = result.data as { success: boolean; data?: { init_point: string } };
-        if (data.success && data.data?.init_point) {
-          setShowSlideConfirm(false);
-          router.push(`/payment/redirect?to=${encodeURIComponent(data.data.init_point)}`);
+        const data = result.data as {
+          success: boolean;
+          initPoint?: string;
+          sandboxInitPoint?: string;
+        };
+
+        if (data.success && data.initPoint) {
+          // Redirigir directamente a MercadoPago
+          console.log('[Checkout] Redirecting to MercadoPago:', data.initPoint);
+
+          // Usar sandbox en desarrollo, producción en prod
+          const redirectUrl = true
+            ? data.initPoint
+            : (data.sandboxInitPoint || data.initPoint);
+
+          window.location.href = redirectUrl!;
         } else {
+          console.error("Failed to create payment preference");
           setShowSlideConfirm(false);
+          setIsProcessing(false);
         }
-      } else {
-        router.push("/payment/success");
       }
     } catch (e) {
       console.error(e);
       setShowSlideConfirm(false);
+      setIsProcessing(false);
     }
   };
 
@@ -79,6 +104,18 @@ export default function CheckoutPage() {
     } catch (e) { console.error(e); }
   };
 
+
+  // Mostrar loading si está procesando
+  if (isProcessing) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-[#0B0B0B]">
+        <div className="text-center space-y-4">
+          <div className="h-12 w-12 mx-auto animate-spin rounded-full border-4 border-neutral-800 border-t-neutral-100" />
+          <p className="text-sm text-neutral-400">Redirigiendo a MercadoPago...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#0B0B0B]">
@@ -127,9 +164,20 @@ export default function CheckoutPage() {
             </div>
           ) : showSlideConfirm ? (
             <div className="space-y-3">
-              <p className="text-center text-xs text-neutral-400">Deslizá para confirmar tu compra</p>
-              <SlideToConfirm onConfirm={handleSlideConfirm} text="Deslizar para comprar" confirmText="Procesando..." />
-              <button onClick={() => setShowSlideConfirm(false)} className="w-full py-1 text-xs text-neutral-400 hover:text-neutral-300">
+              <p className="text-center text-xs text-neutral-400">
+                {hasPaidTickets() ? 'Deslizá para ir a MercadoPago' : 'Deslizá para confirmar'}
+              </p>
+              <SlideToConfirm
+                onConfirm={handleSlideConfirm}
+                text={hasPaidTickets() ? "Deslizar para pagar" : "Deslizar para confirmar"}
+                confirmText="Procesando..."
+                disabled={isProcessing}
+              />
+              <button
+                onClick={() => setShowSlideConfirm(false)}
+                className="w-full py-1 text-xs text-neutral-400 hover:text-neutral-300"
+                disabled={isProcessing}
+              >
                 Cancelar
               </button>
             </div>
