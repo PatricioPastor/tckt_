@@ -289,9 +289,9 @@ export default function EventDetailPage() {
       {/* STICKY CTA */}
       <div className="fixed bottom-0 left-0 right-0 z-30 border-t border-neutral-800 bg-black/95 p-4 backdrop-blur-sm">
         <div className="flex gap-3">
-          <button className="flex-1 rounded-md bg-[#141414] px-4 py-3 text-sm font-medium text-neutral-200 transition-colors hover:bg-[#191919]">
+          {/* <button className="flex-1 rounded-md bg-[#141414] px-4 py-3 text-sm font-medium text-neutral-200 transition-colors hover:bg-[#191919]">
             Referir evento
-          </button>
+          </button> */}
           <button
             onClick={handleBuy}
             disabled={!hasItems}

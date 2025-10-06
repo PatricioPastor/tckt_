@@ -5,62 +5,60 @@ export async function middleware(request: NextRequest) {
   const sessionCookie = getSessionCookie(request);
   const { pathname } = request.nextUrl;
 
-  // Rutas de autenticación (login/signup - signup redirige a login)
+  // 🔒 Rutas de autenticación (login/signup - signup redirige a login)
   const authRoutes = ["/login", "/signup"];
 
-  // Rutas públicas (no requieren autenticación)
-  const publicRoutes = [
-    "/",
+  // 🌐 Rutas públicas (no requieren autenticación)
+  const publicRoutes = ["/"]; // Solo la home es pública
+
+  // 🔐 Rutas protegidas (requieren autenticación)
+  const protectedRoutes = [
     "/events",
     "/checkout",
     "/payment",
-  ];
-
-  // Rutas protegidas (requieren autenticación)
-  const protectedRoutes = [
     "/dashboard",
     "/admin",
     "/scanner",
     "/tickets",
   ];
 
-  // Helper: verifica si la ruta actual coincide con algún patrón
+  // 🚫 Si accede a /not_found → redirigir a /login
+  if (pathname === "/not_found") {
+    return NextResponse.redirect(new URL("/login", request.url));
+  }
+
+  // Helper para comparar rutas (soporta subrutas: /events/123, /payment/success, etc.)
   const matchesRoute = (routes: string[]) => {
-    return routes.some(route => {
-      if (route === pathname) return true;
-      // Permite subrutas (ej: /events/123, /payment/success)
-      if (pathname.startsWith(route + "/")) return true;
-      return false;
-    });
+    return routes.some((route) => pathname === route || pathname.startsWith(route + "/"));
   };
 
-  // 1. Usuarios autenticados intentando acceder a login/signup → redirigir a events/1
+  // 1️⃣ Si el usuario ya está autenticado y va a login/signup → redirigir a /events/1
   if (sessionCookie && authRoutes.includes(pathname)) {
     return NextResponse.redirect(new URL("/events/1", request.url));
   }
 
-  // 2. Rutas públicas → permitir acceso a todos (autenticados o no)
+  // 2️⃣ Rutas públicas → acceso libre
   if (matchesRoute(publicRoutes)) {
     return NextResponse.next();
   }
 
-  // 3. Rutas de autenticación → permitir acceso a todos
+  // 3️⃣ Rutas de autenticación → acceso libre (login y signup)
   if (authRoutes.includes(pathname)) {
     return NextResponse.next();
   }
 
-  // 4. Rutas protegidas sin autenticación → redirigir a login con tab signup
+  // 4️⃣ Rutas protegidas sin autenticación → redirigir a login (tab signup)
   if (!sessionCookie && matchesRoute(protectedRoutes)) {
     return NextResponse.redirect(new URL("/login?tab=signup", request.url));
   }
 
-  // 5. Todo lo demás → permitir
+  // 5️⃣ Todo lo demás → permitir
   return NextResponse.next();
 }
 
 export const config = {
   matcher: [
-    // Apply middleware to all routes except API routes, static files, and Next.js internals
+    // Aplica el middleware a todas las rutas excepto API, estáticos e internos de Next.js
     "/((?!api|_next/static|_next/image|favicon.ico).*)",
   ],
 };
