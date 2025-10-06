@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { useRouter, useSearchParams } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 import Image from "next/image";
-import { AlertCircle, Eye01, EyeOff } from "@untitledui/icons";
+import { AlertCircle, Eye, EyeOff } from "@untitledui/icons";
 import { Checkbox } from "../ui/checkbox";
 
 export function LoginForm({ className, ...props }: React.ComponentProps<"div">) {
