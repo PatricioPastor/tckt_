@@ -10,7 +10,6 @@ import { Decimal } from '@/app/generated/prisma/runtime/library'
 
 const APP_FEE_RATE = 0.08;                       // 8% tuyo
 const MP_FEE_RATE = Number(process.env.MP_FEE_RATE ?? '0.06');   // Comisión MP (6% por defecto)
-const IIBB_RATE   = Number(process.env.IIBB_RATE ?? '0.025');    // IIBB La Pampa (2,5%)
 
 const round2 = (n: number) => Math.round(n * 100) / 100;
 
@@ -114,9 +113,7 @@ export async function POST(req: NextRequest) {
 
         
         const base = Number(tt.price);
-        const withFee = round2(base * (1 + APP_FEE_RATE));
-        const withFeeAndMp = round2(withFee * (1 + MP_FEE_RATE));
-        const finalUnit = round2(withFeeAndMp * (1 + IIBB_RATE));
+        const finalUnit = round2((base * (1 + APP_FEE_RATE)) / (1 - MP_FEE_RATE));
 
         paymentItems.push({
           id: `ticket_${tt.id}`,

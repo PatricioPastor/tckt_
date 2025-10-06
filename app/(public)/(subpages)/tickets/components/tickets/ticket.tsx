@@ -68,9 +68,17 @@ export const TicketCard = ({ticket}: TicketCardProps) => {
           {event.location}
         </div>
         <div className="flex items-center gap-2">
-          <Badge 
+          <Badge
             variant={getBadgeVariant(ticket.status)}
-            className="text-xs px-2 py-0.5 bg-green-300/40 text-neutral-300 border-green-700"
+            className={`text-xs px-2 py-0.5 ${
+              ticket.status === 'paid'
+                ? 'bg-green-300/40 text-neutral-300 border-green-700'
+                : ticket.status === 'pending'
+                ? 'bg-yellow-300/40 text-neutral-300 border-yellow-700'
+                : ticket.status === 'used'
+                ? 'bg-neutral-700/40 text-neutral-400 border-neutral-600'
+                : 'bg-neutral-700/40 text-neutral-400 border-neutral-600'
+            }`}
           >
             {mapTypePaid(ticket.status)}
           </Badge>
@@ -110,9 +118,17 @@ export default function TicketDrawer({ ticket }: { ticket: Ticket }) {
               </div>
               
               <div className="flex justify-center gap-2">
-                <Badge 
+                <Badge
                   variant={getBadgeVariant(ticket.status)}
-                  className="bg-green-300/40 text-neutral-300 border-green-700"
+                  className={`${
+                    ticket.status === 'paid'
+                      ? 'bg-green-300/40 text-neutral-300 border-green-700'
+                      : ticket.status === 'pending'
+                      ? 'bg-yellow-300/40 text-neutral-300 border-yellow-700'
+                      : ticket.status === 'used'
+                      ? 'bg-neutral-700/40 text-neutral-400 border-neutral-600'
+                      : 'bg-neutral-700/40 text-neutral-400 border-neutral-600'
+                  }`}
                 >
                   {mapTypePaid(ticket.status)}
                 </Badge>

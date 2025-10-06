@@ -24,6 +24,7 @@ export default function CheckoutPage() {
   const [showEmailOption, setShowEmailOption] = useState(false);
   const [sendEmail, setSendEmail] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => { if (!isPending) setIsCheckingAuth(false); }, [isPending]);
 
@@ -55,17 +56,12 @@ export default function CheckoutPage() {
 
   const subtotal = getTotal();
   
-  // Calcular el total con todas las comisiones como en el componente Subtotal
   const APP_FEE_RATE = 0.08;
-  // const MP_FEE_RATE = Number(process.env.NEXT_PUBLIC_MP_FEE_RATE ?? "0.06");
-  // const IIBB_RATE = Number(process.env.NEXT_PUBLIC_IIBB_LP_RATE ?? "0.025");
+  const MP_FEE_RATE = 0.06; // o el valor real de tu comisión de MP
   
-  const appFee = Math.round(subtotal * APP_FEE_RATE * 100) / 100;
-  const basePlusApp = subtotal + appFee;
-  // const mpFee = Math.round(basePlusApp * MP_FEE_RATE * 100) / 100;
-  // const basePlusAppAndMp = basePlusApp + mpFee;
-  // const iibb = Math.round(basePlusAppAndMp * IIBB_RATE * 100) / 100;
-  const total = Math.round((subtotal + appFee) * 100) / 100;
+  const base = subtotal; // el valor neto que debe recibir el cliente
+  const priceWithAppFee = base + base * APP_FEE_RATE;
+  const total = Math.round((priceWithAppFee / (1 - MP_FEE_RATE)) * 100) / 100;
 
   const handleContinue = async () => {
     if (!session?.user && !user) { router.push('/signup'); return; }
@@ -75,12 +71,14 @@ export default function CheckoutPage() {
 
   const handleSlideConfirm = async () => {
     setIsProcessing(true);
+    setError(null);
     try {
       // Si solo hay tickets gratis
       if (hasFreeTickets() && !hasPaidTickets()) {
         const freeResult = await checkoutFree(sendEmail);
         if (!freeResult.success) {
-          console.error("Free checkout failed");
+          console.error("Free checkout failed:", freeResult.error);
+          setError(freeResult.error || "Error al procesar tickets gratuitos");
           setShowSlideConfirm(false);
           setIsProcessing(false);
           return;
@@ -92,6 +90,15 @@ export default function CheckoutPage() {
       // Si hay tickets pagos
       if (hasPaidTickets()) {
         const result = await checkout();
+
+        if (!result.success) {
+          console.error("Checkout failed:", result.error);
+          setError(result.error || "Error al procesar el pago");
+          setShowSlideConfirm(false);
+          setIsProcessing(false);
+          return;
+        }
+
         const data = result.data as {
           success: boolean;
           initPoint?: string;
@@ -112,22 +119,32 @@ export default function CheckoutPage() {
           // NO resetear isProcessing aquí, la página se descargará
         } else {
           console.error("Failed to create payment preference");
+          setError("Error al crear la preferencia de pago");
           setShowSlideConfirm(false);
           setIsProcessing(false);
         }
       }
     } catch (e) {
       console.error(e);
+      setError(e instanceof Error ? e.message : "Error inesperado");
       setShowSlideConfirm(false);
       setIsProcessing(false);
     }
   };
 
   const handleFreeCheckout = async () => {
+    setError(null);
     try {
       const r = await checkoutFree(sendEmail);
-      if (r.success) router.push("/tickets");
-    } catch (e) { console.error(e); }
+      if (r.success) {
+        router.push("/tickets");
+      } else {
+        setError(r.error || "Error al obtener tickets gratuitos");
+      }
+    } catch (e) {
+      console.error(e);
+      setError(e instanceof Error ? e.message : "Error inesperado");
+    }
   };
 
 
@@ -156,6 +173,20 @@ export default function CheckoutPage() {
 
       <div className="sticky bottom-0 border-t border-neutral-800 bg-[#0B0B0B]/80 backdrop-blur supports-[backdrop-filter]:backdrop-blur">
         <div className="mx-auto max-w-2xl px-4 py-4">
+          {error && (
+            <div className="mb-3 flex items-center justify-between gap-3 rounded-md border border-yellow-500/20 bg-yellow-500/10 p-3">
+              <p className="text-xs text-yellow-400 flex-1">{error}</p>
+              <a
+                href="https://www.instagram.com/tckt__/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="shrink-0 rounded-md bg-yellow-500 px-3 py-1.5 text-xs font-semibold text-black hover:bg-yellow-400 transition-colors"
+              >
+                Solucionar
+              </a>
+            </div>
+          )}
+
           <div className="mb-3 flex items-center justify-between">
             <div>
               <p className="text-[11px] font-medium text-neutral-400">Total</p>
