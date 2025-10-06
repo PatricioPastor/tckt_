@@ -11,7 +11,7 @@ export const Subtotal = () => {
 
   // ---- Tasas ----
   const APP_FEE_RATE = 0.08; // 8% neto que recibe la app
-  const MP_FEE_RATE = Number(process.env.NEXT_PUBLIC_MP_FEE_RATE ?? "0.041"); // Comisión MP (~4.1%)
+  const MP_FEE_RATE = Number(process.env.NEXT_PUBLIC_MP_FEE_RATE ?? "0.06"); // Comisión MP (~4.1%)
   
   // ---- Cálculo: el cliente paga lo necesario para que, tras la comisión de MP,
   // vos recibas el subtotal + 8%
