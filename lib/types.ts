@@ -12,7 +12,7 @@ import {
   EventStatus,
   TicketStatus,
   PaymentStatus
-} from '../app/generated/prisma';
+} from '@prisma/client';
 
 /**
  * Representa el subconjunto de datos del usuario que está disponible
