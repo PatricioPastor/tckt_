@@ -270,7 +270,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
               {isLoading ? "Cargando..." : activeTab === "login" ? "Iniciar Sesión" : "Crear Cuenta"}
             </Button>
 
-            <div className="relative">
+            {/* <div className="relative">
               <div className="absolute inset-0 flex items-center">
                 <span className="w-full border-t border-border" />
               </div>
@@ -307,7 +307,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
                 </svg>
                 Apple
               </Button>
-            </div>
+            </div> */}
           </form>
         </div>
       </div>
