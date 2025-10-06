@@ -48,6 +48,13 @@ export function NavUser({ user }: { user: User | null }) {
     );
   }
 
+  // Compute stable values to avoid hydration mismatch
+  // Prioritize imageBase64 from database, fallback to image URL
+  const avatarSrc = (user as any)?.imageBase64 || user?.image || "";
+  const fallbackText = user?.name?.[0]?.toUpperCase() || "U";
+  const displayName = user?.name || "";
+  const displayEmail = user?.email || "";
+
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -57,14 +64,14 @@ export function NavUser({ user }: { user: User | null }) {
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
-              <Avatar className="h-8 w-8 rounded-lg grayscale">
-                <AvatarImage src={user?.image || ""} alt={user?.name || ""} />
-                <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+              <Avatar className="h-8 w-8 rounded-lg">
+                <AvatarImage src={avatarSrc} alt={displayName} />
+                <AvatarFallback className="rounded-lg">{fallbackText}</AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{user?.name}</span>
+                <span className="truncate font-medium">{displayName}</span>
                 <span className="text-muted-foreground truncate text-xs">
-                  {user?.email}
+                  {displayEmail}
                 </span>
               </div>
               <IconDotsVertical className="ml-auto size-4" />
@@ -79,15 +86,15 @@ export function NavUser({ user }: { user: User | null }) {
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarImage src={user?.image || ""} alt={user?.name || ""} />
+                  <AvatarImage src={avatarSrc} alt={displayName} />
                   <AvatarFallback className="rounded-lg uppercase">
-                    {user?.name.slice(0, 2)}
+                    {fallbackText}
                   </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">{user?.name}</span>
+                  <span className="truncate font-medium">{displayName}</span>
                   <span className="text-muted-foreground truncate text-xs">
-                    {user?.email}
+                    {displayEmail}
                   </span>
                 </div>
               </div>

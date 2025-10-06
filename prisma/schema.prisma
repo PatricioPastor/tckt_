@@ -46,6 +46,7 @@ model user {
   email         String    @unique
   emailVerified Boolean
   image         String?
+  imageBase64   String?   @map("image_base64")
   createdAt     DateTime
   updatedAt     DateTime
 

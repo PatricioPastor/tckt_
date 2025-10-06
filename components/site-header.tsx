@@ -28,10 +28,12 @@ export function SiteHeader({user}: SiteHeaderProps) {
     router.push("/tickets");
   };
 
-  const handleSidebarClick = () => {
+  const handleSidebarClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     if (!user) {
+      e.stopPropagation(); // Prevenir que toggleSidebar se ejecute
       router.push("/login?tab=signup");
     }
+    // Si hay user, el SidebarTrigger ejecutará toggleSidebar automáticamente
   };
 
   return (

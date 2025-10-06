@@ -14,9 +14,7 @@ import {
 import { NavMain } from "./nav-main";
 import { NavSecondary } from "./nav-secondary";
 import { NavUser } from "./nav-user";
-import { Calendar, Home01, Ticket01, User01 } from "@untitledui/icons";
-import { authClient } from "@/lib/auth-client";
-import { useEffect } from "react";
+import { Home01, Ticket01, User01 } from "@untitledui/icons";
 import { User } from "@/lib/store/user-store";
 import Image from "next/image";
 
@@ -36,11 +34,11 @@ const data = {
     //   url: "/events",
     //   icon: Calendar,
     // },
-    // {
-    //   title: "Mi Cuenta",
-    //   url: "/account",
-    //   icon: User01,
-    // },
+    {
+      title: "Mi Perfil",
+      url: "/profile",
+      icon: User01,
+    },
   ],
   navSecondary: [
     {
@@ -57,22 +55,11 @@ function LogoMono() {
 
 export function AppSidebar({ user: propUser, ...props }: AppSidebarProps) {
   const router = useRouter();
-  const { data: session, isPending } = authClient.useSession();
 
-  // Use session.user if propUser is not provided
-  const resolvedUser = propUser || session?.user;
-
-  useEffect(() => {
-    if (!isPending && !resolvedUser) {
-      router.push("/login");
-    }
-  }, [isPending, resolvedUser, router]);
+  // Use propUser passed from server - avoid client-side session fetch to prevent hydration mismatch
+  const user = propUser;
 
   const handleLogin = () => router.push("/login");
-
-  if (isPending) {
-    return <></>
-  }
 
   return (
     <Sidebar
@@ -98,7 +85,7 @@ export function AppSidebar({ user: propUser, ...props }: AppSidebarProps) {
 
       {/* Content */}
       <SidebarContent className="gap-3">
-        {resolvedUser ? (
+        {user ? (
           <NavMain items={data.navMain} />
         ) : (
           <div className="px-3 pt-3">
@@ -121,7 +108,7 @@ export function AppSidebar({ user: propUser, ...props }: AppSidebarProps) {
 
       {/* Footer */}
       <SidebarFooter className="border-t border-neutral-800">
-        {resolvedUser ? <NavUser user={resolvedUser as any} /> : null}
+        {user ? <NavUser user={user as any} /> : null}
       </SidebarFooter>
     </Sidebar>
   );

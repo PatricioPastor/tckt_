@@ -266,6 +266,12 @@ function SidebarTrigger({
 }) {
   const { toggleSidebar } = useSidebar()
 
+  // Compute fallback text consistently to avoid hydration mismatch
+  const fallbackText = user?.name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || "U"
+
+  // Prioritize imageBase64, fallback to image URL, ensure stable empty string for SSR match
+  const avatarSrc = (user as any)?.imageBase64 || user?.image || ""
+
   return (
     <Button
       data-sidebar="trigger"
@@ -282,8 +288,8 @@ function SidebarTrigger({
       {...props}
     >
       <Avatar>
-        <AvatarImage src={user?.image || ""} />
-        <AvatarFallback>{user?.username?.[0].toUpperCase() || "NF"}</AvatarFallback>
+        <AvatarImage src={avatarSrc} />
+        <AvatarFallback>{fallbackText}</AvatarFallback>
       </Avatar>
 
       <span className="sr-only">Toggle Sidebar</span>

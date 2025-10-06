@@ -9,6 +9,8 @@ const updateUserSchema = z.object({
   dni: z.string().optional(),
   username: z.string().optional(),
   birthDate: z.string().datetime().optional(),
+  name: z.string().optional(),
+  imageBase64: z.string().optional(),
 });
 
 export async function PATCH(request: Request) {
@@ -40,6 +42,7 @@ export async function PATCH(request: Request) {
         username: true,
         role: true,
         image: true,
+        imageBase64: true,
         dni: true,
         birthDate: true,
       },

@@ -16,6 +16,7 @@ interface PublicLayoutClientProps {
     createdAt: Date;
     updatedAt: Date;
     image?: string | null;
+    imageBase64?: string | null;
   } | null;
 }
 

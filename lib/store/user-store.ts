@@ -14,6 +14,7 @@ export type User = {
   createdAt: Date;
   updatedAt: Date;
   image?: string | null;
+  imageBase64?: string | null;
 };
 
 export type UserStore = {
