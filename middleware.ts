@@ -5,7 +5,7 @@ export async function middleware(request: NextRequest) {
   const sessionCookie = getSessionCookie(request);
   const { pathname } = request.nextUrl;
 
-  // Rutas de autenticación (login/signup)
+  // Rutas de autenticación (login/signup - signup redirige a login)
   const authRoutes = ["/login", "/signup"];
 
   // Rutas públicas (no requieren autenticación)
@@ -49,9 +49,9 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // 4. Rutas protegidas sin autenticación → redirigir a signup
+  // 4. Rutas protegidas sin autenticación → redirigir a login con tab signup
   if (!sessionCookie && matchesRoute(protectedRoutes)) {
-    return NextResponse.redirect(new URL("/signup", request.url));
+    return NextResponse.redirect(new URL("/login?tab=signup", request.url));
   }
 
   // 5. Todo lo demás → permitir

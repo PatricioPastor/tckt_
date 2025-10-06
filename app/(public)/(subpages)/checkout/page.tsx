@@ -64,7 +64,7 @@ export default function CheckoutPage() {
   const total = Math.round((priceWithAppFee / (1 - MP_FEE_RATE)) * 100) / 100;
 
   const handleContinue = async () => {
-    if (!session?.user && !user) { router.push('/signup'); return; }
+    if (!session?.user && !user) { router.push('/login?tab=signup'); return; }
     if (!hasPaidTickets() && hasFreeTickets()) { setShowEmailOption(true); return; }
     setShowSlideConfirm(true);
   };

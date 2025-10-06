@@ -165,7 +165,7 @@ export default function HomePage() {
   const handleBuy = () => {
     if (!current) return;
     if (!user) {
-      router.push('/signup');
+      router.push('/login?tab=signup');
       return;
     }
     router.push(`/events/${current.id}`);

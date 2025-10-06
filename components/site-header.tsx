@@ -22,7 +22,7 @@ export function SiteHeader({user}: SiteHeaderProps) {
   const router = useRouter();
   const showTickets = () => {
     if (!user) {
-      router.push("/signup");
+      router.push("/login?tab=signup");
       return;
     }
     router.push("/tickets");
@@ -30,7 +30,7 @@ export function SiteHeader({user}: SiteHeaderProps) {
 
   const handleSidebarClick = () => {
     if (!user) {
-      router.push("/signup");
+      router.push("/login?tab=signup");
     }
   };
 
