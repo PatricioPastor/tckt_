@@ -29,7 +29,9 @@
       "Bash(for:*)",
       "Bash(do sed -i 's|//@ts-expect-error.*||g' \"$file\")",
       "Bash(done)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(dir \"c:\\Users\\patri\\Dev\\main\\NoTrip\\tckt\\web-app\\app\\generated\\prisma\")",
+      "Bash(findstr:*)"
     ],
     "deny": []
   },
