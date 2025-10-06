@@ -13,6 +13,8 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  // Asegurar que Prisma funcione en producción
+  serverExternalPackages: ['@prisma/client', '@prisma/engines'],
   /* config options here */
 };
 
