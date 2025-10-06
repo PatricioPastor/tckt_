@@ -63,10 +63,10 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
           email,
           password,
           name: `${firstName} ${lastName}`.trim(),
-          callbackURL: "/tickets",
+          callbackURL: "/events/1",
         },
         {
-          onSuccess: () => router.push("/tickets"),
+          onSuccess: () => router.push("/events/1"),
           onError: (ctx) => {
             setError(ctx.error.message || "Error al crear cuenta");
             setIsLoading(false);
