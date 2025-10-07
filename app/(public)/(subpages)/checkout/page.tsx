@@ -11,10 +11,11 @@ import { ItemsCart } from "./components/items-cart/items-cart";
 import { Subtotal } from "./components/subtotal/subtotal";
 import { SlideToConfirm } from "@/components/ui/slide-to-confirm";
 import { BackHeader } from "@/components/back-header/back-header";
+import { toast } from "sonner";
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { eventId, getTotal, checkout, checkoutFree, hasFreeTickets, hasPaidTickets } = useCartStore();
+  const { eventId, items, getTotal, checkout, checkoutFree, hasFreeTickets, hasPaidTickets, updateQuantity } = useCartStore();
   const { user } = useUserStore();
   const { data: session, isPending } = authClient.useSession();
   const isHydrated = useHydration();
@@ -25,18 +26,61 @@ export default function CheckoutPage() {
   const [sendEmail, setSendEmail] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isValidating, setIsValidating] = useState(true);
 
   useEffect(() => { if (!isPending) setIsCheckingAuth(false); }, [isPending]);
 
-  // Renderizado consistente durante hydration
-  if (!isHydrated) {
+  // Validar tickets deshabilitados al cargar el checkout
+  useEffect(() => {
+    if (!isHydrated || !eventId) return;
+
+    const validateTickets = async () => {
+      try {
+        const res = await fetch(`/api/events/${eventId}`);
+        if (!res.ok) {
+          setIsValidating(false);
+          return;
+        }
+
+        const event = await res.json();
+        const ticketTypes = event.ticketTypes || [];
+
+        // Verificar si algún ticket en el carrito está deshabilitado
+        let hasDisabledTickets = false;
+        for (const item of items) {
+          const ticketType = ticketTypes.find((tt: any) => tt.code === item.code);
+          if (ticketType?.isDisabled) {
+            // Remover del carrito
+            updateQuantity(item.code, 0, item.price, item.maxStock);
+            hasDisabledTickets = true;
+          }
+        }
+
+        if (hasDisabledTickets) {
+          toast.error("Algunas entradas fueron removidas porque ya no están disponibles");
+          // Redirigir al evento para que el usuario revise
+          setTimeout(() => router.push(`/events/${eventId}`), 2000);
+        }
+
+        setIsValidating(false);
+      } catch (error) {
+        console.error("Error validating tickets:", error);
+        setIsValidating(false);
+      }
+    };
+
+    validateTickets();
+  }, [isHydrated, eventId, items, updateQuantity, router]);
+
+  // Renderizado consistente durante hydration o validación
+  if (!isHydrated || isValidating) {
     return (
       <div className="min-h-screen bg-[#0B0B0B]">
         <BackHeader title="Checkout" className="border-b border-neutral-800 bg-[#0B0B0B]" />
         <div className="flex h-[calc(100vh-64px)] items-center justify-center">
           <div className="text-center space-y-2">
             <div className="h-8 w-8 mx-auto animate-spin rounded-full border-2 border-neutral-800 border-t-neutral-100" />
-            <p className="text-sm text-neutral-400">Cargando carrito...</p>
+            <p className="text-sm text-neutral-400">{!isHydrated ? 'Cargando carrito...' : 'Validando disponibilidad...'}</p>
           </div>
         </div>
       </div>

@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
           ticketTypes: {
             select: {
               id: true, code: true, label: true,
-              price: true, stockCurrent: true, userMaxPerType: true
+              price: true, stockCurrent: true, userMaxPerType: true, isDisabled: true
             }
           }
         }
@@ -88,6 +88,10 @@ export async function POST(req: NextRequest) {
         const tt = event.ticketTypes.find(t => t.code === sel.code)
         if (!tt) throw new Error(`Ticket type not found: ${sel.code}`)
 
+        // Validar que el ticket no esté deshabilitado
+        if (tt.isDisabled) {
+          throw new Error(`Ticket type ${tt.label} is currently disabled and cannot be purchased`)
+        }
 
         // Límite por usuario (contando existentes)
         const existingUserTickets = await tx.ticket.count({

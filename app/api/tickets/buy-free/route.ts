@@ -36,9 +36,14 @@ export async function POST(req: NextRequest) {
       const tickets = [];
 
       for (const sel of selections) {
-        const tt = event.ticketTypes.find(t => t.code === sel.type);
-        if (!tt) throw new Error('Ticket type not found: ' + sel.type);
-        
+        const tt = event.ticketTypes.find(t => t.code === sel.code);
+        if (!tt) throw new Error('Ticket type not found: ' + sel.code);
+
+        // Validar que el ticket no esté deshabilitado
+        if (tt.isDisabled) {
+          throw new Error(`Ticket type ${tt.label} is currently disabled and cannot be acquired`);
+        }
+
         // Ensure it's actually a free ticket
         if (Number(tt.price) > 0) throw new Error('This endpoint only handles free tickets');
         
