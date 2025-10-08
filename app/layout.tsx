@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { Analytics } from "@vercel/analytics/next"
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 import {Toaster} from 'sonner'
 
@@ -81,6 +83,9 @@ export default function RootLayout({
             {  children}
           {/* </UserProvider> */}
           <Toaster theme="dark"  position="top-center" />
+          <Analytics />
+          <SpeedInsights />
+          
         </ThemeProvider>
       </body>
     </html>
