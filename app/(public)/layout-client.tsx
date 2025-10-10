@@ -23,6 +23,12 @@ interface PublicLayoutClientProps {
 export function PublicLayoutClient({ children, user }: PublicLayoutClientProps) {
   const pathname = usePathname();
   const isHomePage = pathname === '/';
+  const isDoorSalePage = pathname.includes('/door-sale');
+
+  // Door-sale pages: No navbar, no sidebar, just content
+  if (isDoorSalePage) {
+    return <>{children}</>;
+  }
 
   // HomePage tiene su propio layout especial (fullscreen)
   if (isHomePage) {

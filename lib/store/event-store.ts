@@ -9,7 +9,8 @@ export interface EventCardData {
   labelName: string;
   location: string;
   imageUrl: string;
-  name:string;
+  name: string;
+  isSoldOut: boolean;
 }
 
 // Usamos Prisma.eventGetPayload para derivar el tipo para la vista de detalle.

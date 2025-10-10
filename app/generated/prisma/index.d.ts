@@ -83,12 +83,26 @@ export type log = $Result.DefaultSelection<Prisma.$logPayload>
  * 
  */
 export type message = $Result.DefaultSelection<Prisma.$messagePayload>
+/**
+ * Model guestList
+ * 
+ */
+export type guestList = $Result.DefaultSelection<Prisma.$guestListPayload>
 
 /**
  * Enums
  */
 export namespace $Enums {
-  export const Role: {
+  export const GuestStatus: {
+  invited: 'invited',
+  checked_in: 'checked_in',
+  no_show: 'no_show'
+};
+
+export type GuestStatus = (typeof GuestStatus)[keyof typeof GuestStatus]
+
+
+export const Role: {
   superadmin: 'superadmin',
   head_producer: 'head_producer',
   rrpp: 'rrpp',
@@ -131,6 +145,10 @@ export const PaymentStatus: {
 export type PaymentStatus = (typeof PaymentStatus)[keyof typeof PaymentStatus]
 
 }
+
+export type GuestStatus = $Enums.GuestStatus
+
+export const GuestStatus: typeof $Enums.GuestStatus
 
 export type Role = $Enums.Role
 
@@ -405,6 +423,16 @@ export class PrismaClient<
     * ```
     */
   get message(): Prisma.messageDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.guestList`: Exposes CRUD operations for the **guestList** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more GuestLists
+    * const guestLists = await prisma.guestList.findMany()
+    * ```
+    */
+  get guestList(): Prisma.guestListDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -858,7 +886,8 @@ export namespace Prisma {
     rrppAssignment: 'rrppAssignment',
     participant: 'participant',
     log: 'log',
-    message: 'message'
+    message: 'message',
+    guestList: 'guestList'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -877,7 +906,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "account" | "session" | "user" | "verification" | "payment" | "event" | "artist" | "eventArtist" | "ticketType" | "ticket" | "rrppAssignment" | "participant" | "log" | "message"
+      modelProps: "account" | "session" | "user" | "verification" | "payment" | "event" | "artist" | "eventArtist" | "ticketType" | "ticket" | "rrppAssignment" | "participant" | "log" | "message" | "guestList"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1917,6 +1946,80 @@ export namespace Prisma {
           }
         }
       }
+      guestList: {
+        payload: Prisma.$guestListPayload<ExtArgs>
+        fields: Prisma.guestListFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.guestListFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$guestListPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.guestListFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$guestListPayload>
+          }
+          findFirst: {
+            args: Prisma.guestListFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$guestListPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.guestListFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$guestListPayload>
+          }
+          findMany: {
+            args: Prisma.guestListFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$guestListPayload>[]
+          }
+          create: {
+            args: Prisma.guestListCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$guestListPayload>
+          }
+          createMany: {
+            args: Prisma.guestListCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.guestListCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$guestListPayload>[]
+          }
+          delete: {
+            args: Prisma.guestListDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$guestListPayload>
+          }
+          update: {
+            args: Prisma.guestListUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$guestListPayload>
+          }
+          deleteMany: {
+            args: Prisma.guestListDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.guestListUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.guestListUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$guestListPayload>[]
+          }
+          upsert: {
+            args: Prisma.guestListUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$guestListPayload>
+          }
+          aggregate: {
+            args: Prisma.GuestListAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateGuestList>
+          }
+          groupBy: {
+            args: Prisma.guestListGroupByArgs<ExtArgs>
+            result: $Utils.Optional<GuestListGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.guestListCountArgs<ExtArgs>
+            result: $Utils.Optional<GuestListCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -2027,6 +2130,7 @@ export namespace Prisma {
     participant?: participantOmit
     log?: logOmit
     message?: messageOmit
+    guestList?: guestListOmit
   }
 
   /* Types for Logging */
@@ -2107,29 +2211,33 @@ export namespace Prisma {
    */
 
   export type UserCountOutputType = {
+    account: number
+    logs: number
+    receivedMessages: number
+    sentMessages: number
+    participants: number
+    payments: number
+    rrppAssignments: number
+    session: number
     tickets: number
     transferredTickets: number
-    participants: number
-    rrppAssignments: number
-    account: number
-    session: number
-    logs: number
-    sentMessages: number
-    receivedMessages: number
-    payments: number
+    guestsImported: number
+    guestsCheckedIn: number
   }
 
   export type UserCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    account?: boolean | UserCountOutputTypeCountAccountArgs
+    logs?: boolean | UserCountOutputTypeCountLogsArgs
+    receivedMessages?: boolean | UserCountOutputTypeCountReceivedMessagesArgs
+    sentMessages?: boolean | UserCountOutputTypeCountSentMessagesArgs
+    participants?: boolean | UserCountOutputTypeCountParticipantsArgs
+    payments?: boolean | UserCountOutputTypeCountPaymentsArgs
+    rrppAssignments?: boolean | UserCountOutputTypeCountRrppAssignmentsArgs
+    session?: boolean | UserCountOutputTypeCountSessionArgs
     tickets?: boolean | UserCountOutputTypeCountTicketsArgs
     transferredTickets?: boolean | UserCountOutputTypeCountTransferredTicketsArgs
-    participants?: boolean | UserCountOutputTypeCountParticipantsArgs
-    rrppAssignments?: boolean | UserCountOutputTypeCountRrppAssignmentsArgs
-    account?: boolean | UserCountOutputTypeCountAccountArgs
-    session?: boolean | UserCountOutputTypeCountSessionArgs
-    logs?: boolean | UserCountOutputTypeCountLogsArgs
-    sentMessages?: boolean | UserCountOutputTypeCountSentMessagesArgs
-    receivedMessages?: boolean | UserCountOutputTypeCountReceivedMessagesArgs
-    payments?: boolean | UserCountOutputTypeCountPaymentsArgs
+    guestsImported?: boolean | UserCountOutputTypeCountGuestsImportedArgs
+    guestsCheckedIn?: boolean | UserCountOutputTypeCountGuestsCheckedInArgs
   }
 
   // Custom InputTypes
@@ -2141,6 +2249,62 @@ export namespace Prisma {
      * Select specific fields to fetch from the UserCountOutputType
      */
     select?: UserCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountAccountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: accountWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountLogsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: logWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountReceivedMessagesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: messageWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountSentMessagesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: messageWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountParticipantsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: participantWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountPaymentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: paymentWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountRrppAssignmentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: rrppAssignmentWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountSessionArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: sessionWhereInput
   }
 
   /**
@@ -2160,57 +2324,15 @@ export namespace Prisma {
   /**
    * UserCountOutputType without action
    */
-  export type UserCountOutputTypeCountParticipantsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: participantWhereInput
+  export type UserCountOutputTypeCountGuestsImportedArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: guestListWhereInput
   }
 
   /**
    * UserCountOutputType without action
    */
-  export type UserCountOutputTypeCountRrppAssignmentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: rrppAssignmentWhereInput
-  }
-
-  /**
-   * UserCountOutputType without action
-   */
-  export type UserCountOutputTypeCountAccountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: accountWhereInput
-  }
-
-  /**
-   * UserCountOutputType without action
-   */
-  export type UserCountOutputTypeCountSessionArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: sessionWhereInput
-  }
-
-  /**
-   * UserCountOutputType without action
-   */
-  export type UserCountOutputTypeCountLogsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: logWhereInput
-  }
-
-  /**
-   * UserCountOutputType without action
-   */
-  export type UserCountOutputTypeCountSentMessagesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: messageWhereInput
-  }
-
-  /**
-   * UserCountOutputType without action
-   */
-  export type UserCountOutputTypeCountReceivedMessagesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: messageWhereInput
-  }
-
-  /**
-   * UserCountOutputType without action
-   */
-  export type UserCountOutputTypeCountPaymentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: paymentWhereInput
+  export type UserCountOutputTypeCountGuestsCheckedInArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: guestListWhereInput
   }
 
 
@@ -2250,21 +2372,23 @@ export namespace Prisma {
    */
 
   export type EventCountOutputType = {
-    ticketTypes: number
     eventArtists: number
-    tickets: number
     participants: number
-    rrppAssignments: number
     payments: number
+    rrppAssignments: number
+    tickets: number
+    ticketTypes: number
+    guestList: number
   }
 
   export type EventCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    ticketTypes?: boolean | EventCountOutputTypeCountTicketTypesArgs
     eventArtists?: boolean | EventCountOutputTypeCountEventArtistsArgs
-    tickets?: boolean | EventCountOutputTypeCountTicketsArgs
     participants?: boolean | EventCountOutputTypeCountParticipantsArgs
-    rrppAssignments?: boolean | EventCountOutputTypeCountRrppAssignmentsArgs
     payments?: boolean | EventCountOutputTypeCountPaymentsArgs
+    rrppAssignments?: boolean | EventCountOutputTypeCountRrppAssignmentsArgs
+    tickets?: boolean | EventCountOutputTypeCountTicketsArgs
+    ticketTypes?: boolean | EventCountOutputTypeCountTicketTypesArgs
+    guestList?: boolean | EventCountOutputTypeCountGuestListArgs
   }
 
   // Custom InputTypes
@@ -2281,22 +2405,8 @@ export namespace Prisma {
   /**
    * EventCountOutputType without action
    */
-  export type EventCountOutputTypeCountTicketTypesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: ticketTypeWhereInput
-  }
-
-  /**
-   * EventCountOutputType without action
-   */
   export type EventCountOutputTypeCountEventArtistsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: eventArtistWhereInput
-  }
-
-  /**
-   * EventCountOutputType without action
-   */
-  export type EventCountOutputTypeCountTicketsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: ticketWhereInput
   }
 
   /**
@@ -2309,6 +2419,13 @@ export namespace Prisma {
   /**
    * EventCountOutputType without action
    */
+  export type EventCountOutputTypeCountPaymentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: paymentWhereInput
+  }
+
+  /**
+   * EventCountOutputType without action
+   */
   export type EventCountOutputTypeCountRrppAssignmentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: rrppAssignmentWhereInput
   }
@@ -2316,8 +2433,22 @@ export namespace Prisma {
   /**
    * EventCountOutputType without action
    */
-  export type EventCountOutputTypeCountPaymentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: paymentWhereInput
+  export type EventCountOutputTypeCountTicketsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ticketWhereInput
+  }
+
+  /**
+   * EventCountOutputType without action
+   */
+  export type EventCountOutputTypeCountTicketTypesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ticketTypeWhereInput
+  }
+
+  /**
+   * EventCountOutputType without action
+   */
+  export type EventCountOutputTypeCountGuestListArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: guestListWhereInput
   }
 
 
@@ -4662,13 +4793,13 @@ export namespace Prisma {
     email: string | null
     emailVerified: boolean | null
     image: string | null
-    imageBase64: string | null
     createdAt: Date | null
     updatedAt: Date | null
     username: string | null
     dni: string | null
     birthDate: Date | null
     role: $Enums.Role | null
+    image_base64: string | null
   }
 
   export type UserMaxAggregateOutputType = {
@@ -4677,13 +4808,13 @@ export namespace Prisma {
     email: string | null
     emailVerified: boolean | null
     image: string | null
-    imageBase64: string | null
     createdAt: Date | null
     updatedAt: Date | null
     username: string | null
     dni: string | null
     birthDate: Date | null
     role: $Enums.Role | null
+    image_base64: string | null
   }
 
   export type UserCountAggregateOutputType = {
@@ -4692,13 +4823,13 @@ export namespace Prisma {
     email: number
     emailVerified: number
     image: number
-    imageBase64: number
     createdAt: number
     updatedAt: number
     username: number
     dni: number
     birthDate: number
     role: number
+    image_base64: number
     _all: number
   }
 
@@ -4709,13 +4840,13 @@ export namespace Prisma {
     email?: true
     emailVerified?: true
     image?: true
-    imageBase64?: true
     createdAt?: true
     updatedAt?: true
     username?: true
     dni?: true
     birthDate?: true
     role?: true
+    image_base64?: true
   }
 
   export type UserMaxAggregateInputType = {
@@ -4724,13 +4855,13 @@ export namespace Prisma {
     email?: true
     emailVerified?: true
     image?: true
-    imageBase64?: true
     createdAt?: true
     updatedAt?: true
     username?: true
     dni?: true
     birthDate?: true
     role?: true
+    image_base64?: true
   }
 
   export type UserCountAggregateInputType = {
@@ -4739,13 +4870,13 @@ export namespace Prisma {
     email?: true
     emailVerified?: true
     image?: true
-    imageBase64?: true
     createdAt?: true
     updatedAt?: true
     username?: true
     dni?: true
     birthDate?: true
     role?: true
+    image_base64?: true
     _all?: true
   }
 
@@ -4827,13 +4958,13 @@ export namespace Prisma {
     email: string
     emailVerified: boolean
     image: string | null
-    imageBase64: string | null
     createdAt: Date
     updatedAt: Date
     username: string | null
     dni: string | null
     birthDate: Date | null
     role: $Enums.Role
+    image_base64: string | null
     _count: UserCountAggregateOutputType | null
     _min: UserMinAggregateOutputType | null
     _max: UserMaxAggregateOutputType | null
@@ -4859,23 +4990,25 @@ export namespace Prisma {
     email?: boolean
     emailVerified?: boolean
     image?: boolean
-    imageBase64?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     username?: boolean
     dni?: boolean
     birthDate?: boolean
     role?: boolean
+    image_base64?: boolean
+    account?: boolean | user$accountArgs<ExtArgs>
+    logs?: boolean | user$logsArgs<ExtArgs>
+    receivedMessages?: boolean | user$receivedMessagesArgs<ExtArgs>
+    sentMessages?: boolean | user$sentMessagesArgs<ExtArgs>
+    participants?: boolean | user$participantsArgs<ExtArgs>
+    payments?: boolean | user$paymentsArgs<ExtArgs>
+    rrppAssignments?: boolean | user$rrppAssignmentsArgs<ExtArgs>
+    session?: boolean | user$sessionArgs<ExtArgs>
     tickets?: boolean | user$ticketsArgs<ExtArgs>
     transferredTickets?: boolean | user$transferredTicketsArgs<ExtArgs>
-    participants?: boolean | user$participantsArgs<ExtArgs>
-    rrppAssignments?: boolean | user$rrppAssignmentsArgs<ExtArgs>
-    account?: boolean | user$accountArgs<ExtArgs>
-    session?: boolean | user$sessionArgs<ExtArgs>
-    logs?: boolean | user$logsArgs<ExtArgs>
-    sentMessages?: boolean | user$sentMessagesArgs<ExtArgs>
-    receivedMessages?: boolean | user$receivedMessagesArgs<ExtArgs>
-    payments?: boolean | user$paymentsArgs<ExtArgs>
+    guestsImported?: boolean | user$guestsImportedArgs<ExtArgs>
+    guestsCheckedIn?: boolean | user$guestsCheckedInArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["user"]>
 
@@ -4885,13 +5018,13 @@ export namespace Prisma {
     email?: boolean
     emailVerified?: boolean
     image?: boolean
-    imageBase64?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     username?: boolean
     dni?: boolean
     birthDate?: boolean
     role?: boolean
+    image_base64?: boolean
   }, ExtArgs["result"]["user"]>
 
   export type userSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -4900,13 +5033,13 @@ export namespace Prisma {
     email?: boolean
     emailVerified?: boolean
     image?: boolean
-    imageBase64?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     username?: boolean
     dni?: boolean
     birthDate?: boolean
     role?: boolean
+    image_base64?: boolean
   }, ExtArgs["result"]["user"]>
 
   export type userSelectScalar = {
@@ -4915,27 +5048,29 @@ export namespace Prisma {
     email?: boolean
     emailVerified?: boolean
     image?: boolean
-    imageBase64?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     username?: boolean
     dni?: boolean
     birthDate?: boolean
     role?: boolean
+    image_base64?: boolean
   }
 
-  export type userOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "email" | "emailVerified" | "image" | "imageBase64" | "createdAt" | "updatedAt" | "username" | "dni" | "birthDate" | "role", ExtArgs["result"]["user"]>
+  export type userOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "email" | "emailVerified" | "image" | "createdAt" | "updatedAt" | "username" | "dni" | "birthDate" | "role" | "image_base64", ExtArgs["result"]["user"]>
   export type userInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    account?: boolean | user$accountArgs<ExtArgs>
+    logs?: boolean | user$logsArgs<ExtArgs>
+    receivedMessages?: boolean | user$receivedMessagesArgs<ExtArgs>
+    sentMessages?: boolean | user$sentMessagesArgs<ExtArgs>
+    participants?: boolean | user$participantsArgs<ExtArgs>
+    payments?: boolean | user$paymentsArgs<ExtArgs>
+    rrppAssignments?: boolean | user$rrppAssignmentsArgs<ExtArgs>
+    session?: boolean | user$sessionArgs<ExtArgs>
     tickets?: boolean | user$ticketsArgs<ExtArgs>
     transferredTickets?: boolean | user$transferredTicketsArgs<ExtArgs>
-    participants?: boolean | user$participantsArgs<ExtArgs>
-    rrppAssignments?: boolean | user$rrppAssignmentsArgs<ExtArgs>
-    account?: boolean | user$accountArgs<ExtArgs>
-    session?: boolean | user$sessionArgs<ExtArgs>
-    logs?: boolean | user$logsArgs<ExtArgs>
-    sentMessages?: boolean | user$sentMessagesArgs<ExtArgs>
-    receivedMessages?: boolean | user$receivedMessagesArgs<ExtArgs>
-    payments?: boolean | user$paymentsArgs<ExtArgs>
+    guestsImported?: boolean | user$guestsImportedArgs<ExtArgs>
+    guestsCheckedIn?: boolean | user$guestsCheckedInArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type userIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -4944,16 +5079,18 @@ export namespace Prisma {
   export type $userPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "user"
     objects: {
+      account: Prisma.$accountPayload<ExtArgs>[]
+      logs: Prisma.$logPayload<ExtArgs>[]
+      receivedMessages: Prisma.$messagePayload<ExtArgs>[]
+      sentMessages: Prisma.$messagePayload<ExtArgs>[]
+      participants: Prisma.$participantPayload<ExtArgs>[]
+      payments: Prisma.$paymentPayload<ExtArgs>[]
+      rrppAssignments: Prisma.$rrppAssignmentPayload<ExtArgs>[]
+      session: Prisma.$sessionPayload<ExtArgs>[]
       tickets: Prisma.$ticketPayload<ExtArgs>[]
       transferredTickets: Prisma.$ticketPayload<ExtArgs>[]
-      participants: Prisma.$participantPayload<ExtArgs>[]
-      rrppAssignments: Prisma.$rrppAssignmentPayload<ExtArgs>[]
-      account: Prisma.$accountPayload<ExtArgs>[]
-      session: Prisma.$sessionPayload<ExtArgs>[]
-      logs: Prisma.$logPayload<ExtArgs>[]
-      sentMessages: Prisma.$messagePayload<ExtArgs>[]
-      receivedMessages: Prisma.$messagePayload<ExtArgs>[]
-      payments: Prisma.$paymentPayload<ExtArgs>[]
+      guestsImported: Prisma.$guestListPayload<ExtArgs>[]
+      guestsCheckedIn: Prisma.$guestListPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -4961,13 +5098,13 @@ export namespace Prisma {
       email: string
       emailVerified: boolean
       image: string | null
-      imageBase64: string | null
       createdAt: Date
       updatedAt: Date
       username: string | null
       dni: string | null
       birthDate: Date | null
       role: $Enums.Role
+      image_base64: string | null
     }, ExtArgs["result"]["user"]>
     composites: {}
   }
@@ -5362,16 +5499,18 @@ export namespace Prisma {
    */
   export interface Prisma__userClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
+    account<T extends user$accountArgs<ExtArgs> = {}>(args?: Subset<T, user$accountArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$accountPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    logs<T extends user$logsArgs<ExtArgs> = {}>(args?: Subset<T, user$logsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$logPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    receivedMessages<T extends user$receivedMessagesArgs<ExtArgs> = {}>(args?: Subset<T, user$receivedMessagesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$messagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    sentMessages<T extends user$sentMessagesArgs<ExtArgs> = {}>(args?: Subset<T, user$sentMessagesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$messagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    participants<T extends user$participantsArgs<ExtArgs> = {}>(args?: Subset<T, user$participantsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$participantPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    payments<T extends user$paymentsArgs<ExtArgs> = {}>(args?: Subset<T, user$paymentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$paymentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    rrppAssignments<T extends user$rrppAssignmentsArgs<ExtArgs> = {}>(args?: Subset<T, user$rrppAssignmentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$rrppAssignmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    session<T extends user$sessionArgs<ExtArgs> = {}>(args?: Subset<T, user$sessionArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$sessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     tickets<T extends user$ticketsArgs<ExtArgs> = {}>(args?: Subset<T, user$ticketsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ticketPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     transferredTickets<T extends user$transferredTicketsArgs<ExtArgs> = {}>(args?: Subset<T, user$transferredTicketsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ticketPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    participants<T extends user$participantsArgs<ExtArgs> = {}>(args?: Subset<T, user$participantsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$participantPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    rrppAssignments<T extends user$rrppAssignmentsArgs<ExtArgs> = {}>(args?: Subset<T, user$rrppAssignmentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$rrppAssignmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    account<T extends user$accountArgs<ExtArgs> = {}>(args?: Subset<T, user$accountArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$accountPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    session<T extends user$sessionArgs<ExtArgs> = {}>(args?: Subset<T, user$sessionArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$sessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    logs<T extends user$logsArgs<ExtArgs> = {}>(args?: Subset<T, user$logsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$logPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    sentMessages<T extends user$sentMessagesArgs<ExtArgs> = {}>(args?: Subset<T, user$sentMessagesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$messagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    receivedMessages<T extends user$receivedMessagesArgs<ExtArgs> = {}>(args?: Subset<T, user$receivedMessagesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$messagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    payments<T extends user$paymentsArgs<ExtArgs> = {}>(args?: Subset<T, user$paymentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$paymentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    guestsImported<T extends user$guestsImportedArgs<ExtArgs> = {}>(args?: Subset<T, user$guestsImportedArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$guestListPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    guestsCheckedIn<T extends user$guestsCheckedInArgs<ExtArgs> = {}>(args?: Subset<T, user$guestsCheckedInArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$guestListPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -5406,13 +5545,13 @@ export namespace Prisma {
     readonly email: FieldRef<"user", 'String'>
     readonly emailVerified: FieldRef<"user", 'Boolean'>
     readonly image: FieldRef<"user", 'String'>
-    readonly imageBase64: FieldRef<"user", 'String'>
     readonly createdAt: FieldRef<"user", 'DateTime'>
     readonly updatedAt: FieldRef<"user", 'DateTime'>
     readonly username: FieldRef<"user", 'String'>
     readonly dni: FieldRef<"user", 'String'>
     readonly birthDate: FieldRef<"user", 'DateTime'>
     readonly role: FieldRef<"user", 'Role'>
+    readonly image_base64: FieldRef<"user", 'String'>
   }
     
 
@@ -5801,6 +5940,198 @@ export namespace Prisma {
   }
 
   /**
+   * user.account
+   */
+  export type user$accountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the account
+     */
+    select?: accountSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the account
+     */
+    omit?: accountOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: accountInclude<ExtArgs> | null
+    where?: accountWhereInput
+    orderBy?: accountOrderByWithRelationInput | accountOrderByWithRelationInput[]
+    cursor?: accountWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: AccountScalarFieldEnum | AccountScalarFieldEnum[]
+  }
+
+  /**
+   * user.logs
+   */
+  export type user$logsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the log
+     */
+    select?: logSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the log
+     */
+    omit?: logOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: logInclude<ExtArgs> | null
+    where?: logWhereInput
+    orderBy?: logOrderByWithRelationInput | logOrderByWithRelationInput[]
+    cursor?: logWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: LogScalarFieldEnum | LogScalarFieldEnum[]
+  }
+
+  /**
+   * user.receivedMessages
+   */
+  export type user$receivedMessagesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the message
+     */
+    select?: messageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the message
+     */
+    omit?: messageOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: messageInclude<ExtArgs> | null
+    where?: messageWhereInput
+    orderBy?: messageOrderByWithRelationInput | messageOrderByWithRelationInput[]
+    cursor?: messageWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: MessageScalarFieldEnum | MessageScalarFieldEnum[]
+  }
+
+  /**
+   * user.sentMessages
+   */
+  export type user$sentMessagesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the message
+     */
+    select?: messageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the message
+     */
+    omit?: messageOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: messageInclude<ExtArgs> | null
+    where?: messageWhereInput
+    orderBy?: messageOrderByWithRelationInput | messageOrderByWithRelationInput[]
+    cursor?: messageWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: MessageScalarFieldEnum | MessageScalarFieldEnum[]
+  }
+
+  /**
+   * user.participants
+   */
+  export type user$participantsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the participant
+     */
+    select?: participantSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the participant
+     */
+    omit?: participantOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: participantInclude<ExtArgs> | null
+    where?: participantWhereInput
+    orderBy?: participantOrderByWithRelationInput | participantOrderByWithRelationInput[]
+    cursor?: participantWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: ParticipantScalarFieldEnum | ParticipantScalarFieldEnum[]
+  }
+
+  /**
+   * user.payments
+   */
+  export type user$paymentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the payment
+     */
+    select?: paymentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the payment
+     */
+    omit?: paymentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: paymentInclude<ExtArgs> | null
+    where?: paymentWhereInput
+    orderBy?: paymentOrderByWithRelationInput | paymentOrderByWithRelationInput[]
+    cursor?: paymentWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: PaymentScalarFieldEnum | PaymentScalarFieldEnum[]
+  }
+
+  /**
+   * user.rrppAssignments
+   */
+  export type user$rrppAssignmentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the rrppAssignment
+     */
+    select?: rrppAssignmentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the rrppAssignment
+     */
+    omit?: rrppAssignmentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: rrppAssignmentInclude<ExtArgs> | null
+    where?: rrppAssignmentWhereInput
+    orderBy?: rrppAssignmentOrderByWithRelationInput | rrppAssignmentOrderByWithRelationInput[]
+    cursor?: rrppAssignmentWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: RrppAssignmentScalarFieldEnum | RrppAssignmentScalarFieldEnum[]
+  }
+
+  /**
+   * user.session
+   */
+  export type user$sessionArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the session
+     */
+    select?: sessionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the session
+     */
+    omit?: sessionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: sessionInclude<ExtArgs> | null
+    where?: sessionWhereInput
+    orderBy?: sessionOrderByWithRelationInput | sessionOrderByWithRelationInput[]
+    cursor?: sessionWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: SessionScalarFieldEnum | SessionScalarFieldEnum[]
+  }
+
+  /**
    * user.tickets
    */
   export type user$ticketsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -5849,195 +6180,51 @@ export namespace Prisma {
   }
 
   /**
-   * user.participants
+   * user.guestsImported
    */
-  export type user$participantsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type user$guestsImportedArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the participant
+     * Select specific fields to fetch from the guestList
      */
-    select?: participantSelect<ExtArgs> | null
+    select?: guestListSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the participant
+     * Omit specific fields from the guestList
      */
-    omit?: participantOmit<ExtArgs> | null
+    omit?: guestListOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: participantInclude<ExtArgs> | null
-    where?: participantWhereInput
-    orderBy?: participantOrderByWithRelationInput | participantOrderByWithRelationInput[]
-    cursor?: participantWhereUniqueInput
+    include?: guestListInclude<ExtArgs> | null
+    where?: guestListWhereInput
+    orderBy?: guestListOrderByWithRelationInput | guestListOrderByWithRelationInput[]
+    cursor?: guestListWhereUniqueInput
     take?: number
     skip?: number
-    distinct?: ParticipantScalarFieldEnum | ParticipantScalarFieldEnum[]
+    distinct?: GuestListScalarFieldEnum | GuestListScalarFieldEnum[]
   }
 
   /**
-   * user.rrppAssignments
+   * user.guestsCheckedIn
    */
-  export type user$rrppAssignmentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type user$guestsCheckedInArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the rrppAssignment
+     * Select specific fields to fetch from the guestList
      */
-    select?: rrppAssignmentSelect<ExtArgs> | null
+    select?: guestListSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the rrppAssignment
+     * Omit specific fields from the guestList
      */
-    omit?: rrppAssignmentOmit<ExtArgs> | null
+    omit?: guestListOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: rrppAssignmentInclude<ExtArgs> | null
-    where?: rrppAssignmentWhereInput
-    orderBy?: rrppAssignmentOrderByWithRelationInput | rrppAssignmentOrderByWithRelationInput[]
-    cursor?: rrppAssignmentWhereUniqueInput
+    include?: guestListInclude<ExtArgs> | null
+    where?: guestListWhereInput
+    orderBy?: guestListOrderByWithRelationInput | guestListOrderByWithRelationInput[]
+    cursor?: guestListWhereUniqueInput
     take?: number
     skip?: number
-    distinct?: RrppAssignmentScalarFieldEnum | RrppAssignmentScalarFieldEnum[]
-  }
-
-  /**
-   * user.account
-   */
-  export type user$accountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the account
-     */
-    select?: accountSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the account
-     */
-    omit?: accountOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: accountInclude<ExtArgs> | null
-    where?: accountWhereInput
-    orderBy?: accountOrderByWithRelationInput | accountOrderByWithRelationInput[]
-    cursor?: accountWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: AccountScalarFieldEnum | AccountScalarFieldEnum[]
-  }
-
-  /**
-   * user.session
-   */
-  export type user$sessionArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the session
-     */
-    select?: sessionSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the session
-     */
-    omit?: sessionOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: sessionInclude<ExtArgs> | null
-    where?: sessionWhereInput
-    orderBy?: sessionOrderByWithRelationInput | sessionOrderByWithRelationInput[]
-    cursor?: sessionWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: SessionScalarFieldEnum | SessionScalarFieldEnum[]
-  }
-
-  /**
-   * user.logs
-   */
-  export type user$logsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the log
-     */
-    select?: logSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the log
-     */
-    omit?: logOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: logInclude<ExtArgs> | null
-    where?: logWhereInput
-    orderBy?: logOrderByWithRelationInput | logOrderByWithRelationInput[]
-    cursor?: logWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: LogScalarFieldEnum | LogScalarFieldEnum[]
-  }
-
-  /**
-   * user.sentMessages
-   */
-  export type user$sentMessagesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the message
-     */
-    select?: messageSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the message
-     */
-    omit?: messageOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: messageInclude<ExtArgs> | null
-    where?: messageWhereInput
-    orderBy?: messageOrderByWithRelationInput | messageOrderByWithRelationInput[]
-    cursor?: messageWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: MessageScalarFieldEnum | MessageScalarFieldEnum[]
-  }
-
-  /**
-   * user.receivedMessages
-   */
-  export type user$receivedMessagesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the message
-     */
-    select?: messageSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the message
-     */
-    omit?: messageOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: messageInclude<ExtArgs> | null
-    where?: messageWhereInput
-    orderBy?: messageOrderByWithRelationInput | messageOrderByWithRelationInput[]
-    cursor?: messageWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: MessageScalarFieldEnum | MessageScalarFieldEnum[]
-  }
-
-  /**
-   * user.payments
-   */
-  export type user$paymentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the payment
-     */
-    select?: paymentSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the payment
-     */
-    omit?: paymentOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: paymentInclude<ExtArgs> | null
-    where?: paymentWhereInput
-    orderBy?: paymentOrderByWithRelationInput | paymentOrderByWithRelationInput[]
-    cursor?: paymentWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: PaymentScalarFieldEnum | PaymentScalarFieldEnum[]
+    distinct?: GuestListScalarFieldEnum | GuestListScalarFieldEnum[]
   }
 
   /**
@@ -7345,8 +7532,8 @@ export namespace Prisma {
     payerName?: boolean
     createdAt?: boolean
     updatedAt?: boolean
-    user?: boolean | userDefaultArgs<ExtArgs>
     event?: boolean | eventDefaultArgs<ExtArgs>
+    user?: boolean | userDefaultArgs<ExtArgs>
     tickets?: boolean | payment$ticketsArgs<ExtArgs>
     _count?: boolean | PaymentCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["payment"]>
@@ -7366,8 +7553,8 @@ export namespace Prisma {
     payerName?: boolean
     createdAt?: boolean
     updatedAt?: boolean
-    user?: boolean | userDefaultArgs<ExtArgs>
     event?: boolean | eventDefaultArgs<ExtArgs>
+    user?: boolean | userDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["payment"]>
 
   export type paymentSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -7385,8 +7572,8 @@ export namespace Prisma {
     payerName?: boolean
     createdAt?: boolean
     updatedAt?: boolean
-    user?: boolean | userDefaultArgs<ExtArgs>
     event?: boolean | eventDefaultArgs<ExtArgs>
+    user?: boolean | userDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["payment"]>
 
   export type paymentSelectScalar = {
@@ -7408,25 +7595,25 @@ export namespace Prisma {
 
   export type paymentOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "eventId" | "status" | "amount" | "currency" | "provider" | "externalReference" | "mpPreferenceId" | "mpPaymentId" | "payerEmail" | "payerName" | "createdAt" | "updatedAt", ExtArgs["result"]["payment"]>
   export type paymentInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    user?: boolean | userDefaultArgs<ExtArgs>
     event?: boolean | eventDefaultArgs<ExtArgs>
+    user?: boolean | userDefaultArgs<ExtArgs>
     tickets?: boolean | payment$ticketsArgs<ExtArgs>
     _count?: boolean | PaymentCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type paymentIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    user?: boolean | userDefaultArgs<ExtArgs>
     event?: boolean | eventDefaultArgs<ExtArgs>
+    user?: boolean | userDefaultArgs<ExtArgs>
   }
   export type paymentIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    user?: boolean | userDefaultArgs<ExtArgs>
     event?: boolean | eventDefaultArgs<ExtArgs>
+    user?: boolean | userDefaultArgs<ExtArgs>
   }
 
   export type $paymentPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "payment"
     objects: {
-      user: Prisma.$userPayload<ExtArgs>
       event: Prisma.$eventPayload<ExtArgs>
+      user: Prisma.$userPayload<ExtArgs>
       tickets: Prisma.$ticketPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
@@ -7838,8 +8025,8 @@ export namespace Prisma {
    */
   export interface Prisma__paymentClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    user<T extends userDefaultArgs<ExtArgs> = {}>(args?: Subset<T, userDefaultArgs<ExtArgs>>): Prisma__userClient<$Result.GetResult<Prisma.$userPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     event<T extends eventDefaultArgs<ExtArgs> = {}>(args?: Subset<T, eventDefaultArgs<ExtArgs>>): Prisma__eventClient<$Result.GetResult<Prisma.$eventPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    user<T extends userDefaultArgs<ExtArgs> = {}>(args?: Subset<T, userDefaultArgs<ExtArgs>>): Prisma__userClient<$Result.GetResult<Prisma.$userPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     tickets<T extends payment$ticketsArgs<ExtArgs> = {}>(args?: Subset<T, payment$ticketsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ticketPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -8357,6 +8544,7 @@ export namespace Prisma {
     producerId: number | null
     capacityTotal: number | null
     isRsvpAllowed: boolean | null
+    isSoldOut: boolean | null
     eventGenre: string | null
     showRemainingTickets: boolean | null
     createdAt: Date | null
@@ -8373,6 +8561,7 @@ export namespace Prisma {
     producerId: number | null
     capacityTotal: number | null
     isRsvpAllowed: boolean | null
+    isSoldOut: boolean | null
     eventGenre: string | null
     showRemainingTickets: boolean | null
     createdAt: Date | null
@@ -8389,6 +8578,7 @@ export namespace Prisma {
     producerId: number
     capacityTotal: number
     isRsvpAllowed: number
+    isSoldOut: number
     eventGenre: number
     showRemainingTickets: number
     createdAt: number
@@ -8419,6 +8609,7 @@ export namespace Prisma {
     producerId?: true
     capacityTotal?: true
     isRsvpAllowed?: true
+    isSoldOut?: true
     eventGenre?: true
     showRemainingTickets?: true
     createdAt?: true
@@ -8435,6 +8626,7 @@ export namespace Prisma {
     producerId?: true
     capacityTotal?: true
     isRsvpAllowed?: true
+    isSoldOut?: true
     eventGenre?: true
     showRemainingTickets?: true
     createdAt?: true
@@ -8451,6 +8643,7 @@ export namespace Prisma {
     producerId?: true
     capacityTotal?: true
     isRsvpAllowed?: true
+    isSoldOut?: true
     eventGenre?: true
     showRemainingTickets?: true
     createdAt?: true
@@ -8554,6 +8747,7 @@ export namespace Prisma {
     producerId: number
     capacityTotal: number | null
     isRsvpAllowed: boolean
+    isSoldOut: boolean
     eventGenre: string | null
     showRemainingTickets: boolean
     createdAt: Date
@@ -8589,15 +8783,17 @@ export namespace Prisma {
     producerId?: boolean
     capacityTotal?: boolean
     isRsvpAllowed?: boolean
+    isSoldOut?: boolean
     eventGenre?: boolean
     showRemainingTickets?: boolean
     createdAt?: boolean
-    ticketTypes?: boolean | event$ticketTypesArgs<ExtArgs>
     eventArtists?: boolean | event$eventArtistsArgs<ExtArgs>
-    tickets?: boolean | event$ticketsArgs<ExtArgs>
     participants?: boolean | event$participantsArgs<ExtArgs>
-    rrppAssignments?: boolean | event$rrppAssignmentsArgs<ExtArgs>
     payments?: boolean | event$paymentsArgs<ExtArgs>
+    rrppAssignments?: boolean | event$rrppAssignmentsArgs<ExtArgs>
+    tickets?: boolean | event$ticketsArgs<ExtArgs>
+    ticketTypes?: boolean | event$ticketTypesArgs<ExtArgs>
+    guestList?: boolean | event$guestListArgs<ExtArgs>
     _count?: boolean | EventCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["event"]>
 
@@ -8612,6 +8808,7 @@ export namespace Prisma {
     producerId?: boolean
     capacityTotal?: boolean
     isRsvpAllowed?: boolean
+    isSoldOut?: boolean
     eventGenre?: boolean
     showRemainingTickets?: boolean
     createdAt?: boolean
@@ -8628,6 +8825,7 @@ export namespace Prisma {
     producerId?: boolean
     capacityTotal?: boolean
     isRsvpAllowed?: boolean
+    isSoldOut?: boolean
     eventGenre?: boolean
     showRemainingTickets?: boolean
     createdAt?: boolean
@@ -8644,19 +8842,21 @@ export namespace Prisma {
     producerId?: boolean
     capacityTotal?: boolean
     isRsvpAllowed?: boolean
+    isSoldOut?: boolean
     eventGenre?: boolean
     showRemainingTickets?: boolean
     createdAt?: boolean
   }
 
-  export type eventOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "date" | "location" | "description" | "bannerUrl" | "status" | "producerId" | "capacityTotal" | "isRsvpAllowed" | "eventGenre" | "showRemainingTickets" | "createdAt", ExtArgs["result"]["event"]>
+  export type eventOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "date" | "location" | "description" | "bannerUrl" | "status" | "producerId" | "capacityTotal" | "isRsvpAllowed" | "isSoldOut" | "eventGenre" | "showRemainingTickets" | "createdAt", ExtArgs["result"]["event"]>
   export type eventInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    ticketTypes?: boolean | event$ticketTypesArgs<ExtArgs>
     eventArtists?: boolean | event$eventArtistsArgs<ExtArgs>
-    tickets?: boolean | event$ticketsArgs<ExtArgs>
     participants?: boolean | event$participantsArgs<ExtArgs>
-    rrppAssignments?: boolean | event$rrppAssignmentsArgs<ExtArgs>
     payments?: boolean | event$paymentsArgs<ExtArgs>
+    rrppAssignments?: boolean | event$rrppAssignmentsArgs<ExtArgs>
+    tickets?: boolean | event$ticketsArgs<ExtArgs>
+    ticketTypes?: boolean | event$ticketTypesArgs<ExtArgs>
+    guestList?: boolean | event$guestListArgs<ExtArgs>
     _count?: boolean | EventCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type eventIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -8665,12 +8865,13 @@ export namespace Prisma {
   export type $eventPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "event"
     objects: {
-      ticketTypes: Prisma.$ticketTypePayload<ExtArgs>[]
       eventArtists: Prisma.$eventArtistPayload<ExtArgs>[]
-      tickets: Prisma.$ticketPayload<ExtArgs>[]
       participants: Prisma.$participantPayload<ExtArgs>[]
-      rrppAssignments: Prisma.$rrppAssignmentPayload<ExtArgs>[]
       payments: Prisma.$paymentPayload<ExtArgs>[]
+      rrppAssignments: Prisma.$rrppAssignmentPayload<ExtArgs>[]
+      tickets: Prisma.$ticketPayload<ExtArgs>[]
+      ticketTypes: Prisma.$ticketTypePayload<ExtArgs>[]
+      guestList: Prisma.$guestListPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
@@ -8683,6 +8884,7 @@ export namespace Prisma {
       producerId: number
       capacityTotal: number | null
       isRsvpAllowed: boolean
+      isSoldOut: boolean
       eventGenre: string | null
       showRemainingTickets: boolean
       createdAt: Date
@@ -9080,12 +9282,13 @@ export namespace Prisma {
    */
   export interface Prisma__eventClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    ticketTypes<T extends event$ticketTypesArgs<ExtArgs> = {}>(args?: Subset<T, event$ticketTypesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ticketTypePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     eventArtists<T extends event$eventArtistsArgs<ExtArgs> = {}>(args?: Subset<T, event$eventArtistsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$eventArtistPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    tickets<T extends event$ticketsArgs<ExtArgs> = {}>(args?: Subset<T, event$ticketsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ticketPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     participants<T extends event$participantsArgs<ExtArgs> = {}>(args?: Subset<T, event$participantsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$participantPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    rrppAssignments<T extends event$rrppAssignmentsArgs<ExtArgs> = {}>(args?: Subset<T, event$rrppAssignmentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$rrppAssignmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     payments<T extends event$paymentsArgs<ExtArgs> = {}>(args?: Subset<T, event$paymentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$paymentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    rrppAssignments<T extends event$rrppAssignmentsArgs<ExtArgs> = {}>(args?: Subset<T, event$rrppAssignmentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$rrppAssignmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    tickets<T extends event$ticketsArgs<ExtArgs> = {}>(args?: Subset<T, event$ticketsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ticketPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    ticketTypes<T extends event$ticketTypesArgs<ExtArgs> = {}>(args?: Subset<T, event$ticketTypesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ticketTypePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    guestList<T extends event$guestListArgs<ExtArgs> = {}>(args?: Subset<T, event$guestListArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$guestListPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -9125,6 +9328,7 @@ export namespace Prisma {
     readonly producerId: FieldRef<"event", 'Int'>
     readonly capacityTotal: FieldRef<"event", 'Int'>
     readonly isRsvpAllowed: FieldRef<"event", 'Boolean'>
+    readonly isSoldOut: FieldRef<"event", 'Boolean'>
     readonly eventGenre: FieldRef<"event", 'String'>
     readonly showRemainingTickets: FieldRef<"event", 'Boolean'>
     readonly createdAt: FieldRef<"event", 'DateTime'>
@@ -9516,30 +9720,6 @@ export namespace Prisma {
   }
 
   /**
-   * event.ticketTypes
-   */
-  export type event$ticketTypesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ticketType
-     */
-    select?: ticketTypeSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ticketType
-     */
-    omit?: ticketTypeOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ticketTypeInclude<ExtArgs> | null
-    where?: ticketTypeWhereInput
-    orderBy?: ticketTypeOrderByWithRelationInput | ticketTypeOrderByWithRelationInput[]
-    cursor?: ticketTypeWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: TicketTypeScalarFieldEnum | TicketTypeScalarFieldEnum[]
-  }
-
-  /**
    * event.eventArtists
    */
   export type event$eventArtistsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -9561,30 +9741,6 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: EventArtistScalarFieldEnum | EventArtistScalarFieldEnum[]
-  }
-
-  /**
-   * event.tickets
-   */
-  export type event$ticketsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ticket
-     */
-    select?: ticketSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the ticket
-     */
-    omit?: ticketOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ticketInclude<ExtArgs> | null
-    where?: ticketWhereInput
-    orderBy?: ticketOrderByWithRelationInput | ticketOrderByWithRelationInput[]
-    cursor?: ticketWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: TicketScalarFieldEnum | TicketScalarFieldEnum[]
   }
 
   /**
@@ -9612,6 +9768,30 @@ export namespace Prisma {
   }
 
   /**
+   * event.payments
+   */
+  export type event$paymentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the payment
+     */
+    select?: paymentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the payment
+     */
+    omit?: paymentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: paymentInclude<ExtArgs> | null
+    where?: paymentWhereInput
+    orderBy?: paymentOrderByWithRelationInput | paymentOrderByWithRelationInput[]
+    cursor?: paymentWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: PaymentScalarFieldEnum | PaymentScalarFieldEnum[]
+  }
+
+  /**
    * event.rrppAssignments
    */
   export type event$rrppAssignmentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -9636,27 +9816,75 @@ export namespace Prisma {
   }
 
   /**
-   * event.payments
+   * event.tickets
    */
-  export type event$paymentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type event$ticketsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the payment
+     * Select specific fields to fetch from the ticket
      */
-    select?: paymentSelect<ExtArgs> | null
+    select?: ticketSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the payment
+     * Omit specific fields from the ticket
      */
-    omit?: paymentOmit<ExtArgs> | null
+    omit?: ticketOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: paymentInclude<ExtArgs> | null
-    where?: paymentWhereInput
-    orderBy?: paymentOrderByWithRelationInput | paymentOrderByWithRelationInput[]
-    cursor?: paymentWhereUniqueInput
+    include?: ticketInclude<ExtArgs> | null
+    where?: ticketWhereInput
+    orderBy?: ticketOrderByWithRelationInput | ticketOrderByWithRelationInput[]
+    cursor?: ticketWhereUniqueInput
     take?: number
     skip?: number
-    distinct?: PaymentScalarFieldEnum | PaymentScalarFieldEnum[]
+    distinct?: TicketScalarFieldEnum | TicketScalarFieldEnum[]
+  }
+
+  /**
+   * event.ticketTypes
+   */
+  export type event$ticketTypesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ticketType
+     */
+    select?: ticketTypeSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ticketType
+     */
+    omit?: ticketTypeOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ticketTypeInclude<ExtArgs> | null
+    where?: ticketTypeWhereInput
+    orderBy?: ticketTypeOrderByWithRelationInput | ticketTypeOrderByWithRelationInput[]
+    cursor?: ticketTypeWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: TicketTypeScalarFieldEnum | TicketTypeScalarFieldEnum[]
+  }
+
+  /**
+   * event.guestList
+   */
+  export type event$guestListArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the guestList
+     */
+    select?: guestListSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the guestList
+     */
+    omit?: guestListOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: guestListInclude<ExtArgs> | null
+    where?: guestListWhereInput
+    orderBy?: guestListOrderByWithRelationInput | guestListOrderByWithRelationInput[]
+    cursor?: guestListWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: GuestListScalarFieldEnum | GuestListScalarFieldEnum[]
   }
 
   /**
@@ -12152,8 +12380,8 @@ export namespace Prisma {
     scanExpiration?: boolean
     isVisible?: boolean
     isDisabled?: boolean
-    event?: boolean | eventDefaultArgs<ExtArgs>
     tickets?: boolean | ticketType$ticketsArgs<ExtArgs>
+    event?: boolean | eventDefaultArgs<ExtArgs>
     _count?: boolean | TicketTypeCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["ticketType"]>
 
@@ -12203,8 +12431,8 @@ export namespace Prisma {
 
   export type ticketTypeOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "eventId" | "code" | "label" | "price" | "stockMax" | "stockCurrent" | "userMaxPerType" | "scanExpiration" | "isVisible" | "isDisabled", ExtArgs["result"]["ticketType"]>
   export type ticketTypeInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    event?: boolean | eventDefaultArgs<ExtArgs>
     tickets?: boolean | ticketType$ticketsArgs<ExtArgs>
+    event?: boolean | eventDefaultArgs<ExtArgs>
     _count?: boolean | TicketTypeCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type ticketTypeIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -12217,8 +12445,8 @@ export namespace Prisma {
   export type $ticketTypePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "ticketType"
     objects: {
-      event: Prisma.$eventPayload<ExtArgs>
       tickets: Prisma.$ticketPayload<ExtArgs>[]
+      event: Prisma.$eventPayload<ExtArgs>
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
@@ -12626,8 +12854,8 @@ export namespace Prisma {
    */
   export interface Prisma__ticketTypeClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    event<T extends eventDefaultArgs<ExtArgs> = {}>(args?: Subset<T, eventDefaultArgs<ExtArgs>>): Prisma__eventClient<$Result.GetResult<Prisma.$eventPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     tickets<T extends ticketType$ticketsArgs<ExtArgs> = {}>(args?: Subset<T, ticketType$ticketsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ticketPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    event<T extends eventDefaultArgs<ExtArgs> = {}>(args?: Subset<T, eventDefaultArgs<ExtArgs>>): Prisma__eventClient<$Result.GetResult<Prisma.$eventPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -13358,9 +13586,9 @@ export namespace Prisma {
     createdAt?: boolean
     event?: boolean | eventDefaultArgs<ExtArgs>
     owner?: boolean | userDefaultArgs<ExtArgs>
-    type?: boolean | ticketTypeDefaultArgs<ExtArgs>
-    transferredFrom?: boolean | ticket$transferredFromArgs<ExtArgs>
     payment?: boolean | ticket$paymentArgs<ExtArgs>
+    transferredFrom?: boolean | ticket$transferredFromArgs<ExtArgs>
+    type?: boolean | ticketTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["ticket"]>
 
   export type ticketSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -13376,9 +13604,9 @@ export namespace Prisma {
     createdAt?: boolean
     event?: boolean | eventDefaultArgs<ExtArgs>
     owner?: boolean | userDefaultArgs<ExtArgs>
-    type?: boolean | ticketTypeDefaultArgs<ExtArgs>
-    transferredFrom?: boolean | ticket$transferredFromArgs<ExtArgs>
     payment?: boolean | ticket$paymentArgs<ExtArgs>
+    transferredFrom?: boolean | ticket$transferredFromArgs<ExtArgs>
+    type?: boolean | ticketTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["ticket"]>
 
   export type ticketSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -13394,9 +13622,9 @@ export namespace Prisma {
     createdAt?: boolean
     event?: boolean | eventDefaultArgs<ExtArgs>
     owner?: boolean | userDefaultArgs<ExtArgs>
-    type?: boolean | ticketTypeDefaultArgs<ExtArgs>
-    transferredFrom?: boolean | ticket$transferredFromArgs<ExtArgs>
     payment?: boolean | ticket$paymentArgs<ExtArgs>
+    transferredFrom?: boolean | ticket$transferredFromArgs<ExtArgs>
+    type?: boolean | ticketTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["ticket"]>
 
   export type ticketSelectScalar = {
@@ -13416,23 +13644,23 @@ export namespace Prisma {
   export type ticketInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     event?: boolean | eventDefaultArgs<ExtArgs>
     owner?: boolean | userDefaultArgs<ExtArgs>
-    type?: boolean | ticketTypeDefaultArgs<ExtArgs>
-    transferredFrom?: boolean | ticket$transferredFromArgs<ExtArgs>
     payment?: boolean | ticket$paymentArgs<ExtArgs>
+    transferredFrom?: boolean | ticket$transferredFromArgs<ExtArgs>
+    type?: boolean | ticketTypeDefaultArgs<ExtArgs>
   }
   export type ticketIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     event?: boolean | eventDefaultArgs<ExtArgs>
     owner?: boolean | userDefaultArgs<ExtArgs>
-    type?: boolean | ticketTypeDefaultArgs<ExtArgs>
-    transferredFrom?: boolean | ticket$transferredFromArgs<ExtArgs>
     payment?: boolean | ticket$paymentArgs<ExtArgs>
+    transferredFrom?: boolean | ticket$transferredFromArgs<ExtArgs>
+    type?: boolean | ticketTypeDefaultArgs<ExtArgs>
   }
   export type ticketIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     event?: boolean | eventDefaultArgs<ExtArgs>
     owner?: boolean | userDefaultArgs<ExtArgs>
-    type?: boolean | ticketTypeDefaultArgs<ExtArgs>
-    transferredFrom?: boolean | ticket$transferredFromArgs<ExtArgs>
     payment?: boolean | ticket$paymentArgs<ExtArgs>
+    transferredFrom?: boolean | ticket$transferredFromArgs<ExtArgs>
+    type?: boolean | ticketTypeDefaultArgs<ExtArgs>
   }
 
   export type $ticketPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -13440,9 +13668,9 @@ export namespace Prisma {
     objects: {
       event: Prisma.$eventPayload<ExtArgs>
       owner: Prisma.$userPayload<ExtArgs>
-      type: Prisma.$ticketTypePayload<ExtArgs>
-      transferredFrom: Prisma.$userPayload<ExtArgs> | null
       payment: Prisma.$paymentPayload<ExtArgs> | null
+      transferredFrom: Prisma.$userPayload<ExtArgs> | null
+      type: Prisma.$ticketTypePayload<ExtArgs>
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
@@ -13851,9 +14079,9 @@ export namespace Prisma {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     event<T extends eventDefaultArgs<ExtArgs> = {}>(args?: Subset<T, eventDefaultArgs<ExtArgs>>): Prisma__eventClient<$Result.GetResult<Prisma.$eventPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     owner<T extends userDefaultArgs<ExtArgs> = {}>(args?: Subset<T, userDefaultArgs<ExtArgs>>): Prisma__userClient<$Result.GetResult<Prisma.$userPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-    type<T extends ticketTypeDefaultArgs<ExtArgs> = {}>(args?: Subset<T, ticketTypeDefaultArgs<ExtArgs>>): Prisma__ticketTypeClient<$Result.GetResult<Prisma.$ticketTypePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-    transferredFrom<T extends ticket$transferredFromArgs<ExtArgs> = {}>(args?: Subset<T, ticket$transferredFromArgs<ExtArgs>>): Prisma__userClient<$Result.GetResult<Prisma.$userPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     payment<T extends ticket$paymentArgs<ExtArgs> = {}>(args?: Subset<T, ticket$paymentArgs<ExtArgs>>): Prisma__paymentClient<$Result.GetResult<Prisma.$paymentPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    transferredFrom<T extends ticket$transferredFromArgs<ExtArgs> = {}>(args?: Subset<T, ticket$transferredFromArgs<ExtArgs>>): Prisma__userClient<$Result.GetResult<Prisma.$userPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    type<T extends ticketTypeDefaultArgs<ExtArgs> = {}>(args?: Subset<T, ticketTypeDefaultArgs<ExtArgs>>): Prisma__ticketTypeClient<$Result.GetResult<Prisma.$ticketTypePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -14289,25 +14517,6 @@ export namespace Prisma {
   }
 
   /**
-   * ticket.transferredFrom
-   */
-  export type ticket$transferredFromArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the user
-     */
-    select?: userSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the user
-     */
-    omit?: userOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: userInclude<ExtArgs> | null
-    where?: userWhereInput
-  }
-
-  /**
    * ticket.payment
    */
   export type ticket$paymentArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -14324,6 +14533,25 @@ export namespace Prisma {
      */
     include?: paymentInclude<ExtArgs> | null
     where?: paymentWhereInput
+  }
+
+  /**
+   * ticket.transferredFrom
+   */
+  export type ticket$transferredFromArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the user
+     */
+    select?: userSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the user
+     */
+    omit?: userOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: userInclude<ExtArgs> | null
+    where?: userWhereInput
   }
 
   /**
@@ -14543,8 +14771,8 @@ export namespace Prisma {
     eventId?: boolean
     commissionRate?: boolean
     freesGranted?: boolean
-    rrppUser?: boolean | userDefaultArgs<ExtArgs>
     event?: boolean | eventDefaultArgs<ExtArgs>
+    rrppUser?: boolean | userDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["rrppAssignment"]>
 
   export type rrppAssignmentSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -14552,8 +14780,8 @@ export namespace Prisma {
     eventId?: boolean
     commissionRate?: boolean
     freesGranted?: boolean
-    rrppUser?: boolean | userDefaultArgs<ExtArgs>
     event?: boolean | eventDefaultArgs<ExtArgs>
+    rrppUser?: boolean | userDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["rrppAssignment"]>
 
   export type rrppAssignmentSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -14561,8 +14789,8 @@ export namespace Prisma {
     eventId?: boolean
     commissionRate?: boolean
     freesGranted?: boolean
-    rrppUser?: boolean | userDefaultArgs<ExtArgs>
     event?: boolean | eventDefaultArgs<ExtArgs>
+    rrppUser?: boolean | userDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["rrppAssignment"]>
 
   export type rrppAssignmentSelectScalar = {
@@ -14574,23 +14802,23 @@ export namespace Prisma {
 
   export type rrppAssignmentOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"rrppUserId" | "eventId" | "commissionRate" | "freesGranted", ExtArgs["result"]["rrppAssignment"]>
   export type rrppAssignmentInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    rrppUser?: boolean | userDefaultArgs<ExtArgs>
     event?: boolean | eventDefaultArgs<ExtArgs>
+    rrppUser?: boolean | userDefaultArgs<ExtArgs>
   }
   export type rrppAssignmentIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    rrppUser?: boolean | userDefaultArgs<ExtArgs>
     event?: boolean | eventDefaultArgs<ExtArgs>
+    rrppUser?: boolean | userDefaultArgs<ExtArgs>
   }
   export type rrppAssignmentIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    rrppUser?: boolean | userDefaultArgs<ExtArgs>
     event?: boolean | eventDefaultArgs<ExtArgs>
+    rrppUser?: boolean | userDefaultArgs<ExtArgs>
   }
 
   export type $rrppAssignmentPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "rrppAssignment"
     objects: {
-      rrppUser: Prisma.$userPayload<ExtArgs>
       event: Prisma.$eventPayload<ExtArgs>
+      rrppUser: Prisma.$userPayload<ExtArgs>
     }
     scalars: $Extensions.GetPayloadResult<{
       rrppUserId: string
@@ -14991,8 +15219,8 @@ export namespace Prisma {
    */
   export interface Prisma__rrppAssignmentClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    rrppUser<T extends userDefaultArgs<ExtArgs> = {}>(args?: Subset<T, userDefaultArgs<ExtArgs>>): Prisma__userClient<$Result.GetResult<Prisma.$userPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     event<T extends eventDefaultArgs<ExtArgs> = {}>(args?: Subset<T, eventDefaultArgs<ExtArgs>>): Prisma__eventClient<$Result.GetResult<Prisma.$eventPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    rrppUser<T extends userDefaultArgs<ExtArgs> = {}>(args?: Subset<T, userDefaultArgs<ExtArgs>>): Prisma__userClient<$Result.GetResult<Prisma.$userPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -15630,8 +15858,8 @@ export namespace Prisma {
     eventId?: boolean
     viaRsvp?: boolean
     qrCode?: boolean
-    user?: boolean | userDefaultArgs<ExtArgs>
     event?: boolean | eventDefaultArgs<ExtArgs>
+    user?: boolean | userDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["participant"]>
 
   export type participantSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -15639,8 +15867,8 @@ export namespace Prisma {
     eventId?: boolean
     viaRsvp?: boolean
     qrCode?: boolean
-    user?: boolean | userDefaultArgs<ExtArgs>
     event?: boolean | eventDefaultArgs<ExtArgs>
+    user?: boolean | userDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["participant"]>
 
   export type participantSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -15648,8 +15876,8 @@ export namespace Prisma {
     eventId?: boolean
     viaRsvp?: boolean
     qrCode?: boolean
-    user?: boolean | userDefaultArgs<ExtArgs>
     event?: boolean | eventDefaultArgs<ExtArgs>
+    user?: boolean | userDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["participant"]>
 
   export type participantSelectScalar = {
@@ -15661,23 +15889,23 @@ export namespace Prisma {
 
   export type participantOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"userId" | "eventId" | "viaRsvp" | "qrCode", ExtArgs["result"]["participant"]>
   export type participantInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    user?: boolean | userDefaultArgs<ExtArgs>
     event?: boolean | eventDefaultArgs<ExtArgs>
+    user?: boolean | userDefaultArgs<ExtArgs>
   }
   export type participantIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    user?: boolean | userDefaultArgs<ExtArgs>
     event?: boolean | eventDefaultArgs<ExtArgs>
+    user?: boolean | userDefaultArgs<ExtArgs>
   }
   export type participantIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    user?: boolean | userDefaultArgs<ExtArgs>
     event?: boolean | eventDefaultArgs<ExtArgs>
+    user?: boolean | userDefaultArgs<ExtArgs>
   }
 
   export type $participantPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "participant"
     objects: {
-      user: Prisma.$userPayload<ExtArgs>
       event: Prisma.$eventPayload<ExtArgs>
+      user: Prisma.$userPayload<ExtArgs>
     }
     scalars: $Extensions.GetPayloadResult<{
       userId: string
@@ -16078,8 +16306,8 @@ export namespace Prisma {
    */
   export interface Prisma__participantClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    user<T extends userDefaultArgs<ExtArgs> = {}>(args?: Subset<T, userDefaultArgs<ExtArgs>>): Prisma__userClient<$Result.GetResult<Prisma.$userPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     event<T extends eventDefaultArgs<ExtArgs> = {}>(args?: Subset<T, eventDefaultArgs<ExtArgs>>): Prisma__eventClient<$Result.GetResult<Prisma.$eventPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    user<T extends userDefaultArgs<ExtArgs> = {}>(args?: Subset<T, userDefaultArgs<ExtArgs>>): Prisma__userClient<$Result.GetResult<Prisma.$userPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -17840,8 +18068,8 @@ export namespace Prisma {
     message?: boolean
     timestamp?: boolean
     readStatus?: boolean
-    sender?: boolean | userDefaultArgs<ExtArgs>
     receiver?: boolean | userDefaultArgs<ExtArgs>
+    sender?: boolean | userDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["message"]>
 
   export type messageSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -17851,8 +18079,8 @@ export namespace Prisma {
     message?: boolean
     timestamp?: boolean
     readStatus?: boolean
-    sender?: boolean | userDefaultArgs<ExtArgs>
     receiver?: boolean | userDefaultArgs<ExtArgs>
+    sender?: boolean | userDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["message"]>
 
   export type messageSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -17862,8 +18090,8 @@ export namespace Prisma {
     message?: boolean
     timestamp?: boolean
     readStatus?: boolean
-    sender?: boolean | userDefaultArgs<ExtArgs>
     receiver?: boolean | userDefaultArgs<ExtArgs>
+    sender?: boolean | userDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["message"]>
 
   export type messageSelectScalar = {
@@ -17877,23 +18105,23 @@ export namespace Prisma {
 
   export type messageOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "senderId" | "receiverId" | "message" | "timestamp" | "readStatus", ExtArgs["result"]["message"]>
   export type messageInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    sender?: boolean | userDefaultArgs<ExtArgs>
     receiver?: boolean | userDefaultArgs<ExtArgs>
+    sender?: boolean | userDefaultArgs<ExtArgs>
   }
   export type messageIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    sender?: boolean | userDefaultArgs<ExtArgs>
     receiver?: boolean | userDefaultArgs<ExtArgs>
+    sender?: boolean | userDefaultArgs<ExtArgs>
   }
   export type messageIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    sender?: boolean | userDefaultArgs<ExtArgs>
     receiver?: boolean | userDefaultArgs<ExtArgs>
+    sender?: boolean | userDefaultArgs<ExtArgs>
   }
 
   export type $messagePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "message"
     objects: {
-      sender: Prisma.$userPayload<ExtArgs>
       receiver: Prisma.$userPayload<ExtArgs>
+      sender: Prisma.$userPayload<ExtArgs>
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
@@ -18296,8 +18524,8 @@ export namespace Prisma {
    */
   export interface Prisma__messageClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    sender<T extends userDefaultArgs<ExtArgs> = {}>(args?: Subset<T, userDefaultArgs<ExtArgs>>): Prisma__userClient<$Result.GetResult<Prisma.$userPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     receiver<T extends userDefaultArgs<ExtArgs> = {}>(args?: Subset<T, userDefaultArgs<ExtArgs>>): Prisma__userClient<$Result.GetResult<Prisma.$userPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    sender<T extends userDefaultArgs<ExtArgs> = {}>(args?: Subset<T, userDefaultArgs<ExtArgs>>): Prisma__userClient<$Result.GetResult<Prisma.$userPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -18748,6 +18976,1267 @@ export namespace Prisma {
 
 
   /**
+   * Model guestList
+   */
+
+  export type AggregateGuestList = {
+    _count: GuestListCountAggregateOutputType | null
+    _avg: GuestListAvgAggregateOutputType | null
+    _sum: GuestListSumAggregateOutputType | null
+    _min: GuestListMinAggregateOutputType | null
+    _max: GuestListMaxAggregateOutputType | null
+  }
+
+  export type GuestListAvgAggregateOutputType = {
+    id: number | null
+    eventId: number | null
+  }
+
+  export type GuestListSumAggregateOutputType = {
+    id: number | null
+    eventId: number | null
+  }
+
+  export type GuestListMinAggregateOutputType = {
+    id: number | null
+    eventId: number | null
+    fullName: string | null
+    normalizedName: string | null
+    email: string | null
+    age: string | null
+    invitedBy: string | null
+    gender: string | null
+    status: $Enums.GuestStatus | null
+    qrCode: string | null
+    checkedInAt: Date | null
+    checkedInBy: string | null
+    importedAt: Date | null
+    importedBy: string | null
+    timestamp: string | null
+  }
+
+  export type GuestListMaxAggregateOutputType = {
+    id: number | null
+    eventId: number | null
+    fullName: string | null
+    normalizedName: string | null
+    email: string | null
+    age: string | null
+    invitedBy: string | null
+    gender: string | null
+    status: $Enums.GuestStatus | null
+    qrCode: string | null
+    checkedInAt: Date | null
+    checkedInBy: string | null
+    importedAt: Date | null
+    importedBy: string | null
+    timestamp: string | null
+  }
+
+  export type GuestListCountAggregateOutputType = {
+    id: number
+    eventId: number
+    fullName: number
+    normalizedName: number
+    email: number
+    age: number
+    invitedBy: number
+    gender: number
+    status: number
+    qrCode: number
+    checkedInAt: number
+    checkedInBy: number
+    importedAt: number
+    importedBy: number
+    timestamp: number
+    _all: number
+  }
+
+
+  export type GuestListAvgAggregateInputType = {
+    id?: true
+    eventId?: true
+  }
+
+  export type GuestListSumAggregateInputType = {
+    id?: true
+    eventId?: true
+  }
+
+  export type GuestListMinAggregateInputType = {
+    id?: true
+    eventId?: true
+    fullName?: true
+    normalizedName?: true
+    email?: true
+    age?: true
+    invitedBy?: true
+    gender?: true
+    status?: true
+    qrCode?: true
+    checkedInAt?: true
+    checkedInBy?: true
+    importedAt?: true
+    importedBy?: true
+    timestamp?: true
+  }
+
+  export type GuestListMaxAggregateInputType = {
+    id?: true
+    eventId?: true
+    fullName?: true
+    normalizedName?: true
+    email?: true
+    age?: true
+    invitedBy?: true
+    gender?: true
+    status?: true
+    qrCode?: true
+    checkedInAt?: true
+    checkedInBy?: true
+    importedAt?: true
+    importedBy?: true
+    timestamp?: true
+  }
+
+  export type GuestListCountAggregateInputType = {
+    id?: true
+    eventId?: true
+    fullName?: true
+    normalizedName?: true
+    email?: true
+    age?: true
+    invitedBy?: true
+    gender?: true
+    status?: true
+    qrCode?: true
+    checkedInAt?: true
+    checkedInBy?: true
+    importedAt?: true
+    importedBy?: true
+    timestamp?: true
+    _all?: true
+  }
+
+  export type GuestListAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which guestList to aggregate.
+     */
+    where?: guestListWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of guestLists to fetch.
+     */
+    orderBy?: guestListOrderByWithRelationInput | guestListOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: guestListWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` guestLists from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` guestLists.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned guestLists
+    **/
+    _count?: true | GuestListCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: GuestListAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: GuestListSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: GuestListMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: GuestListMaxAggregateInputType
+  }
+
+  export type GetGuestListAggregateType<T extends GuestListAggregateArgs> = {
+        [P in keyof T & keyof AggregateGuestList]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateGuestList[P]>
+      : GetScalarType<T[P], AggregateGuestList[P]>
+  }
+
+
+
+
+  export type guestListGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: guestListWhereInput
+    orderBy?: guestListOrderByWithAggregationInput | guestListOrderByWithAggregationInput[]
+    by: GuestListScalarFieldEnum[] | GuestListScalarFieldEnum
+    having?: guestListScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: GuestListCountAggregateInputType | true
+    _avg?: GuestListAvgAggregateInputType
+    _sum?: GuestListSumAggregateInputType
+    _min?: GuestListMinAggregateInputType
+    _max?: GuestListMaxAggregateInputType
+  }
+
+  export type GuestListGroupByOutputType = {
+    id: number
+    eventId: number
+    fullName: string
+    normalizedName: string
+    email: string
+    age: string | null
+    invitedBy: string | null
+    gender: string | null
+    status: $Enums.GuestStatus
+    qrCode: string
+    checkedInAt: Date | null
+    checkedInBy: string | null
+    importedAt: Date
+    importedBy: string
+    timestamp: string | null
+    _count: GuestListCountAggregateOutputType | null
+    _avg: GuestListAvgAggregateOutputType | null
+    _sum: GuestListSumAggregateOutputType | null
+    _min: GuestListMinAggregateOutputType | null
+    _max: GuestListMaxAggregateOutputType | null
+  }
+
+  type GetGuestListGroupByPayload<T extends guestListGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<GuestListGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof GuestListGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], GuestListGroupByOutputType[P]>
+            : GetScalarType<T[P], GuestListGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type guestListSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    eventId?: boolean
+    fullName?: boolean
+    normalizedName?: boolean
+    email?: boolean
+    age?: boolean
+    invitedBy?: boolean
+    gender?: boolean
+    status?: boolean
+    qrCode?: boolean
+    checkedInAt?: boolean
+    checkedInBy?: boolean
+    importedAt?: boolean
+    importedBy?: boolean
+    timestamp?: boolean
+    event?: boolean | eventDefaultArgs<ExtArgs>
+    checkedInByUser?: boolean | guestList$checkedInByUserArgs<ExtArgs>
+    importedByUser?: boolean | userDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["guestList"]>
+
+  export type guestListSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    eventId?: boolean
+    fullName?: boolean
+    normalizedName?: boolean
+    email?: boolean
+    age?: boolean
+    invitedBy?: boolean
+    gender?: boolean
+    status?: boolean
+    qrCode?: boolean
+    checkedInAt?: boolean
+    checkedInBy?: boolean
+    importedAt?: boolean
+    importedBy?: boolean
+    timestamp?: boolean
+    event?: boolean | eventDefaultArgs<ExtArgs>
+    checkedInByUser?: boolean | guestList$checkedInByUserArgs<ExtArgs>
+    importedByUser?: boolean | userDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["guestList"]>
+
+  export type guestListSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    eventId?: boolean
+    fullName?: boolean
+    normalizedName?: boolean
+    email?: boolean
+    age?: boolean
+    invitedBy?: boolean
+    gender?: boolean
+    status?: boolean
+    qrCode?: boolean
+    checkedInAt?: boolean
+    checkedInBy?: boolean
+    importedAt?: boolean
+    importedBy?: boolean
+    timestamp?: boolean
+    event?: boolean | eventDefaultArgs<ExtArgs>
+    checkedInByUser?: boolean | guestList$checkedInByUserArgs<ExtArgs>
+    importedByUser?: boolean | userDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["guestList"]>
+
+  export type guestListSelectScalar = {
+    id?: boolean
+    eventId?: boolean
+    fullName?: boolean
+    normalizedName?: boolean
+    email?: boolean
+    age?: boolean
+    invitedBy?: boolean
+    gender?: boolean
+    status?: boolean
+    qrCode?: boolean
+    checkedInAt?: boolean
+    checkedInBy?: boolean
+    importedAt?: boolean
+    importedBy?: boolean
+    timestamp?: boolean
+  }
+
+  export type guestListOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "eventId" | "fullName" | "normalizedName" | "email" | "age" | "invitedBy" | "gender" | "status" | "qrCode" | "checkedInAt" | "checkedInBy" | "importedAt" | "importedBy" | "timestamp", ExtArgs["result"]["guestList"]>
+  export type guestListInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    event?: boolean | eventDefaultArgs<ExtArgs>
+    checkedInByUser?: boolean | guestList$checkedInByUserArgs<ExtArgs>
+    importedByUser?: boolean | userDefaultArgs<ExtArgs>
+  }
+  export type guestListIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    event?: boolean | eventDefaultArgs<ExtArgs>
+    checkedInByUser?: boolean | guestList$checkedInByUserArgs<ExtArgs>
+    importedByUser?: boolean | userDefaultArgs<ExtArgs>
+  }
+  export type guestListIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    event?: boolean | eventDefaultArgs<ExtArgs>
+    checkedInByUser?: boolean | guestList$checkedInByUserArgs<ExtArgs>
+    importedByUser?: boolean | userDefaultArgs<ExtArgs>
+  }
+
+  export type $guestListPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "guestList"
+    objects: {
+      event: Prisma.$eventPayload<ExtArgs>
+      checkedInByUser: Prisma.$userPayload<ExtArgs> | null
+      importedByUser: Prisma.$userPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      eventId: number
+      fullName: string
+      normalizedName: string
+      email: string
+      age: string | null
+      invitedBy: string | null
+      gender: string | null
+      status: $Enums.GuestStatus
+      qrCode: string
+      checkedInAt: Date | null
+      checkedInBy: string | null
+      importedAt: Date
+      importedBy: string
+      timestamp: string | null
+    }, ExtArgs["result"]["guestList"]>
+    composites: {}
+  }
+
+  type guestListGetPayload<S extends boolean | null | undefined | guestListDefaultArgs> = $Result.GetResult<Prisma.$guestListPayload, S>
+
+  type guestListCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<guestListFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: GuestListCountAggregateInputType | true
+    }
+
+  export interface guestListDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['guestList'], meta: { name: 'guestList' } }
+    /**
+     * Find zero or one GuestList that matches the filter.
+     * @param {guestListFindUniqueArgs} args - Arguments to find a GuestList
+     * @example
+     * // Get one GuestList
+     * const guestList = await prisma.guestList.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends guestListFindUniqueArgs>(args: SelectSubset<T, guestListFindUniqueArgs<ExtArgs>>): Prisma__guestListClient<$Result.GetResult<Prisma.$guestListPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one GuestList that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {guestListFindUniqueOrThrowArgs} args - Arguments to find a GuestList
+     * @example
+     * // Get one GuestList
+     * const guestList = await prisma.guestList.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends guestListFindUniqueOrThrowArgs>(args: SelectSubset<T, guestListFindUniqueOrThrowArgs<ExtArgs>>): Prisma__guestListClient<$Result.GetResult<Prisma.$guestListPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first GuestList that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {guestListFindFirstArgs} args - Arguments to find a GuestList
+     * @example
+     * // Get one GuestList
+     * const guestList = await prisma.guestList.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends guestListFindFirstArgs>(args?: SelectSubset<T, guestListFindFirstArgs<ExtArgs>>): Prisma__guestListClient<$Result.GetResult<Prisma.$guestListPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first GuestList that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {guestListFindFirstOrThrowArgs} args - Arguments to find a GuestList
+     * @example
+     * // Get one GuestList
+     * const guestList = await prisma.guestList.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends guestListFindFirstOrThrowArgs>(args?: SelectSubset<T, guestListFindFirstOrThrowArgs<ExtArgs>>): Prisma__guestListClient<$Result.GetResult<Prisma.$guestListPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more GuestLists that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {guestListFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all GuestLists
+     * const guestLists = await prisma.guestList.findMany()
+     * 
+     * // Get first 10 GuestLists
+     * const guestLists = await prisma.guestList.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const guestListWithIdOnly = await prisma.guestList.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends guestListFindManyArgs>(args?: SelectSubset<T, guestListFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$guestListPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a GuestList.
+     * @param {guestListCreateArgs} args - Arguments to create a GuestList.
+     * @example
+     * // Create one GuestList
+     * const GuestList = await prisma.guestList.create({
+     *   data: {
+     *     // ... data to create a GuestList
+     *   }
+     * })
+     * 
+     */
+    create<T extends guestListCreateArgs>(args: SelectSubset<T, guestListCreateArgs<ExtArgs>>): Prisma__guestListClient<$Result.GetResult<Prisma.$guestListPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many GuestLists.
+     * @param {guestListCreateManyArgs} args - Arguments to create many GuestLists.
+     * @example
+     * // Create many GuestLists
+     * const guestList = await prisma.guestList.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends guestListCreateManyArgs>(args?: SelectSubset<T, guestListCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many GuestLists and returns the data saved in the database.
+     * @param {guestListCreateManyAndReturnArgs} args - Arguments to create many GuestLists.
+     * @example
+     * // Create many GuestLists
+     * const guestList = await prisma.guestList.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many GuestLists and only return the `id`
+     * const guestListWithIdOnly = await prisma.guestList.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends guestListCreateManyAndReturnArgs>(args?: SelectSubset<T, guestListCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$guestListPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a GuestList.
+     * @param {guestListDeleteArgs} args - Arguments to delete one GuestList.
+     * @example
+     * // Delete one GuestList
+     * const GuestList = await prisma.guestList.delete({
+     *   where: {
+     *     // ... filter to delete one GuestList
+     *   }
+     * })
+     * 
+     */
+    delete<T extends guestListDeleteArgs>(args: SelectSubset<T, guestListDeleteArgs<ExtArgs>>): Prisma__guestListClient<$Result.GetResult<Prisma.$guestListPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one GuestList.
+     * @param {guestListUpdateArgs} args - Arguments to update one GuestList.
+     * @example
+     * // Update one GuestList
+     * const guestList = await prisma.guestList.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends guestListUpdateArgs>(args: SelectSubset<T, guestListUpdateArgs<ExtArgs>>): Prisma__guestListClient<$Result.GetResult<Prisma.$guestListPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more GuestLists.
+     * @param {guestListDeleteManyArgs} args - Arguments to filter GuestLists to delete.
+     * @example
+     * // Delete a few GuestLists
+     * const { count } = await prisma.guestList.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends guestListDeleteManyArgs>(args?: SelectSubset<T, guestListDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more GuestLists.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {guestListUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many GuestLists
+     * const guestList = await prisma.guestList.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends guestListUpdateManyArgs>(args: SelectSubset<T, guestListUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more GuestLists and returns the data updated in the database.
+     * @param {guestListUpdateManyAndReturnArgs} args - Arguments to update many GuestLists.
+     * @example
+     * // Update many GuestLists
+     * const guestList = await prisma.guestList.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more GuestLists and only return the `id`
+     * const guestListWithIdOnly = await prisma.guestList.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends guestListUpdateManyAndReturnArgs>(args: SelectSubset<T, guestListUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$guestListPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one GuestList.
+     * @param {guestListUpsertArgs} args - Arguments to update or create a GuestList.
+     * @example
+     * // Update or create a GuestList
+     * const guestList = await prisma.guestList.upsert({
+     *   create: {
+     *     // ... data to create a GuestList
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the GuestList we want to update
+     *   }
+     * })
+     */
+    upsert<T extends guestListUpsertArgs>(args: SelectSubset<T, guestListUpsertArgs<ExtArgs>>): Prisma__guestListClient<$Result.GetResult<Prisma.$guestListPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of GuestLists.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {guestListCountArgs} args - Arguments to filter GuestLists to count.
+     * @example
+     * // Count the number of GuestLists
+     * const count = await prisma.guestList.count({
+     *   where: {
+     *     // ... the filter for the GuestLists we want to count
+     *   }
+     * })
+    **/
+    count<T extends guestListCountArgs>(
+      args?: Subset<T, guestListCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], GuestListCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a GuestList.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GuestListAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends GuestListAggregateArgs>(args: Subset<T, GuestListAggregateArgs>): Prisma.PrismaPromise<GetGuestListAggregateType<T>>
+
+    /**
+     * Group by GuestList.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {guestListGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends guestListGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: guestListGroupByArgs['orderBy'] }
+        : { orderBy?: guestListGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, guestListGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetGuestListGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the guestList model
+   */
+  readonly fields: guestListFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for guestList.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__guestListClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    event<T extends eventDefaultArgs<ExtArgs> = {}>(args?: Subset<T, eventDefaultArgs<ExtArgs>>): Prisma__eventClient<$Result.GetResult<Prisma.$eventPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    checkedInByUser<T extends guestList$checkedInByUserArgs<ExtArgs> = {}>(args?: Subset<T, guestList$checkedInByUserArgs<ExtArgs>>): Prisma__userClient<$Result.GetResult<Prisma.$userPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    importedByUser<T extends userDefaultArgs<ExtArgs> = {}>(args?: Subset<T, userDefaultArgs<ExtArgs>>): Prisma__userClient<$Result.GetResult<Prisma.$userPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the guestList model
+   */
+  interface guestListFieldRefs {
+    readonly id: FieldRef<"guestList", 'Int'>
+    readonly eventId: FieldRef<"guestList", 'Int'>
+    readonly fullName: FieldRef<"guestList", 'String'>
+    readonly normalizedName: FieldRef<"guestList", 'String'>
+    readonly email: FieldRef<"guestList", 'String'>
+    readonly age: FieldRef<"guestList", 'String'>
+    readonly invitedBy: FieldRef<"guestList", 'String'>
+    readonly gender: FieldRef<"guestList", 'String'>
+    readonly status: FieldRef<"guestList", 'GuestStatus'>
+    readonly qrCode: FieldRef<"guestList", 'String'>
+    readonly checkedInAt: FieldRef<"guestList", 'DateTime'>
+    readonly checkedInBy: FieldRef<"guestList", 'String'>
+    readonly importedAt: FieldRef<"guestList", 'DateTime'>
+    readonly importedBy: FieldRef<"guestList", 'String'>
+    readonly timestamp: FieldRef<"guestList", 'String'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * guestList findUnique
+   */
+  export type guestListFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the guestList
+     */
+    select?: guestListSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the guestList
+     */
+    omit?: guestListOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: guestListInclude<ExtArgs> | null
+    /**
+     * Filter, which guestList to fetch.
+     */
+    where: guestListWhereUniqueInput
+  }
+
+  /**
+   * guestList findUniqueOrThrow
+   */
+  export type guestListFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the guestList
+     */
+    select?: guestListSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the guestList
+     */
+    omit?: guestListOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: guestListInclude<ExtArgs> | null
+    /**
+     * Filter, which guestList to fetch.
+     */
+    where: guestListWhereUniqueInput
+  }
+
+  /**
+   * guestList findFirst
+   */
+  export type guestListFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the guestList
+     */
+    select?: guestListSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the guestList
+     */
+    omit?: guestListOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: guestListInclude<ExtArgs> | null
+    /**
+     * Filter, which guestList to fetch.
+     */
+    where?: guestListWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of guestLists to fetch.
+     */
+    orderBy?: guestListOrderByWithRelationInput | guestListOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for guestLists.
+     */
+    cursor?: guestListWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` guestLists from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` guestLists.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of guestLists.
+     */
+    distinct?: GuestListScalarFieldEnum | GuestListScalarFieldEnum[]
+  }
+
+  /**
+   * guestList findFirstOrThrow
+   */
+  export type guestListFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the guestList
+     */
+    select?: guestListSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the guestList
+     */
+    omit?: guestListOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: guestListInclude<ExtArgs> | null
+    /**
+     * Filter, which guestList to fetch.
+     */
+    where?: guestListWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of guestLists to fetch.
+     */
+    orderBy?: guestListOrderByWithRelationInput | guestListOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for guestLists.
+     */
+    cursor?: guestListWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` guestLists from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` guestLists.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of guestLists.
+     */
+    distinct?: GuestListScalarFieldEnum | GuestListScalarFieldEnum[]
+  }
+
+  /**
+   * guestList findMany
+   */
+  export type guestListFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the guestList
+     */
+    select?: guestListSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the guestList
+     */
+    omit?: guestListOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: guestListInclude<ExtArgs> | null
+    /**
+     * Filter, which guestLists to fetch.
+     */
+    where?: guestListWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of guestLists to fetch.
+     */
+    orderBy?: guestListOrderByWithRelationInput | guestListOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing guestLists.
+     */
+    cursor?: guestListWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` guestLists from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` guestLists.
+     */
+    skip?: number
+    distinct?: GuestListScalarFieldEnum | GuestListScalarFieldEnum[]
+  }
+
+  /**
+   * guestList create
+   */
+  export type guestListCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the guestList
+     */
+    select?: guestListSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the guestList
+     */
+    omit?: guestListOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: guestListInclude<ExtArgs> | null
+    /**
+     * The data needed to create a guestList.
+     */
+    data: XOR<guestListCreateInput, guestListUncheckedCreateInput>
+  }
+
+  /**
+   * guestList createMany
+   */
+  export type guestListCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many guestLists.
+     */
+    data: guestListCreateManyInput | guestListCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * guestList createManyAndReturn
+   */
+  export type guestListCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the guestList
+     */
+    select?: guestListSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the guestList
+     */
+    omit?: guestListOmit<ExtArgs> | null
+    /**
+     * The data used to create many guestLists.
+     */
+    data: guestListCreateManyInput | guestListCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: guestListIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * guestList update
+   */
+  export type guestListUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the guestList
+     */
+    select?: guestListSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the guestList
+     */
+    omit?: guestListOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: guestListInclude<ExtArgs> | null
+    /**
+     * The data needed to update a guestList.
+     */
+    data: XOR<guestListUpdateInput, guestListUncheckedUpdateInput>
+    /**
+     * Choose, which guestList to update.
+     */
+    where: guestListWhereUniqueInput
+  }
+
+  /**
+   * guestList updateMany
+   */
+  export type guestListUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update guestLists.
+     */
+    data: XOR<guestListUpdateManyMutationInput, guestListUncheckedUpdateManyInput>
+    /**
+     * Filter which guestLists to update
+     */
+    where?: guestListWhereInput
+    /**
+     * Limit how many guestLists to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * guestList updateManyAndReturn
+   */
+  export type guestListUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the guestList
+     */
+    select?: guestListSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the guestList
+     */
+    omit?: guestListOmit<ExtArgs> | null
+    /**
+     * The data used to update guestLists.
+     */
+    data: XOR<guestListUpdateManyMutationInput, guestListUncheckedUpdateManyInput>
+    /**
+     * Filter which guestLists to update
+     */
+    where?: guestListWhereInput
+    /**
+     * Limit how many guestLists to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: guestListIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * guestList upsert
+   */
+  export type guestListUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the guestList
+     */
+    select?: guestListSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the guestList
+     */
+    omit?: guestListOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: guestListInclude<ExtArgs> | null
+    /**
+     * The filter to search for the guestList to update in case it exists.
+     */
+    where: guestListWhereUniqueInput
+    /**
+     * In case the guestList found by the `where` argument doesn't exist, create a new guestList with this data.
+     */
+    create: XOR<guestListCreateInput, guestListUncheckedCreateInput>
+    /**
+     * In case the guestList was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<guestListUpdateInput, guestListUncheckedUpdateInput>
+  }
+
+  /**
+   * guestList delete
+   */
+  export type guestListDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the guestList
+     */
+    select?: guestListSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the guestList
+     */
+    omit?: guestListOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: guestListInclude<ExtArgs> | null
+    /**
+     * Filter which guestList to delete.
+     */
+    where: guestListWhereUniqueInput
+  }
+
+  /**
+   * guestList deleteMany
+   */
+  export type guestListDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which guestLists to delete
+     */
+    where?: guestListWhereInput
+    /**
+     * Limit how many guestLists to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * guestList.checkedInByUser
+   */
+  export type guestList$checkedInByUserArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the user
+     */
+    select?: userSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the user
+     */
+    omit?: userOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: userInclude<ExtArgs> | null
+    where?: userWhereInput
+  }
+
+  /**
+   * guestList without action
+   */
+  export type guestListDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the guestList
+     */
+    select?: guestListSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the guestList
+     */
+    omit?: guestListOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: guestListInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -18800,13 +20289,13 @@ export namespace Prisma {
     email: 'email',
     emailVerified: 'emailVerified',
     image: 'image',
-    imageBase64: 'imageBase64',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
     username: 'username',
     dni: 'dni',
     birthDate: 'birthDate',
-    role: 'role'
+    role: 'role',
+    image_base64: 'image_base64'
   };
 
   export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
@@ -18855,6 +20344,7 @@ export namespace Prisma {
     producerId: 'producerId',
     capacityTotal: 'capacityTotal',
     isRsvpAllowed: 'isRsvpAllowed',
+    isSoldOut: 'isSoldOut',
     eventGenre: 'eventGenre',
     showRemainingTickets: 'showRemainingTickets',
     createdAt: 'createdAt'
@@ -18959,6 +20449,27 @@ export namespace Prisma {
   };
 
   export type MessageScalarFieldEnum = (typeof MessageScalarFieldEnum)[keyof typeof MessageScalarFieldEnum]
+
+
+  export const GuestListScalarFieldEnum: {
+    id: 'id',
+    eventId: 'eventId',
+    fullName: 'fullName',
+    normalizedName: 'normalizedName',
+    email: 'email',
+    age: 'age',
+    invitedBy: 'invitedBy',
+    gender: 'gender',
+    status: 'status',
+    qrCode: 'qrCode',
+    checkedInAt: 'checkedInAt',
+    checkedInBy: 'checkedInBy',
+    importedAt: 'importedAt',
+    importedBy: 'importedBy',
+    timestamp: 'timestamp'
+  };
+
+  export type GuestListScalarFieldEnum = (typeof GuestListScalarFieldEnum)[keyof typeof GuestListScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -19137,6 +20648,20 @@ export namespace Prisma {
    * Reference to a field of type 'TicketStatus[]'
    */
   export type ListEnumTicketStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TicketStatus[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'GuestStatus'
+   */
+  export type EnumGuestStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'GuestStatus'>
+    
+
+
+  /**
+   * Reference to a field of type 'GuestStatus[]'
+   */
+  export type ListEnumGuestStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'GuestStatus[]'>
     
 
 
@@ -19331,23 +20856,25 @@ export namespace Prisma {
     email?: StringFilter<"user"> | string
     emailVerified?: BoolFilter<"user"> | boolean
     image?: StringNullableFilter<"user"> | string | null
-    imageBase64?: StringNullableFilter<"user"> | string | null
     createdAt?: DateTimeFilter<"user"> | Date | string
     updatedAt?: DateTimeFilter<"user"> | Date | string
     username?: StringNullableFilter<"user"> | string | null
     dni?: StringNullableFilter<"user"> | string | null
     birthDate?: DateTimeNullableFilter<"user"> | Date | string | null
     role?: EnumRoleFilter<"user"> | $Enums.Role
+    image_base64?: StringNullableFilter<"user"> | string | null
+    account?: AccountListRelationFilter
+    logs?: LogListRelationFilter
+    receivedMessages?: MessageListRelationFilter
+    sentMessages?: MessageListRelationFilter
+    participants?: ParticipantListRelationFilter
+    payments?: PaymentListRelationFilter
+    rrppAssignments?: RrppAssignmentListRelationFilter
+    session?: SessionListRelationFilter
     tickets?: TicketListRelationFilter
     transferredTickets?: TicketListRelationFilter
-    participants?: ParticipantListRelationFilter
-    rrppAssignments?: RrppAssignmentListRelationFilter
-    account?: AccountListRelationFilter
-    session?: SessionListRelationFilter
-    logs?: LogListRelationFilter
-    sentMessages?: MessageListRelationFilter
-    receivedMessages?: MessageListRelationFilter
-    payments?: PaymentListRelationFilter
+    guestsImported?: GuestListListRelationFilter
+    guestsCheckedIn?: GuestListListRelationFilter
   }
 
   export type userOrderByWithRelationInput = {
@@ -19356,23 +20883,25 @@ export namespace Prisma {
     email?: SortOrder
     emailVerified?: SortOrder
     image?: SortOrderInput | SortOrder
-    imageBase64?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     username?: SortOrderInput | SortOrder
     dni?: SortOrderInput | SortOrder
     birthDate?: SortOrderInput | SortOrder
     role?: SortOrder
+    image_base64?: SortOrderInput | SortOrder
+    account?: accountOrderByRelationAggregateInput
+    logs?: logOrderByRelationAggregateInput
+    receivedMessages?: messageOrderByRelationAggregateInput
+    sentMessages?: messageOrderByRelationAggregateInput
+    participants?: participantOrderByRelationAggregateInput
+    payments?: paymentOrderByRelationAggregateInput
+    rrppAssignments?: rrppAssignmentOrderByRelationAggregateInput
+    session?: sessionOrderByRelationAggregateInput
     tickets?: ticketOrderByRelationAggregateInput
     transferredTickets?: ticketOrderByRelationAggregateInput
-    participants?: participantOrderByRelationAggregateInput
-    rrppAssignments?: rrppAssignmentOrderByRelationAggregateInput
-    account?: accountOrderByRelationAggregateInput
-    session?: sessionOrderByRelationAggregateInput
-    logs?: logOrderByRelationAggregateInput
-    sentMessages?: messageOrderByRelationAggregateInput
-    receivedMessages?: messageOrderByRelationAggregateInput
-    payments?: paymentOrderByRelationAggregateInput
+    guestsImported?: guestListOrderByRelationAggregateInput
+    guestsCheckedIn?: guestListOrderByRelationAggregateInput
   }
 
   export type userWhereUniqueInput = Prisma.AtLeast<{
@@ -19385,22 +20914,24 @@ export namespace Prisma {
     name?: StringFilter<"user"> | string
     emailVerified?: BoolFilter<"user"> | boolean
     image?: StringNullableFilter<"user"> | string | null
-    imageBase64?: StringNullableFilter<"user"> | string | null
     createdAt?: DateTimeFilter<"user"> | Date | string
     updatedAt?: DateTimeFilter<"user"> | Date | string
     dni?: StringNullableFilter<"user"> | string | null
     birthDate?: DateTimeNullableFilter<"user"> | Date | string | null
     role?: EnumRoleFilter<"user"> | $Enums.Role
+    image_base64?: StringNullableFilter<"user"> | string | null
+    account?: AccountListRelationFilter
+    logs?: LogListRelationFilter
+    receivedMessages?: MessageListRelationFilter
+    sentMessages?: MessageListRelationFilter
+    participants?: ParticipantListRelationFilter
+    payments?: PaymentListRelationFilter
+    rrppAssignments?: RrppAssignmentListRelationFilter
+    session?: SessionListRelationFilter
     tickets?: TicketListRelationFilter
     transferredTickets?: TicketListRelationFilter
-    participants?: ParticipantListRelationFilter
-    rrppAssignments?: RrppAssignmentListRelationFilter
-    account?: AccountListRelationFilter
-    session?: SessionListRelationFilter
-    logs?: LogListRelationFilter
-    sentMessages?: MessageListRelationFilter
-    receivedMessages?: MessageListRelationFilter
-    payments?: PaymentListRelationFilter
+    guestsImported?: GuestListListRelationFilter
+    guestsCheckedIn?: GuestListListRelationFilter
   }, "id" | "email" | "username">
 
   export type userOrderByWithAggregationInput = {
@@ -19409,13 +20940,13 @@ export namespace Prisma {
     email?: SortOrder
     emailVerified?: SortOrder
     image?: SortOrderInput | SortOrder
-    imageBase64?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     username?: SortOrderInput | SortOrder
     dni?: SortOrderInput | SortOrder
     birthDate?: SortOrderInput | SortOrder
     role?: SortOrder
+    image_base64?: SortOrderInput | SortOrder
     _count?: userCountOrderByAggregateInput
     _max?: userMaxOrderByAggregateInput
     _min?: userMinOrderByAggregateInput
@@ -19430,13 +20961,13 @@ export namespace Prisma {
     email?: StringWithAggregatesFilter<"user"> | string
     emailVerified?: BoolWithAggregatesFilter<"user"> | boolean
     image?: StringNullableWithAggregatesFilter<"user"> | string | null
-    imageBase64?: StringNullableWithAggregatesFilter<"user"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"user"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"user"> | Date | string
     username?: StringNullableWithAggregatesFilter<"user"> | string | null
     dni?: StringNullableWithAggregatesFilter<"user"> | string | null
     birthDate?: DateTimeNullableWithAggregatesFilter<"user"> | Date | string | null
     role?: EnumRoleWithAggregatesFilter<"user"> | $Enums.Role
+    image_base64?: StringNullableWithAggregatesFilter<"user"> | string | null
   }
 
   export type verificationWhereInput = {
@@ -19514,8 +21045,8 @@ export namespace Prisma {
     payerName?: StringNullableFilter<"payment"> | string | null
     createdAt?: DateTimeFilter<"payment"> | Date | string
     updatedAt?: DateTimeFilter<"payment"> | Date | string
-    user?: XOR<UserScalarRelationFilter, userWhereInput>
     event?: XOR<EventScalarRelationFilter, eventWhereInput>
+    user?: XOR<UserScalarRelationFilter, userWhereInput>
     tickets?: TicketListRelationFilter
   }
 
@@ -19534,8 +21065,8 @@ export namespace Prisma {
     payerName?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-    user?: userOrderByWithRelationInput
     event?: eventOrderByWithRelationInput
+    user?: userOrderByWithRelationInput
     tickets?: ticketOrderByRelationAggregateInput
   }
 
@@ -19557,8 +21088,8 @@ export namespace Prisma {
     payerName?: StringNullableFilter<"payment"> | string | null
     createdAt?: DateTimeFilter<"payment"> | Date | string
     updatedAt?: DateTimeFilter<"payment"> | Date | string
-    user?: XOR<UserScalarRelationFilter, userWhereInput>
     event?: XOR<EventScalarRelationFilter, eventWhereInput>
+    user?: XOR<UserScalarRelationFilter, userWhereInput>
     tickets?: TicketListRelationFilter
   }, "id" | "externalReference" | "mpPaymentId">
 
@@ -19618,15 +21149,17 @@ export namespace Prisma {
     producerId?: IntFilter<"event"> | number
     capacityTotal?: IntNullableFilter<"event"> | number | null
     isRsvpAllowed?: BoolFilter<"event"> | boolean
+    isSoldOut?: BoolFilter<"event"> | boolean
     eventGenre?: StringNullableFilter<"event"> | string | null
     showRemainingTickets?: BoolFilter<"event"> | boolean
     createdAt?: DateTimeFilter<"event"> | Date | string
-    ticketTypes?: TicketTypeListRelationFilter
     eventArtists?: EventArtistListRelationFilter
-    tickets?: TicketListRelationFilter
     participants?: ParticipantListRelationFilter
-    rrppAssignments?: RrppAssignmentListRelationFilter
     payments?: PaymentListRelationFilter
+    rrppAssignments?: RrppAssignmentListRelationFilter
+    tickets?: TicketListRelationFilter
+    ticketTypes?: TicketTypeListRelationFilter
+    guestList?: GuestListListRelationFilter
   }
 
   export type eventOrderByWithRelationInput = {
@@ -19640,15 +21173,17 @@ export namespace Prisma {
     producerId?: SortOrder
     capacityTotal?: SortOrderInput | SortOrder
     isRsvpAllowed?: SortOrder
+    isSoldOut?: SortOrder
     eventGenre?: SortOrderInput | SortOrder
     showRemainingTickets?: SortOrder
     createdAt?: SortOrder
-    ticketTypes?: ticketTypeOrderByRelationAggregateInput
     eventArtists?: eventArtistOrderByRelationAggregateInput
-    tickets?: ticketOrderByRelationAggregateInput
     participants?: participantOrderByRelationAggregateInput
-    rrppAssignments?: rrppAssignmentOrderByRelationAggregateInput
     payments?: paymentOrderByRelationAggregateInput
+    rrppAssignments?: rrppAssignmentOrderByRelationAggregateInput
+    tickets?: ticketOrderByRelationAggregateInput
+    ticketTypes?: ticketTypeOrderByRelationAggregateInput
+    guestList?: guestListOrderByRelationAggregateInput
   }
 
   export type eventWhereUniqueInput = Prisma.AtLeast<{
@@ -19665,15 +21200,17 @@ export namespace Prisma {
     producerId?: IntFilter<"event"> | number
     capacityTotal?: IntNullableFilter<"event"> | number | null
     isRsvpAllowed?: BoolFilter<"event"> | boolean
+    isSoldOut?: BoolFilter<"event"> | boolean
     eventGenre?: StringNullableFilter<"event"> | string | null
     showRemainingTickets?: BoolFilter<"event"> | boolean
     createdAt?: DateTimeFilter<"event"> | Date | string
-    ticketTypes?: TicketTypeListRelationFilter
     eventArtists?: EventArtistListRelationFilter
-    tickets?: TicketListRelationFilter
     participants?: ParticipantListRelationFilter
-    rrppAssignments?: RrppAssignmentListRelationFilter
     payments?: PaymentListRelationFilter
+    rrppAssignments?: RrppAssignmentListRelationFilter
+    tickets?: TicketListRelationFilter
+    ticketTypes?: TicketTypeListRelationFilter
+    guestList?: GuestListListRelationFilter
   }, "id">
 
   export type eventOrderByWithAggregationInput = {
@@ -19687,6 +21224,7 @@ export namespace Prisma {
     producerId?: SortOrder
     capacityTotal?: SortOrderInput | SortOrder
     isRsvpAllowed?: SortOrder
+    isSoldOut?: SortOrder
     eventGenre?: SortOrderInput | SortOrder
     showRemainingTickets?: SortOrder
     createdAt?: SortOrder
@@ -19711,6 +21249,7 @@ export namespace Prisma {
     producerId?: IntWithAggregatesFilter<"event"> | number
     capacityTotal?: IntNullableWithAggregatesFilter<"event"> | number | null
     isRsvpAllowed?: BoolWithAggregatesFilter<"event"> | boolean
+    isSoldOut?: BoolWithAggregatesFilter<"event"> | boolean
     eventGenre?: StringNullableWithAggregatesFilter<"event"> | string | null
     showRemainingTickets?: BoolWithAggregatesFilter<"event"> | boolean
     createdAt?: DateTimeWithAggregatesFilter<"event"> | Date | string
@@ -19849,8 +21388,8 @@ export namespace Prisma {
     scanExpiration?: DateTimeNullableFilter<"ticketType"> | Date | string | null
     isVisible?: BoolFilter<"ticketType"> | boolean
     isDisabled?: BoolFilter<"ticketType"> | boolean
-    event?: XOR<EventScalarRelationFilter, eventWhereInput>
     tickets?: TicketListRelationFilter
+    event?: XOR<EventScalarRelationFilter, eventWhereInput>
   }
 
   export type ticketTypeOrderByWithRelationInput = {
@@ -19865,8 +21404,8 @@ export namespace Prisma {
     scanExpiration?: SortOrderInput | SortOrder
     isVisible?: SortOrder
     isDisabled?: SortOrder
-    event?: eventOrderByWithRelationInput
     tickets?: ticketOrderByRelationAggregateInput
+    event?: eventOrderByWithRelationInput
   }
 
   export type ticketTypeWhereUniqueInput = Prisma.AtLeast<{
@@ -19885,8 +21424,8 @@ export namespace Prisma {
     scanExpiration?: DateTimeNullableFilter<"ticketType"> | Date | string | null
     isVisible?: BoolFilter<"ticketType"> | boolean
     isDisabled?: BoolFilter<"ticketType"> | boolean
-    event?: XOR<EventScalarRelationFilter, eventWhereInput>
     tickets?: TicketListRelationFilter
+    event?: XOR<EventScalarRelationFilter, eventWhereInput>
   }, "id" | "eventId_code">
 
   export type ticketTypeOrderByWithAggregationInput = {
@@ -19941,9 +21480,9 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"ticket"> | Date | string
     event?: XOR<EventScalarRelationFilter, eventWhereInput>
     owner?: XOR<UserScalarRelationFilter, userWhereInput>
-    type?: XOR<TicketTypeScalarRelationFilter, ticketTypeWhereInput>
-    transferredFrom?: XOR<UserNullableScalarRelationFilter, userWhereInput> | null
     payment?: XOR<PaymentNullableScalarRelationFilter, paymentWhereInput> | null
+    transferredFrom?: XOR<UserNullableScalarRelationFilter, userWhereInput> | null
+    type?: XOR<TicketTypeScalarRelationFilter, ticketTypeWhereInput>
   }
 
   export type ticketOrderByWithRelationInput = {
@@ -19959,9 +21498,9 @@ export namespace Prisma {
     createdAt?: SortOrder
     event?: eventOrderByWithRelationInput
     owner?: userOrderByWithRelationInput
-    type?: ticketTypeOrderByWithRelationInput
-    transferredFrom?: userOrderByWithRelationInput
     payment?: paymentOrderByWithRelationInput
+    transferredFrom?: userOrderByWithRelationInput
+    type?: ticketTypeOrderByWithRelationInput
   }
 
   export type ticketWhereUniqueInput = Prisma.AtLeast<{
@@ -19980,9 +21519,9 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"ticket"> | Date | string
     event?: XOR<EventScalarRelationFilter, eventWhereInput>
     owner?: XOR<UserScalarRelationFilter, userWhereInput>
-    type?: XOR<TicketTypeScalarRelationFilter, ticketTypeWhereInput>
-    transferredFrom?: XOR<UserNullableScalarRelationFilter, userWhereInput> | null
     payment?: XOR<PaymentNullableScalarRelationFilter, paymentWhereInput> | null
+    transferredFrom?: XOR<UserNullableScalarRelationFilter, userWhereInput> | null
+    type?: XOR<TicketTypeScalarRelationFilter, ticketTypeWhereInput>
   }, "id" | "qrCode" | "code">
 
   export type ticketOrderByWithAggregationInput = {
@@ -20027,8 +21566,8 @@ export namespace Prisma {
     eventId?: IntFilter<"rrppAssignment"> | number
     commissionRate?: DecimalFilter<"rrppAssignment"> | Decimal | DecimalJsLike | number | string
     freesGranted?: IntFilter<"rrppAssignment"> | number
-    rrppUser?: XOR<UserScalarRelationFilter, userWhereInput>
     event?: XOR<EventScalarRelationFilter, eventWhereInput>
+    rrppUser?: XOR<UserScalarRelationFilter, userWhereInput>
   }
 
   export type rrppAssignmentOrderByWithRelationInput = {
@@ -20036,8 +21575,8 @@ export namespace Prisma {
     eventId?: SortOrder
     commissionRate?: SortOrder
     freesGranted?: SortOrder
-    rrppUser?: userOrderByWithRelationInput
     event?: eventOrderByWithRelationInput
+    rrppUser?: userOrderByWithRelationInput
   }
 
   export type rrppAssignmentWhereUniqueInput = Prisma.AtLeast<{
@@ -20049,8 +21588,8 @@ export namespace Prisma {
     eventId?: IntFilter<"rrppAssignment"> | number
     commissionRate?: DecimalFilter<"rrppAssignment"> | Decimal | DecimalJsLike | number | string
     freesGranted?: IntFilter<"rrppAssignment"> | number
-    rrppUser?: XOR<UserScalarRelationFilter, userWhereInput>
     event?: XOR<EventScalarRelationFilter, eventWhereInput>
+    rrppUser?: XOR<UserScalarRelationFilter, userWhereInput>
   }, "rrppUserId_eventId">
 
   export type rrppAssignmentOrderByWithAggregationInput = {
@@ -20083,8 +21622,8 @@ export namespace Prisma {
     eventId?: IntFilter<"participant"> | number
     viaRsvp?: BoolFilter<"participant"> | boolean
     qrCode?: StringNullableFilter<"participant"> | string | null
-    user?: XOR<UserScalarRelationFilter, userWhereInput>
     event?: XOR<EventScalarRelationFilter, eventWhereInput>
+    user?: XOR<UserScalarRelationFilter, userWhereInput>
   }
 
   export type participantOrderByWithRelationInput = {
@@ -20092,8 +21631,8 @@ export namespace Prisma {
     eventId?: SortOrder
     viaRsvp?: SortOrder
     qrCode?: SortOrderInput | SortOrder
-    user?: userOrderByWithRelationInput
     event?: eventOrderByWithRelationInput
+    user?: userOrderByWithRelationInput
   }
 
   export type participantWhereUniqueInput = Prisma.AtLeast<{
@@ -20105,8 +21644,8 @@ export namespace Prisma {
     eventId?: IntFilter<"participant"> | number
     viaRsvp?: BoolFilter<"participant"> | boolean
     qrCode?: StringNullableFilter<"participant"> | string | null
-    user?: XOR<UserScalarRelationFilter, userWhereInput>
     event?: XOR<EventScalarRelationFilter, eventWhereInput>
+    user?: XOR<UserScalarRelationFilter, userWhereInput>
   }, "userId_eventId">
 
   export type participantOrderByWithAggregationInput = {
@@ -20198,8 +21737,8 @@ export namespace Prisma {
     message?: StringFilter<"message"> | string
     timestamp?: DateTimeFilter<"message"> | Date | string
     readStatus?: BoolFilter<"message"> | boolean
-    sender?: XOR<UserScalarRelationFilter, userWhereInput>
     receiver?: XOR<UserScalarRelationFilter, userWhereInput>
+    sender?: XOR<UserScalarRelationFilter, userWhereInput>
   }
 
   export type messageOrderByWithRelationInput = {
@@ -20209,8 +21748,8 @@ export namespace Prisma {
     message?: SortOrder
     timestamp?: SortOrder
     readStatus?: SortOrder
-    sender?: userOrderByWithRelationInput
     receiver?: userOrderByWithRelationInput
+    sender?: userOrderByWithRelationInput
   }
 
   export type messageWhereUniqueInput = Prisma.AtLeast<{
@@ -20223,8 +21762,8 @@ export namespace Prisma {
     message?: StringFilter<"message"> | string
     timestamp?: DateTimeFilter<"message"> | Date | string
     readStatus?: BoolFilter<"message"> | boolean
-    sender?: XOR<UserScalarRelationFilter, userWhereInput>
     receiver?: XOR<UserScalarRelationFilter, userWhereInput>
+    sender?: XOR<UserScalarRelationFilter, userWhereInput>
   }, "id">
 
   export type messageOrderByWithAggregationInput = {
@@ -20251,6 +21790,120 @@ export namespace Prisma {
     message?: StringWithAggregatesFilter<"message"> | string
     timestamp?: DateTimeWithAggregatesFilter<"message"> | Date | string
     readStatus?: BoolWithAggregatesFilter<"message"> | boolean
+  }
+
+  export type guestListWhereInput = {
+    AND?: guestListWhereInput | guestListWhereInput[]
+    OR?: guestListWhereInput[]
+    NOT?: guestListWhereInput | guestListWhereInput[]
+    id?: IntFilter<"guestList"> | number
+    eventId?: IntFilter<"guestList"> | number
+    fullName?: StringFilter<"guestList"> | string
+    normalizedName?: StringFilter<"guestList"> | string
+    email?: StringFilter<"guestList"> | string
+    age?: StringNullableFilter<"guestList"> | string | null
+    invitedBy?: StringNullableFilter<"guestList"> | string | null
+    gender?: StringNullableFilter<"guestList"> | string | null
+    status?: EnumGuestStatusFilter<"guestList"> | $Enums.GuestStatus
+    qrCode?: StringFilter<"guestList"> | string
+    checkedInAt?: DateTimeNullableFilter<"guestList"> | Date | string | null
+    checkedInBy?: StringNullableFilter<"guestList"> | string | null
+    importedAt?: DateTimeFilter<"guestList"> | Date | string
+    importedBy?: StringFilter<"guestList"> | string
+    timestamp?: StringNullableFilter<"guestList"> | string | null
+    event?: XOR<EventScalarRelationFilter, eventWhereInput>
+    checkedInByUser?: XOR<UserNullableScalarRelationFilter, userWhereInput> | null
+    importedByUser?: XOR<UserScalarRelationFilter, userWhereInput>
+  }
+
+  export type guestListOrderByWithRelationInput = {
+    id?: SortOrder
+    eventId?: SortOrder
+    fullName?: SortOrder
+    normalizedName?: SortOrder
+    email?: SortOrder
+    age?: SortOrderInput | SortOrder
+    invitedBy?: SortOrderInput | SortOrder
+    gender?: SortOrderInput | SortOrder
+    status?: SortOrder
+    qrCode?: SortOrder
+    checkedInAt?: SortOrderInput | SortOrder
+    checkedInBy?: SortOrderInput | SortOrder
+    importedAt?: SortOrder
+    importedBy?: SortOrder
+    timestamp?: SortOrderInput | SortOrder
+    event?: eventOrderByWithRelationInput
+    checkedInByUser?: userOrderByWithRelationInput
+    importedByUser?: userOrderByWithRelationInput
+  }
+
+  export type guestListWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    qrCode?: string
+    eventId_email_normalizedName?: guestListEventIdEmailNormalizedNameCompoundUniqueInput
+    AND?: guestListWhereInput | guestListWhereInput[]
+    OR?: guestListWhereInput[]
+    NOT?: guestListWhereInput | guestListWhereInput[]
+    eventId?: IntFilter<"guestList"> | number
+    fullName?: StringFilter<"guestList"> | string
+    normalizedName?: StringFilter<"guestList"> | string
+    email?: StringFilter<"guestList"> | string
+    age?: StringNullableFilter<"guestList"> | string | null
+    invitedBy?: StringNullableFilter<"guestList"> | string | null
+    gender?: StringNullableFilter<"guestList"> | string | null
+    status?: EnumGuestStatusFilter<"guestList"> | $Enums.GuestStatus
+    checkedInAt?: DateTimeNullableFilter<"guestList"> | Date | string | null
+    checkedInBy?: StringNullableFilter<"guestList"> | string | null
+    importedAt?: DateTimeFilter<"guestList"> | Date | string
+    importedBy?: StringFilter<"guestList"> | string
+    timestamp?: StringNullableFilter<"guestList"> | string | null
+    event?: XOR<EventScalarRelationFilter, eventWhereInput>
+    checkedInByUser?: XOR<UserNullableScalarRelationFilter, userWhereInput> | null
+    importedByUser?: XOR<UserScalarRelationFilter, userWhereInput>
+  }, "id" | "qrCode" | "eventId_email_normalizedName">
+
+  export type guestListOrderByWithAggregationInput = {
+    id?: SortOrder
+    eventId?: SortOrder
+    fullName?: SortOrder
+    normalizedName?: SortOrder
+    email?: SortOrder
+    age?: SortOrderInput | SortOrder
+    invitedBy?: SortOrderInput | SortOrder
+    gender?: SortOrderInput | SortOrder
+    status?: SortOrder
+    qrCode?: SortOrder
+    checkedInAt?: SortOrderInput | SortOrder
+    checkedInBy?: SortOrderInput | SortOrder
+    importedAt?: SortOrder
+    importedBy?: SortOrder
+    timestamp?: SortOrderInput | SortOrder
+    _count?: guestListCountOrderByAggregateInput
+    _avg?: guestListAvgOrderByAggregateInput
+    _max?: guestListMaxOrderByAggregateInput
+    _min?: guestListMinOrderByAggregateInput
+    _sum?: guestListSumOrderByAggregateInput
+  }
+
+  export type guestListScalarWhereWithAggregatesInput = {
+    AND?: guestListScalarWhereWithAggregatesInput | guestListScalarWhereWithAggregatesInput[]
+    OR?: guestListScalarWhereWithAggregatesInput[]
+    NOT?: guestListScalarWhereWithAggregatesInput | guestListScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"guestList"> | number
+    eventId?: IntWithAggregatesFilter<"guestList"> | number
+    fullName?: StringWithAggregatesFilter<"guestList"> | string
+    normalizedName?: StringWithAggregatesFilter<"guestList"> | string
+    email?: StringWithAggregatesFilter<"guestList"> | string
+    age?: StringNullableWithAggregatesFilter<"guestList"> | string | null
+    invitedBy?: StringNullableWithAggregatesFilter<"guestList"> | string | null
+    gender?: StringNullableWithAggregatesFilter<"guestList"> | string | null
+    status?: EnumGuestStatusWithAggregatesFilter<"guestList"> | $Enums.GuestStatus
+    qrCode?: StringWithAggregatesFilter<"guestList"> | string
+    checkedInAt?: DateTimeNullableWithAggregatesFilter<"guestList"> | Date | string | null
+    checkedInBy?: StringNullableWithAggregatesFilter<"guestList"> | string | null
+    importedAt?: DateTimeWithAggregatesFilter<"guestList"> | Date | string
+    importedBy?: StringWithAggregatesFilter<"guestList"> | string
+    timestamp?: StringNullableWithAggregatesFilter<"guestList"> | string | null
   }
 
   export type accountCreateInput = {
@@ -20446,23 +22099,25 @@ export namespace Prisma {
     email: string
     emailVerified: boolean
     image?: string | null
-    imageBase64?: string | null
     createdAt: Date | string
     updatedAt: Date | string
     username?: string | null
     dni?: string | null
     birthDate?: Date | string | null
     role?: $Enums.Role
+    image_base64?: string | null
+    account?: accountCreateNestedManyWithoutUserInput
+    logs?: logCreateNestedManyWithoutUserInput
+    receivedMessages?: messageCreateNestedManyWithoutReceiverInput
+    sentMessages?: messageCreateNestedManyWithoutSenderInput
+    participants?: participantCreateNestedManyWithoutUserInput
+    payments?: paymentCreateNestedManyWithoutUserInput
+    rrppAssignments?: rrppAssignmentCreateNestedManyWithoutRrppUserInput
+    session?: sessionCreateNestedManyWithoutUserInput
     tickets?: ticketCreateNestedManyWithoutOwnerInput
     transferredTickets?: ticketCreateNestedManyWithoutTransferredFromInput
-    participants?: participantCreateNestedManyWithoutUserInput
-    rrppAssignments?: rrppAssignmentCreateNestedManyWithoutRrppUserInput
-    account?: accountCreateNestedManyWithoutUserInput
-    session?: sessionCreateNestedManyWithoutUserInput
-    logs?: logCreateNestedManyWithoutUserInput
-    sentMessages?: messageCreateNestedManyWithoutSenderInput
-    receivedMessages?: messageCreateNestedManyWithoutReceiverInput
-    payments?: paymentCreateNestedManyWithoutUserInput
+    guestsImported?: guestListCreateNestedManyWithoutImportedByUserInput
+    guestsCheckedIn?: guestListCreateNestedManyWithoutCheckedInByUserInput
   }
 
   export type userUncheckedCreateInput = {
@@ -20471,23 +22126,25 @@ export namespace Prisma {
     email: string
     emailVerified: boolean
     image?: string | null
-    imageBase64?: string | null
     createdAt: Date | string
     updatedAt: Date | string
     username?: string | null
     dni?: string | null
     birthDate?: Date | string | null
     role?: $Enums.Role
+    image_base64?: string | null
+    account?: accountUncheckedCreateNestedManyWithoutUserInput
+    logs?: logUncheckedCreateNestedManyWithoutUserInput
+    receivedMessages?: messageUncheckedCreateNestedManyWithoutReceiverInput
+    sentMessages?: messageUncheckedCreateNestedManyWithoutSenderInput
+    participants?: participantUncheckedCreateNestedManyWithoutUserInput
+    payments?: paymentUncheckedCreateNestedManyWithoutUserInput
+    rrppAssignments?: rrppAssignmentUncheckedCreateNestedManyWithoutRrppUserInput
+    session?: sessionUncheckedCreateNestedManyWithoutUserInput
     tickets?: ticketUncheckedCreateNestedManyWithoutOwnerInput
     transferredTickets?: ticketUncheckedCreateNestedManyWithoutTransferredFromInput
-    participants?: participantUncheckedCreateNestedManyWithoutUserInput
-    rrppAssignments?: rrppAssignmentUncheckedCreateNestedManyWithoutRrppUserInput
-    account?: accountUncheckedCreateNestedManyWithoutUserInput
-    session?: sessionUncheckedCreateNestedManyWithoutUserInput
-    logs?: logUncheckedCreateNestedManyWithoutUserInput
-    sentMessages?: messageUncheckedCreateNestedManyWithoutSenderInput
-    receivedMessages?: messageUncheckedCreateNestedManyWithoutReceiverInput
-    payments?: paymentUncheckedCreateNestedManyWithoutUserInput
+    guestsImported?: guestListUncheckedCreateNestedManyWithoutImportedByUserInput
+    guestsCheckedIn?: guestListUncheckedCreateNestedManyWithoutCheckedInByUserInput
   }
 
   export type userUpdateInput = {
@@ -20496,23 +22153,25 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: BoolFieldUpdateOperationsInput | boolean
     image?: NullableStringFieldUpdateOperationsInput | string | null
-    imageBase64?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     username?: NullableStringFieldUpdateOperationsInput | string | null
     dni?: NullableStringFieldUpdateOperationsInput | string | null
     birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    image_base64?: NullableStringFieldUpdateOperationsInput | string | null
+    account?: accountUpdateManyWithoutUserNestedInput
+    logs?: logUpdateManyWithoutUserNestedInput
+    receivedMessages?: messageUpdateManyWithoutReceiverNestedInput
+    sentMessages?: messageUpdateManyWithoutSenderNestedInput
+    participants?: participantUpdateManyWithoutUserNestedInput
+    payments?: paymentUpdateManyWithoutUserNestedInput
+    rrppAssignments?: rrppAssignmentUpdateManyWithoutRrppUserNestedInput
+    session?: sessionUpdateManyWithoutUserNestedInput
     tickets?: ticketUpdateManyWithoutOwnerNestedInput
     transferredTickets?: ticketUpdateManyWithoutTransferredFromNestedInput
-    participants?: participantUpdateManyWithoutUserNestedInput
-    rrppAssignments?: rrppAssignmentUpdateManyWithoutRrppUserNestedInput
-    account?: accountUpdateManyWithoutUserNestedInput
-    session?: sessionUpdateManyWithoutUserNestedInput
-    logs?: logUpdateManyWithoutUserNestedInput
-    sentMessages?: messageUpdateManyWithoutSenderNestedInput
-    receivedMessages?: messageUpdateManyWithoutReceiverNestedInput
-    payments?: paymentUpdateManyWithoutUserNestedInput
+    guestsImported?: guestListUpdateManyWithoutImportedByUserNestedInput
+    guestsCheckedIn?: guestListUpdateManyWithoutCheckedInByUserNestedInput
   }
 
   export type userUncheckedUpdateInput = {
@@ -20521,23 +22180,25 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: BoolFieldUpdateOperationsInput | boolean
     image?: NullableStringFieldUpdateOperationsInput | string | null
-    imageBase64?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     username?: NullableStringFieldUpdateOperationsInput | string | null
     dni?: NullableStringFieldUpdateOperationsInput | string | null
     birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    image_base64?: NullableStringFieldUpdateOperationsInput | string | null
+    account?: accountUncheckedUpdateManyWithoutUserNestedInput
+    logs?: logUncheckedUpdateManyWithoutUserNestedInput
+    receivedMessages?: messageUncheckedUpdateManyWithoutReceiverNestedInput
+    sentMessages?: messageUncheckedUpdateManyWithoutSenderNestedInput
+    participants?: participantUncheckedUpdateManyWithoutUserNestedInput
+    payments?: paymentUncheckedUpdateManyWithoutUserNestedInput
+    rrppAssignments?: rrppAssignmentUncheckedUpdateManyWithoutRrppUserNestedInput
+    session?: sessionUncheckedUpdateManyWithoutUserNestedInput
     tickets?: ticketUncheckedUpdateManyWithoutOwnerNestedInput
     transferredTickets?: ticketUncheckedUpdateManyWithoutTransferredFromNestedInput
-    participants?: participantUncheckedUpdateManyWithoutUserNestedInput
-    rrppAssignments?: rrppAssignmentUncheckedUpdateManyWithoutRrppUserNestedInput
-    account?: accountUncheckedUpdateManyWithoutUserNestedInput
-    session?: sessionUncheckedUpdateManyWithoutUserNestedInput
-    logs?: logUncheckedUpdateManyWithoutUserNestedInput
-    sentMessages?: messageUncheckedUpdateManyWithoutSenderNestedInput
-    receivedMessages?: messageUncheckedUpdateManyWithoutReceiverNestedInput
-    payments?: paymentUncheckedUpdateManyWithoutUserNestedInput
+    guestsImported?: guestListUncheckedUpdateManyWithoutImportedByUserNestedInput
+    guestsCheckedIn?: guestListUncheckedUpdateManyWithoutCheckedInByUserNestedInput
   }
 
   export type userCreateManyInput = {
@@ -20546,13 +22207,13 @@ export namespace Prisma {
     email: string
     emailVerified: boolean
     image?: string | null
-    imageBase64?: string | null
     createdAt: Date | string
     updatedAt: Date | string
     username?: string | null
     dni?: string | null
     birthDate?: Date | string | null
     role?: $Enums.Role
+    image_base64?: string | null
   }
 
   export type userUpdateManyMutationInput = {
@@ -20561,13 +22222,13 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: BoolFieldUpdateOperationsInput | boolean
     image?: NullableStringFieldUpdateOperationsInput | string | null
-    imageBase64?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     username?: NullableStringFieldUpdateOperationsInput | string | null
     dni?: NullableStringFieldUpdateOperationsInput | string | null
     birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    image_base64?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type userUncheckedUpdateManyInput = {
@@ -20576,13 +22237,13 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: BoolFieldUpdateOperationsInput | boolean
     image?: NullableStringFieldUpdateOperationsInput | string | null
-    imageBase64?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     username?: NullableStringFieldUpdateOperationsInput | string | null
     dni?: NullableStringFieldUpdateOperationsInput | string | null
     birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    image_base64?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type verificationCreateInput = {
@@ -20660,8 +22321,8 @@ export namespace Prisma {
     payerName?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    user: userCreateNestedOneWithoutPaymentsInput
     event: eventCreateNestedOneWithoutPaymentsInput
+    user: userCreateNestedOneWithoutPaymentsInput
     tickets?: ticketCreateNestedManyWithoutPaymentInput
   }
 
@@ -20695,8 +22356,8 @@ export namespace Prisma {
     payerName?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    user?: userUpdateOneRequiredWithoutPaymentsNestedInput
     event?: eventUpdateOneRequiredWithoutPaymentsNestedInput
+    user?: userUpdateOneRequiredWithoutPaymentsNestedInput
     tickets?: ticketUpdateManyWithoutPaymentNestedInput
   }
 
@@ -20776,15 +22437,17 @@ export namespace Prisma {
     producerId?: number
     capacityTotal?: number | null
     isRsvpAllowed?: boolean
+    isSoldOut?: boolean
     eventGenre?: string | null
     showRemainingTickets?: boolean
     createdAt?: Date | string
-    ticketTypes?: ticketTypeCreateNestedManyWithoutEventInput
     eventArtists?: eventArtistCreateNestedManyWithoutEventInput
-    tickets?: ticketCreateNestedManyWithoutEventInput
     participants?: participantCreateNestedManyWithoutEventInput
-    rrppAssignments?: rrppAssignmentCreateNestedManyWithoutEventInput
     payments?: paymentCreateNestedManyWithoutEventInput
+    rrppAssignments?: rrppAssignmentCreateNestedManyWithoutEventInput
+    tickets?: ticketCreateNestedManyWithoutEventInput
+    ticketTypes?: ticketTypeCreateNestedManyWithoutEventInput
+    guestList?: guestListCreateNestedManyWithoutEventInput
   }
 
   export type eventUncheckedCreateInput = {
@@ -20798,15 +22461,17 @@ export namespace Prisma {
     producerId?: number
     capacityTotal?: number | null
     isRsvpAllowed?: boolean
+    isSoldOut?: boolean
     eventGenre?: string | null
     showRemainingTickets?: boolean
     createdAt?: Date | string
-    ticketTypes?: ticketTypeUncheckedCreateNestedManyWithoutEventInput
     eventArtists?: eventArtistUncheckedCreateNestedManyWithoutEventInput
-    tickets?: ticketUncheckedCreateNestedManyWithoutEventInput
     participants?: participantUncheckedCreateNestedManyWithoutEventInput
-    rrppAssignments?: rrppAssignmentUncheckedCreateNestedManyWithoutEventInput
     payments?: paymentUncheckedCreateNestedManyWithoutEventInput
+    rrppAssignments?: rrppAssignmentUncheckedCreateNestedManyWithoutEventInput
+    tickets?: ticketUncheckedCreateNestedManyWithoutEventInput
+    ticketTypes?: ticketTypeUncheckedCreateNestedManyWithoutEventInput
+    guestList?: guestListUncheckedCreateNestedManyWithoutEventInput
   }
 
   export type eventUpdateInput = {
@@ -20819,15 +22484,17 @@ export namespace Prisma {
     producerId?: IntFieldUpdateOperationsInput | number
     capacityTotal?: NullableIntFieldUpdateOperationsInput | number | null
     isRsvpAllowed?: BoolFieldUpdateOperationsInput | boolean
+    isSoldOut?: BoolFieldUpdateOperationsInput | boolean
     eventGenre?: NullableStringFieldUpdateOperationsInput | string | null
     showRemainingTickets?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    ticketTypes?: ticketTypeUpdateManyWithoutEventNestedInput
     eventArtists?: eventArtistUpdateManyWithoutEventNestedInput
-    tickets?: ticketUpdateManyWithoutEventNestedInput
     participants?: participantUpdateManyWithoutEventNestedInput
-    rrppAssignments?: rrppAssignmentUpdateManyWithoutEventNestedInput
     payments?: paymentUpdateManyWithoutEventNestedInput
+    rrppAssignments?: rrppAssignmentUpdateManyWithoutEventNestedInput
+    tickets?: ticketUpdateManyWithoutEventNestedInput
+    ticketTypes?: ticketTypeUpdateManyWithoutEventNestedInput
+    guestList?: guestListUpdateManyWithoutEventNestedInput
   }
 
   export type eventUncheckedUpdateInput = {
@@ -20841,15 +22508,17 @@ export namespace Prisma {
     producerId?: IntFieldUpdateOperationsInput | number
     capacityTotal?: NullableIntFieldUpdateOperationsInput | number | null
     isRsvpAllowed?: BoolFieldUpdateOperationsInput | boolean
+    isSoldOut?: BoolFieldUpdateOperationsInput | boolean
     eventGenre?: NullableStringFieldUpdateOperationsInput | string | null
     showRemainingTickets?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    ticketTypes?: ticketTypeUncheckedUpdateManyWithoutEventNestedInput
     eventArtists?: eventArtistUncheckedUpdateManyWithoutEventNestedInput
-    tickets?: ticketUncheckedUpdateManyWithoutEventNestedInput
     participants?: participantUncheckedUpdateManyWithoutEventNestedInput
-    rrppAssignments?: rrppAssignmentUncheckedUpdateManyWithoutEventNestedInput
     payments?: paymentUncheckedUpdateManyWithoutEventNestedInput
+    rrppAssignments?: rrppAssignmentUncheckedUpdateManyWithoutEventNestedInput
+    tickets?: ticketUncheckedUpdateManyWithoutEventNestedInput
+    ticketTypes?: ticketTypeUncheckedUpdateManyWithoutEventNestedInput
+    guestList?: guestListUncheckedUpdateManyWithoutEventNestedInput
   }
 
   export type eventCreateManyInput = {
@@ -20863,6 +22532,7 @@ export namespace Prisma {
     producerId?: number
     capacityTotal?: number | null
     isRsvpAllowed?: boolean
+    isSoldOut?: boolean
     eventGenre?: string | null
     showRemainingTickets?: boolean
     createdAt?: Date | string
@@ -20878,6 +22548,7 @@ export namespace Prisma {
     producerId?: IntFieldUpdateOperationsInput | number
     capacityTotal?: NullableIntFieldUpdateOperationsInput | number | null
     isRsvpAllowed?: BoolFieldUpdateOperationsInput | boolean
+    isSoldOut?: BoolFieldUpdateOperationsInput | boolean
     eventGenre?: NullableStringFieldUpdateOperationsInput | string | null
     showRemainingTickets?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -20894,6 +22565,7 @@ export namespace Prisma {
     producerId?: IntFieldUpdateOperationsInput | number
     capacityTotal?: NullableIntFieldUpdateOperationsInput | number | null
     isRsvpAllowed?: BoolFieldUpdateOperationsInput | boolean
+    isSoldOut?: BoolFieldUpdateOperationsInput | boolean
     eventGenre?: NullableStringFieldUpdateOperationsInput | string | null
     showRemainingTickets?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -21020,8 +22692,8 @@ export namespace Prisma {
     scanExpiration?: Date | string | null
     isVisible?: boolean
     isDisabled?: boolean
-    event: eventCreateNestedOneWithoutTicketTypesInput
     tickets?: ticketCreateNestedManyWithoutTypeInput
+    event: eventCreateNestedOneWithoutTicketTypesInput
   }
 
   export type ticketTypeUncheckedCreateInput = {
@@ -21049,8 +22721,8 @@ export namespace Prisma {
     scanExpiration?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isVisible?: BoolFieldUpdateOperationsInput | boolean
     isDisabled?: BoolFieldUpdateOperationsInput | boolean
-    event?: eventUpdateOneRequiredWithoutTicketTypesNestedInput
     tickets?: ticketUpdateManyWithoutTypeNestedInput
+    event?: eventUpdateOneRequiredWithoutTicketTypesNestedInput
   }
 
   export type ticketTypeUncheckedUpdateInput = {
@@ -21115,9 +22787,9 @@ export namespace Prisma {
     createdAt?: Date | string
     event: eventCreateNestedOneWithoutTicketsInput
     owner: userCreateNestedOneWithoutTicketsInput
-    type: ticketTypeCreateNestedOneWithoutTicketsInput
-    transferredFrom?: userCreateNestedOneWithoutTransferredTicketsInput
     payment?: paymentCreateNestedOneWithoutTicketsInput
+    transferredFrom?: userCreateNestedOneWithoutTransferredTicketsInput
+    type: ticketTypeCreateNestedOneWithoutTicketsInput
   }
 
   export type ticketUncheckedCreateInput = {
@@ -21140,9 +22812,9 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     event?: eventUpdateOneRequiredWithoutTicketsNestedInput
     owner?: userUpdateOneRequiredWithoutTicketsNestedInput
-    type?: ticketTypeUpdateOneRequiredWithoutTicketsNestedInput
-    transferredFrom?: userUpdateOneWithoutTransferredTicketsNestedInput
     payment?: paymentUpdateOneWithoutTicketsNestedInput
+    transferredFrom?: userUpdateOneWithoutTransferredTicketsNestedInput
+    type?: ticketTypeUpdateOneRequiredWithoutTicketsNestedInput
   }
 
   export type ticketUncheckedUpdateInput = {
@@ -21194,8 +22866,8 @@ export namespace Prisma {
   export type rrppAssignmentCreateInput = {
     commissionRate?: Decimal | DecimalJsLike | number | string
     freesGranted?: number
-    rrppUser: userCreateNestedOneWithoutRrppAssignmentsInput
     event: eventCreateNestedOneWithoutRrppAssignmentsInput
+    rrppUser: userCreateNestedOneWithoutRrppAssignmentsInput
   }
 
   export type rrppAssignmentUncheckedCreateInput = {
@@ -21208,8 +22880,8 @@ export namespace Prisma {
   export type rrppAssignmentUpdateInput = {
     commissionRate?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     freesGranted?: IntFieldUpdateOperationsInput | number
-    rrppUser?: userUpdateOneRequiredWithoutRrppAssignmentsNestedInput
     event?: eventUpdateOneRequiredWithoutRrppAssignmentsNestedInput
+    rrppUser?: userUpdateOneRequiredWithoutRrppAssignmentsNestedInput
   }
 
   export type rrppAssignmentUncheckedUpdateInput = {
@@ -21241,8 +22913,8 @@ export namespace Prisma {
   export type participantCreateInput = {
     viaRsvp?: boolean
     qrCode?: string | null
-    user: userCreateNestedOneWithoutParticipantsInput
     event: eventCreateNestedOneWithoutParticipantsInput
+    user: userCreateNestedOneWithoutParticipantsInput
   }
 
   export type participantUncheckedCreateInput = {
@@ -21255,8 +22927,8 @@ export namespace Prisma {
   export type participantUpdateInput = {
     viaRsvp?: BoolFieldUpdateOperationsInput | boolean
     qrCode?: NullableStringFieldUpdateOperationsInput | string | null
-    user?: userUpdateOneRequiredWithoutParticipantsNestedInput
     event?: eventUpdateOneRequiredWithoutParticipantsNestedInput
+    user?: userUpdateOneRequiredWithoutParticipantsNestedInput
   }
 
   export type participantUncheckedUpdateInput = {
@@ -21341,8 +23013,8 @@ export namespace Prisma {
     message: string
     timestamp?: Date | string
     readStatus?: boolean
-    sender: userCreateNestedOneWithoutSentMessagesInput
     receiver: userCreateNestedOneWithoutReceivedMessagesInput
+    sender: userCreateNestedOneWithoutSentMessagesInput
   }
 
   export type messageUncheckedCreateInput = {
@@ -21358,8 +23030,8 @@ export namespace Prisma {
     message?: StringFieldUpdateOperationsInput | string
     timestamp?: DateTimeFieldUpdateOperationsInput | Date | string
     readStatus?: BoolFieldUpdateOperationsInput | boolean
-    sender?: userUpdateOneRequiredWithoutSentMessagesNestedInput
     receiver?: userUpdateOneRequiredWithoutReceivedMessagesNestedInput
+    sender?: userUpdateOneRequiredWithoutSentMessagesNestedInput
   }
 
   export type messageUncheckedUpdateInput = {
@@ -21393,6 +23065,126 @@ export namespace Prisma {
     message?: StringFieldUpdateOperationsInput | string
     timestamp?: DateTimeFieldUpdateOperationsInput | Date | string
     readStatus?: BoolFieldUpdateOperationsInput | boolean
+  }
+
+  export type guestListCreateInput = {
+    fullName: string
+    normalizedName: string
+    email: string
+    age?: string | null
+    invitedBy?: string | null
+    gender?: string | null
+    status?: $Enums.GuestStatus
+    qrCode: string
+    checkedInAt?: Date | string | null
+    importedAt?: Date | string
+    timestamp?: string | null
+    event: eventCreateNestedOneWithoutGuestListInput
+    checkedInByUser?: userCreateNestedOneWithoutGuestsCheckedInInput
+    importedByUser: userCreateNestedOneWithoutGuestsImportedInput
+  }
+
+  export type guestListUncheckedCreateInput = {
+    id?: number
+    eventId: number
+    fullName: string
+    normalizedName: string
+    email: string
+    age?: string | null
+    invitedBy?: string | null
+    gender?: string | null
+    status?: $Enums.GuestStatus
+    qrCode: string
+    checkedInAt?: Date | string | null
+    checkedInBy?: string | null
+    importedAt?: Date | string
+    importedBy: string
+    timestamp?: string | null
+  }
+
+  export type guestListUpdateInput = {
+    fullName?: StringFieldUpdateOperationsInput | string
+    normalizedName?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    age?: NullableStringFieldUpdateOperationsInput | string | null
+    invitedBy?: NullableStringFieldUpdateOperationsInput | string | null
+    gender?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumGuestStatusFieldUpdateOperationsInput | $Enums.GuestStatus
+    qrCode?: StringFieldUpdateOperationsInput | string
+    checkedInAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    importedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    timestamp?: NullableStringFieldUpdateOperationsInput | string | null
+    event?: eventUpdateOneRequiredWithoutGuestListNestedInput
+    checkedInByUser?: userUpdateOneWithoutGuestsCheckedInNestedInput
+    importedByUser?: userUpdateOneRequiredWithoutGuestsImportedNestedInput
+  }
+
+  export type guestListUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    eventId?: IntFieldUpdateOperationsInput | number
+    fullName?: StringFieldUpdateOperationsInput | string
+    normalizedName?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    age?: NullableStringFieldUpdateOperationsInput | string | null
+    invitedBy?: NullableStringFieldUpdateOperationsInput | string | null
+    gender?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumGuestStatusFieldUpdateOperationsInput | $Enums.GuestStatus
+    qrCode?: StringFieldUpdateOperationsInput | string
+    checkedInAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    checkedInBy?: NullableStringFieldUpdateOperationsInput | string | null
+    importedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    importedBy?: StringFieldUpdateOperationsInput | string
+    timestamp?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type guestListCreateManyInput = {
+    id?: number
+    eventId: number
+    fullName: string
+    normalizedName: string
+    email: string
+    age?: string | null
+    invitedBy?: string | null
+    gender?: string | null
+    status?: $Enums.GuestStatus
+    qrCode: string
+    checkedInAt?: Date | string | null
+    checkedInBy?: string | null
+    importedAt?: Date | string
+    importedBy: string
+    timestamp?: string | null
+  }
+
+  export type guestListUpdateManyMutationInput = {
+    fullName?: StringFieldUpdateOperationsInput | string
+    normalizedName?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    age?: NullableStringFieldUpdateOperationsInput | string | null
+    invitedBy?: NullableStringFieldUpdateOperationsInput | string | null
+    gender?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumGuestStatusFieldUpdateOperationsInput | $Enums.GuestStatus
+    qrCode?: StringFieldUpdateOperationsInput | string
+    checkedInAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    importedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    timestamp?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type guestListUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    eventId?: IntFieldUpdateOperationsInput | number
+    fullName?: StringFieldUpdateOperationsInput | string
+    normalizedName?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    age?: NullableStringFieldUpdateOperationsInput | string | null
+    invitedBy?: NullableStringFieldUpdateOperationsInput | string | null
+    gender?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumGuestStatusFieldUpdateOperationsInput | $Enums.GuestStatus
+    qrCode?: StringFieldUpdateOperationsInput | string
+    checkedInAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    checkedInBy?: NullableStringFieldUpdateOperationsInput | string | null
+    importedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    importedBy?: StringFieldUpdateOperationsInput | string
+    timestamp?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type StringFilter<$PrismaModel = never> = {
@@ -21614,34 +23406,10 @@ export namespace Prisma {
     not?: NestedEnumRoleFilter<$PrismaModel> | $Enums.Role
   }
 
-  export type TicketListRelationFilter = {
-    every?: ticketWhereInput
-    some?: ticketWhereInput
-    none?: ticketWhereInput
-  }
-
-  export type ParticipantListRelationFilter = {
-    every?: participantWhereInput
-    some?: participantWhereInput
-    none?: participantWhereInput
-  }
-
-  export type RrppAssignmentListRelationFilter = {
-    every?: rrppAssignmentWhereInput
-    some?: rrppAssignmentWhereInput
-    none?: rrppAssignmentWhereInput
-  }
-
   export type AccountListRelationFilter = {
     every?: accountWhereInput
     some?: accountWhereInput
     none?: accountWhereInput
-  }
-
-  export type SessionListRelationFilter = {
-    every?: sessionWhereInput
-    some?: sessionWhereInput
-    none?: sessionWhereInput
   }
 
   export type LogListRelationFilter = {
@@ -21656,29 +23424,43 @@ export namespace Prisma {
     none?: messageWhereInput
   }
 
+  export type ParticipantListRelationFilter = {
+    every?: participantWhereInput
+    some?: participantWhereInput
+    none?: participantWhereInput
+  }
+
   export type PaymentListRelationFilter = {
     every?: paymentWhereInput
     some?: paymentWhereInput
     none?: paymentWhereInput
   }
 
-  export type ticketOrderByRelationAggregateInput = {
-    _count?: SortOrder
+  export type RrppAssignmentListRelationFilter = {
+    every?: rrppAssignmentWhereInput
+    some?: rrppAssignmentWhereInput
+    none?: rrppAssignmentWhereInput
   }
 
-  export type participantOrderByRelationAggregateInput = {
-    _count?: SortOrder
+  export type SessionListRelationFilter = {
+    every?: sessionWhereInput
+    some?: sessionWhereInput
+    none?: sessionWhereInput
   }
 
-  export type rrppAssignmentOrderByRelationAggregateInput = {
-    _count?: SortOrder
+  export type TicketListRelationFilter = {
+    every?: ticketWhereInput
+    some?: ticketWhereInput
+    none?: ticketWhereInput
+  }
+
+  export type GuestListListRelationFilter = {
+    every?: guestListWhereInput
+    some?: guestListWhereInput
+    none?: guestListWhereInput
   }
 
   export type accountOrderByRelationAggregateInput = {
-    _count?: SortOrder
-  }
-
-  export type sessionOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -21690,7 +23472,27 @@ export namespace Prisma {
     _count?: SortOrder
   }
 
+  export type participantOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
   export type paymentOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type rrppAssignmentOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type sessionOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type ticketOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type guestListOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -21700,13 +23502,13 @@ export namespace Prisma {
     email?: SortOrder
     emailVerified?: SortOrder
     image?: SortOrder
-    imageBase64?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     username?: SortOrder
     dni?: SortOrder
     birthDate?: SortOrder
     role?: SortOrder
+    image_base64?: SortOrder
   }
 
   export type userMaxOrderByAggregateInput = {
@@ -21715,13 +23517,13 @@ export namespace Prisma {
     email?: SortOrder
     emailVerified?: SortOrder
     image?: SortOrder
-    imageBase64?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     username?: SortOrder
     dni?: SortOrder
     birthDate?: SortOrder
     role?: SortOrder
+    image_base64?: SortOrder
   }
 
   export type userMinOrderByAggregateInput = {
@@ -21730,13 +23532,13 @@ export namespace Prisma {
     email?: SortOrder
     emailVerified?: SortOrder
     image?: SortOrder
-    imageBase64?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     username?: SortOrder
     dni?: SortOrder
     birthDate?: SortOrder
     role?: SortOrder
+    image_base64?: SortOrder
   }
 
   export type BoolWithAggregatesFilter<$PrismaModel = never> = {
@@ -21941,23 +23743,23 @@ export namespace Prisma {
     not?: NestedIntNullableFilter<$PrismaModel> | number | null
   }
 
-  export type TicketTypeListRelationFilter = {
-    every?: ticketTypeWhereInput
-    some?: ticketTypeWhereInput
-    none?: ticketTypeWhereInput
-  }
-
   export type EventArtistListRelationFilter = {
     every?: eventArtistWhereInput
     some?: eventArtistWhereInput
     none?: eventArtistWhereInput
   }
 
-  export type ticketTypeOrderByRelationAggregateInput = {
-    _count?: SortOrder
+  export type TicketTypeListRelationFilter = {
+    every?: ticketTypeWhereInput
+    some?: ticketTypeWhereInput
+    none?: ticketTypeWhereInput
   }
 
   export type eventArtistOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type ticketTypeOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -21972,6 +23774,7 @@ export namespace Prisma {
     producerId?: SortOrder
     capacityTotal?: SortOrder
     isRsvpAllowed?: SortOrder
+    isSoldOut?: SortOrder
     eventGenre?: SortOrder
     showRemainingTickets?: SortOrder
     createdAt?: SortOrder
@@ -21994,6 +23797,7 @@ export namespace Prisma {
     producerId?: SortOrder
     capacityTotal?: SortOrder
     isRsvpAllowed?: SortOrder
+    isSoldOut?: SortOrder
     eventGenre?: SortOrder
     showRemainingTickets?: SortOrder
     createdAt?: SortOrder
@@ -22010,6 +23814,7 @@ export namespace Prisma {
     producerId?: SortOrder
     capacityTotal?: SortOrder
     isRsvpAllowed?: SortOrder
+    isSoldOut?: SortOrder
     eventGenre?: SortOrder
     showRemainingTickets?: SortOrder
     createdAt?: SortOrder
@@ -22244,9 +24049,9 @@ export namespace Prisma {
     not?: NestedEnumTicketStatusFilter<$PrismaModel> | $Enums.TicketStatus
   }
 
-  export type TicketTypeScalarRelationFilter = {
-    is?: ticketTypeWhereInput
-    isNot?: ticketTypeWhereInput
+  export type PaymentNullableScalarRelationFilter = {
+    is?: paymentWhereInput | null
+    isNot?: paymentWhereInput | null
   }
 
   export type UserNullableScalarRelationFilter = {
@@ -22254,9 +24059,9 @@ export namespace Prisma {
     isNot?: userWhereInput | null
   }
 
-  export type PaymentNullableScalarRelationFilter = {
-    is?: paymentWhereInput | null
-    isNot?: paymentWhereInput | null
+  export type TicketTypeScalarRelationFilter = {
+    is?: ticketTypeWhereInput
+    isNot?: ticketTypeWhereInput
   }
 
   export type ticketCountOrderByAggregateInput = {
@@ -22459,6 +24264,93 @@ export namespace Prisma {
     id?: SortOrder
   }
 
+  export type EnumGuestStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.GuestStatus | EnumGuestStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.GuestStatus[] | ListEnumGuestStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.GuestStatus[] | ListEnumGuestStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumGuestStatusFilter<$PrismaModel> | $Enums.GuestStatus
+  }
+
+  export type guestListEventIdEmailNormalizedNameCompoundUniqueInput = {
+    eventId: number
+    email: string
+    normalizedName: string
+  }
+
+  export type guestListCountOrderByAggregateInput = {
+    id?: SortOrder
+    eventId?: SortOrder
+    fullName?: SortOrder
+    normalizedName?: SortOrder
+    email?: SortOrder
+    age?: SortOrder
+    invitedBy?: SortOrder
+    gender?: SortOrder
+    status?: SortOrder
+    qrCode?: SortOrder
+    checkedInAt?: SortOrder
+    checkedInBy?: SortOrder
+    importedAt?: SortOrder
+    importedBy?: SortOrder
+    timestamp?: SortOrder
+  }
+
+  export type guestListAvgOrderByAggregateInput = {
+    id?: SortOrder
+    eventId?: SortOrder
+  }
+
+  export type guestListMaxOrderByAggregateInput = {
+    id?: SortOrder
+    eventId?: SortOrder
+    fullName?: SortOrder
+    normalizedName?: SortOrder
+    email?: SortOrder
+    age?: SortOrder
+    invitedBy?: SortOrder
+    gender?: SortOrder
+    status?: SortOrder
+    qrCode?: SortOrder
+    checkedInAt?: SortOrder
+    checkedInBy?: SortOrder
+    importedAt?: SortOrder
+    importedBy?: SortOrder
+    timestamp?: SortOrder
+  }
+
+  export type guestListMinOrderByAggregateInput = {
+    id?: SortOrder
+    eventId?: SortOrder
+    fullName?: SortOrder
+    normalizedName?: SortOrder
+    email?: SortOrder
+    age?: SortOrder
+    invitedBy?: SortOrder
+    gender?: SortOrder
+    status?: SortOrder
+    qrCode?: SortOrder
+    checkedInAt?: SortOrder
+    checkedInBy?: SortOrder
+    importedAt?: SortOrder
+    importedBy?: SortOrder
+    timestamp?: SortOrder
+  }
+
+  export type guestListSumOrderByAggregateInput = {
+    id?: SortOrder
+    eventId?: SortOrder
+  }
+
+  export type EnumGuestStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.GuestStatus | EnumGuestStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.GuestStatus[] | ListEnumGuestStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.GuestStatus[] | ListEnumGuestStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumGuestStatusWithAggregatesFilter<$PrismaModel> | $Enums.GuestStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumGuestStatusFilter<$PrismaModel>
+    _max?: NestedEnumGuestStatusFilter<$PrismaModel>
+  }
+
   export type userCreateNestedOneWithoutAccountInput = {
     create?: XOR<userCreateWithoutAccountInput, userUncheckedCreateWithoutAccountInput>
     connectOrCreate?: userCreateOrConnectWithoutAccountInput
@@ -22503,6 +24395,62 @@ export namespace Prisma {
     update?: XOR<XOR<userUpdateToOneWithWhereWithoutSessionInput, userUpdateWithoutSessionInput>, userUncheckedUpdateWithoutSessionInput>
   }
 
+  export type accountCreateNestedManyWithoutUserInput = {
+    create?: XOR<accountCreateWithoutUserInput, accountUncheckedCreateWithoutUserInput> | accountCreateWithoutUserInput[] | accountUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: accountCreateOrConnectWithoutUserInput | accountCreateOrConnectWithoutUserInput[]
+    createMany?: accountCreateManyUserInputEnvelope
+    connect?: accountWhereUniqueInput | accountWhereUniqueInput[]
+  }
+
+  export type logCreateNestedManyWithoutUserInput = {
+    create?: XOR<logCreateWithoutUserInput, logUncheckedCreateWithoutUserInput> | logCreateWithoutUserInput[] | logUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: logCreateOrConnectWithoutUserInput | logCreateOrConnectWithoutUserInput[]
+    createMany?: logCreateManyUserInputEnvelope
+    connect?: logWhereUniqueInput | logWhereUniqueInput[]
+  }
+
+  export type messageCreateNestedManyWithoutReceiverInput = {
+    create?: XOR<messageCreateWithoutReceiverInput, messageUncheckedCreateWithoutReceiverInput> | messageCreateWithoutReceiverInput[] | messageUncheckedCreateWithoutReceiverInput[]
+    connectOrCreate?: messageCreateOrConnectWithoutReceiverInput | messageCreateOrConnectWithoutReceiverInput[]
+    createMany?: messageCreateManyReceiverInputEnvelope
+    connect?: messageWhereUniqueInput | messageWhereUniqueInput[]
+  }
+
+  export type messageCreateNestedManyWithoutSenderInput = {
+    create?: XOR<messageCreateWithoutSenderInput, messageUncheckedCreateWithoutSenderInput> | messageCreateWithoutSenderInput[] | messageUncheckedCreateWithoutSenderInput[]
+    connectOrCreate?: messageCreateOrConnectWithoutSenderInput | messageCreateOrConnectWithoutSenderInput[]
+    createMany?: messageCreateManySenderInputEnvelope
+    connect?: messageWhereUniqueInput | messageWhereUniqueInput[]
+  }
+
+  export type participantCreateNestedManyWithoutUserInput = {
+    create?: XOR<participantCreateWithoutUserInput, participantUncheckedCreateWithoutUserInput> | participantCreateWithoutUserInput[] | participantUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: participantCreateOrConnectWithoutUserInput | participantCreateOrConnectWithoutUserInput[]
+    createMany?: participantCreateManyUserInputEnvelope
+    connect?: participantWhereUniqueInput | participantWhereUniqueInput[]
+  }
+
+  export type paymentCreateNestedManyWithoutUserInput = {
+    create?: XOR<paymentCreateWithoutUserInput, paymentUncheckedCreateWithoutUserInput> | paymentCreateWithoutUserInput[] | paymentUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: paymentCreateOrConnectWithoutUserInput | paymentCreateOrConnectWithoutUserInput[]
+    createMany?: paymentCreateManyUserInputEnvelope
+    connect?: paymentWhereUniqueInput | paymentWhereUniqueInput[]
+  }
+
+  export type rrppAssignmentCreateNestedManyWithoutRrppUserInput = {
+    create?: XOR<rrppAssignmentCreateWithoutRrppUserInput, rrppAssignmentUncheckedCreateWithoutRrppUserInput> | rrppAssignmentCreateWithoutRrppUserInput[] | rrppAssignmentUncheckedCreateWithoutRrppUserInput[]
+    connectOrCreate?: rrppAssignmentCreateOrConnectWithoutRrppUserInput | rrppAssignmentCreateOrConnectWithoutRrppUserInput[]
+    createMany?: rrppAssignmentCreateManyRrppUserInputEnvelope
+    connect?: rrppAssignmentWhereUniqueInput | rrppAssignmentWhereUniqueInput[]
+  }
+
+  export type sessionCreateNestedManyWithoutUserInput = {
+    create?: XOR<sessionCreateWithoutUserInput, sessionUncheckedCreateWithoutUserInput> | sessionCreateWithoutUserInput[] | sessionUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: sessionCreateOrConnectWithoutUserInput | sessionCreateOrConnectWithoutUserInput[]
+    createMany?: sessionCreateManyUserInputEnvelope
+    connect?: sessionWhereUniqueInput | sessionWhereUniqueInput[]
+  }
+
   export type ticketCreateNestedManyWithoutOwnerInput = {
     create?: XOR<ticketCreateWithoutOwnerInput, ticketUncheckedCreateWithoutOwnerInput> | ticketCreateWithoutOwnerInput[] | ticketUncheckedCreateWithoutOwnerInput[]
     connectOrCreate?: ticketCreateOrConnectWithoutOwnerInput | ticketCreateOrConnectWithoutOwnerInput[]
@@ -22517,60 +24465,74 @@ export namespace Prisma {
     connect?: ticketWhereUniqueInput | ticketWhereUniqueInput[]
   }
 
-  export type participantCreateNestedManyWithoutUserInput = {
-    create?: XOR<participantCreateWithoutUserInput, participantUncheckedCreateWithoutUserInput> | participantCreateWithoutUserInput[] | participantUncheckedCreateWithoutUserInput[]
-    connectOrCreate?: participantCreateOrConnectWithoutUserInput | participantCreateOrConnectWithoutUserInput[]
-    createMany?: participantCreateManyUserInputEnvelope
-    connect?: participantWhereUniqueInput | participantWhereUniqueInput[]
+  export type guestListCreateNestedManyWithoutImportedByUserInput = {
+    create?: XOR<guestListCreateWithoutImportedByUserInput, guestListUncheckedCreateWithoutImportedByUserInput> | guestListCreateWithoutImportedByUserInput[] | guestListUncheckedCreateWithoutImportedByUserInput[]
+    connectOrCreate?: guestListCreateOrConnectWithoutImportedByUserInput | guestListCreateOrConnectWithoutImportedByUserInput[]
+    createMany?: guestListCreateManyImportedByUserInputEnvelope
+    connect?: guestListWhereUniqueInput | guestListWhereUniqueInput[]
   }
 
-  export type rrppAssignmentCreateNestedManyWithoutRrppUserInput = {
-    create?: XOR<rrppAssignmentCreateWithoutRrppUserInput, rrppAssignmentUncheckedCreateWithoutRrppUserInput> | rrppAssignmentCreateWithoutRrppUserInput[] | rrppAssignmentUncheckedCreateWithoutRrppUserInput[]
-    connectOrCreate?: rrppAssignmentCreateOrConnectWithoutRrppUserInput | rrppAssignmentCreateOrConnectWithoutRrppUserInput[]
-    createMany?: rrppAssignmentCreateManyRrppUserInputEnvelope
-    connect?: rrppAssignmentWhereUniqueInput | rrppAssignmentWhereUniqueInput[]
+  export type guestListCreateNestedManyWithoutCheckedInByUserInput = {
+    create?: XOR<guestListCreateWithoutCheckedInByUserInput, guestListUncheckedCreateWithoutCheckedInByUserInput> | guestListCreateWithoutCheckedInByUserInput[] | guestListUncheckedCreateWithoutCheckedInByUserInput[]
+    connectOrCreate?: guestListCreateOrConnectWithoutCheckedInByUserInput | guestListCreateOrConnectWithoutCheckedInByUserInput[]
+    createMany?: guestListCreateManyCheckedInByUserInputEnvelope
+    connect?: guestListWhereUniqueInput | guestListWhereUniqueInput[]
   }
 
-  export type accountCreateNestedManyWithoutUserInput = {
+  export type accountUncheckedCreateNestedManyWithoutUserInput = {
     create?: XOR<accountCreateWithoutUserInput, accountUncheckedCreateWithoutUserInput> | accountCreateWithoutUserInput[] | accountUncheckedCreateWithoutUserInput[]
     connectOrCreate?: accountCreateOrConnectWithoutUserInput | accountCreateOrConnectWithoutUserInput[]
     createMany?: accountCreateManyUserInputEnvelope
     connect?: accountWhereUniqueInput | accountWhereUniqueInput[]
   }
 
-  export type sessionCreateNestedManyWithoutUserInput = {
-    create?: XOR<sessionCreateWithoutUserInput, sessionUncheckedCreateWithoutUserInput> | sessionCreateWithoutUserInput[] | sessionUncheckedCreateWithoutUserInput[]
-    connectOrCreate?: sessionCreateOrConnectWithoutUserInput | sessionCreateOrConnectWithoutUserInput[]
-    createMany?: sessionCreateManyUserInputEnvelope
-    connect?: sessionWhereUniqueInput | sessionWhereUniqueInput[]
-  }
-
-  export type logCreateNestedManyWithoutUserInput = {
+  export type logUncheckedCreateNestedManyWithoutUserInput = {
     create?: XOR<logCreateWithoutUserInput, logUncheckedCreateWithoutUserInput> | logCreateWithoutUserInput[] | logUncheckedCreateWithoutUserInput[]
     connectOrCreate?: logCreateOrConnectWithoutUserInput | logCreateOrConnectWithoutUserInput[]
     createMany?: logCreateManyUserInputEnvelope
     connect?: logWhereUniqueInput | logWhereUniqueInput[]
   }
 
-  export type messageCreateNestedManyWithoutSenderInput = {
-    create?: XOR<messageCreateWithoutSenderInput, messageUncheckedCreateWithoutSenderInput> | messageCreateWithoutSenderInput[] | messageUncheckedCreateWithoutSenderInput[]
-    connectOrCreate?: messageCreateOrConnectWithoutSenderInput | messageCreateOrConnectWithoutSenderInput[]
-    createMany?: messageCreateManySenderInputEnvelope
-    connect?: messageWhereUniqueInput | messageWhereUniqueInput[]
-  }
-
-  export type messageCreateNestedManyWithoutReceiverInput = {
+  export type messageUncheckedCreateNestedManyWithoutReceiverInput = {
     create?: XOR<messageCreateWithoutReceiverInput, messageUncheckedCreateWithoutReceiverInput> | messageCreateWithoutReceiverInput[] | messageUncheckedCreateWithoutReceiverInput[]
     connectOrCreate?: messageCreateOrConnectWithoutReceiverInput | messageCreateOrConnectWithoutReceiverInput[]
     createMany?: messageCreateManyReceiverInputEnvelope
     connect?: messageWhereUniqueInput | messageWhereUniqueInput[]
   }
 
-  export type paymentCreateNestedManyWithoutUserInput = {
+  export type messageUncheckedCreateNestedManyWithoutSenderInput = {
+    create?: XOR<messageCreateWithoutSenderInput, messageUncheckedCreateWithoutSenderInput> | messageCreateWithoutSenderInput[] | messageUncheckedCreateWithoutSenderInput[]
+    connectOrCreate?: messageCreateOrConnectWithoutSenderInput | messageCreateOrConnectWithoutSenderInput[]
+    createMany?: messageCreateManySenderInputEnvelope
+    connect?: messageWhereUniqueInput | messageWhereUniqueInput[]
+  }
+
+  export type participantUncheckedCreateNestedManyWithoutUserInput = {
+    create?: XOR<participantCreateWithoutUserInput, participantUncheckedCreateWithoutUserInput> | participantCreateWithoutUserInput[] | participantUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: participantCreateOrConnectWithoutUserInput | participantCreateOrConnectWithoutUserInput[]
+    createMany?: participantCreateManyUserInputEnvelope
+    connect?: participantWhereUniqueInput | participantWhereUniqueInput[]
+  }
+
+  export type paymentUncheckedCreateNestedManyWithoutUserInput = {
     create?: XOR<paymentCreateWithoutUserInput, paymentUncheckedCreateWithoutUserInput> | paymentCreateWithoutUserInput[] | paymentUncheckedCreateWithoutUserInput[]
     connectOrCreate?: paymentCreateOrConnectWithoutUserInput | paymentCreateOrConnectWithoutUserInput[]
     createMany?: paymentCreateManyUserInputEnvelope
     connect?: paymentWhereUniqueInput | paymentWhereUniqueInput[]
+  }
+
+  export type rrppAssignmentUncheckedCreateNestedManyWithoutRrppUserInput = {
+    create?: XOR<rrppAssignmentCreateWithoutRrppUserInput, rrppAssignmentUncheckedCreateWithoutRrppUserInput> | rrppAssignmentCreateWithoutRrppUserInput[] | rrppAssignmentUncheckedCreateWithoutRrppUserInput[]
+    connectOrCreate?: rrppAssignmentCreateOrConnectWithoutRrppUserInput | rrppAssignmentCreateOrConnectWithoutRrppUserInput[]
+    createMany?: rrppAssignmentCreateManyRrppUserInputEnvelope
+    connect?: rrppAssignmentWhereUniqueInput | rrppAssignmentWhereUniqueInput[]
+  }
+
+  export type sessionUncheckedCreateNestedManyWithoutUserInput = {
+    create?: XOR<sessionCreateWithoutUserInput, sessionUncheckedCreateWithoutUserInput> | sessionCreateWithoutUserInput[] | sessionUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: sessionCreateOrConnectWithoutUserInput | sessionCreateOrConnectWithoutUserInput[]
+    createMany?: sessionCreateManyUserInputEnvelope
+    connect?: sessionWhereUniqueInput | sessionWhereUniqueInput[]
   }
 
   export type ticketUncheckedCreateNestedManyWithoutOwnerInput = {
@@ -22587,60 +24549,18 @@ export namespace Prisma {
     connect?: ticketWhereUniqueInput | ticketWhereUniqueInput[]
   }
 
-  export type participantUncheckedCreateNestedManyWithoutUserInput = {
-    create?: XOR<participantCreateWithoutUserInput, participantUncheckedCreateWithoutUserInput> | participantCreateWithoutUserInput[] | participantUncheckedCreateWithoutUserInput[]
-    connectOrCreate?: participantCreateOrConnectWithoutUserInput | participantCreateOrConnectWithoutUserInput[]
-    createMany?: participantCreateManyUserInputEnvelope
-    connect?: participantWhereUniqueInput | participantWhereUniqueInput[]
+  export type guestListUncheckedCreateNestedManyWithoutImportedByUserInput = {
+    create?: XOR<guestListCreateWithoutImportedByUserInput, guestListUncheckedCreateWithoutImportedByUserInput> | guestListCreateWithoutImportedByUserInput[] | guestListUncheckedCreateWithoutImportedByUserInput[]
+    connectOrCreate?: guestListCreateOrConnectWithoutImportedByUserInput | guestListCreateOrConnectWithoutImportedByUserInput[]
+    createMany?: guestListCreateManyImportedByUserInputEnvelope
+    connect?: guestListWhereUniqueInput | guestListWhereUniqueInput[]
   }
 
-  export type rrppAssignmentUncheckedCreateNestedManyWithoutRrppUserInput = {
-    create?: XOR<rrppAssignmentCreateWithoutRrppUserInput, rrppAssignmentUncheckedCreateWithoutRrppUserInput> | rrppAssignmentCreateWithoutRrppUserInput[] | rrppAssignmentUncheckedCreateWithoutRrppUserInput[]
-    connectOrCreate?: rrppAssignmentCreateOrConnectWithoutRrppUserInput | rrppAssignmentCreateOrConnectWithoutRrppUserInput[]
-    createMany?: rrppAssignmentCreateManyRrppUserInputEnvelope
-    connect?: rrppAssignmentWhereUniqueInput | rrppAssignmentWhereUniqueInput[]
-  }
-
-  export type accountUncheckedCreateNestedManyWithoutUserInput = {
-    create?: XOR<accountCreateWithoutUserInput, accountUncheckedCreateWithoutUserInput> | accountCreateWithoutUserInput[] | accountUncheckedCreateWithoutUserInput[]
-    connectOrCreate?: accountCreateOrConnectWithoutUserInput | accountCreateOrConnectWithoutUserInput[]
-    createMany?: accountCreateManyUserInputEnvelope
-    connect?: accountWhereUniqueInput | accountWhereUniqueInput[]
-  }
-
-  export type sessionUncheckedCreateNestedManyWithoutUserInput = {
-    create?: XOR<sessionCreateWithoutUserInput, sessionUncheckedCreateWithoutUserInput> | sessionCreateWithoutUserInput[] | sessionUncheckedCreateWithoutUserInput[]
-    connectOrCreate?: sessionCreateOrConnectWithoutUserInput | sessionCreateOrConnectWithoutUserInput[]
-    createMany?: sessionCreateManyUserInputEnvelope
-    connect?: sessionWhereUniqueInput | sessionWhereUniqueInput[]
-  }
-
-  export type logUncheckedCreateNestedManyWithoutUserInput = {
-    create?: XOR<logCreateWithoutUserInput, logUncheckedCreateWithoutUserInput> | logCreateWithoutUserInput[] | logUncheckedCreateWithoutUserInput[]
-    connectOrCreate?: logCreateOrConnectWithoutUserInput | logCreateOrConnectWithoutUserInput[]
-    createMany?: logCreateManyUserInputEnvelope
-    connect?: logWhereUniqueInput | logWhereUniqueInput[]
-  }
-
-  export type messageUncheckedCreateNestedManyWithoutSenderInput = {
-    create?: XOR<messageCreateWithoutSenderInput, messageUncheckedCreateWithoutSenderInput> | messageCreateWithoutSenderInput[] | messageUncheckedCreateWithoutSenderInput[]
-    connectOrCreate?: messageCreateOrConnectWithoutSenderInput | messageCreateOrConnectWithoutSenderInput[]
-    createMany?: messageCreateManySenderInputEnvelope
-    connect?: messageWhereUniqueInput | messageWhereUniqueInput[]
-  }
-
-  export type messageUncheckedCreateNestedManyWithoutReceiverInput = {
-    create?: XOR<messageCreateWithoutReceiverInput, messageUncheckedCreateWithoutReceiverInput> | messageCreateWithoutReceiverInput[] | messageUncheckedCreateWithoutReceiverInput[]
-    connectOrCreate?: messageCreateOrConnectWithoutReceiverInput | messageCreateOrConnectWithoutReceiverInput[]
-    createMany?: messageCreateManyReceiverInputEnvelope
-    connect?: messageWhereUniqueInput | messageWhereUniqueInput[]
-  }
-
-  export type paymentUncheckedCreateNestedManyWithoutUserInput = {
-    create?: XOR<paymentCreateWithoutUserInput, paymentUncheckedCreateWithoutUserInput> | paymentCreateWithoutUserInput[] | paymentUncheckedCreateWithoutUserInput[]
-    connectOrCreate?: paymentCreateOrConnectWithoutUserInput | paymentCreateOrConnectWithoutUserInput[]
-    createMany?: paymentCreateManyUserInputEnvelope
-    connect?: paymentWhereUniqueInput | paymentWhereUniqueInput[]
+  export type guestListUncheckedCreateNestedManyWithoutCheckedInByUserInput = {
+    create?: XOR<guestListCreateWithoutCheckedInByUserInput, guestListUncheckedCreateWithoutCheckedInByUserInput> | guestListCreateWithoutCheckedInByUserInput[] | guestListUncheckedCreateWithoutCheckedInByUserInput[]
+    connectOrCreate?: guestListCreateOrConnectWithoutCheckedInByUserInput | guestListCreateOrConnectWithoutCheckedInByUserInput[]
+    createMany?: guestListCreateManyCheckedInByUserInputEnvelope
+    connect?: guestListWhereUniqueInput | guestListWhereUniqueInput[]
   }
 
   export type BoolFieldUpdateOperationsInput = {
@@ -22649,6 +24569,118 @@ export namespace Prisma {
 
   export type EnumRoleFieldUpdateOperationsInput = {
     set?: $Enums.Role
+  }
+
+  export type accountUpdateManyWithoutUserNestedInput = {
+    create?: XOR<accountCreateWithoutUserInput, accountUncheckedCreateWithoutUserInput> | accountCreateWithoutUserInput[] | accountUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: accountCreateOrConnectWithoutUserInput | accountCreateOrConnectWithoutUserInput[]
+    upsert?: accountUpsertWithWhereUniqueWithoutUserInput | accountUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: accountCreateManyUserInputEnvelope
+    set?: accountWhereUniqueInput | accountWhereUniqueInput[]
+    disconnect?: accountWhereUniqueInput | accountWhereUniqueInput[]
+    delete?: accountWhereUniqueInput | accountWhereUniqueInput[]
+    connect?: accountWhereUniqueInput | accountWhereUniqueInput[]
+    update?: accountUpdateWithWhereUniqueWithoutUserInput | accountUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: accountUpdateManyWithWhereWithoutUserInput | accountUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: accountScalarWhereInput | accountScalarWhereInput[]
+  }
+
+  export type logUpdateManyWithoutUserNestedInput = {
+    create?: XOR<logCreateWithoutUserInput, logUncheckedCreateWithoutUserInput> | logCreateWithoutUserInput[] | logUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: logCreateOrConnectWithoutUserInput | logCreateOrConnectWithoutUserInput[]
+    upsert?: logUpsertWithWhereUniqueWithoutUserInput | logUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: logCreateManyUserInputEnvelope
+    set?: logWhereUniqueInput | logWhereUniqueInput[]
+    disconnect?: logWhereUniqueInput | logWhereUniqueInput[]
+    delete?: logWhereUniqueInput | logWhereUniqueInput[]
+    connect?: logWhereUniqueInput | logWhereUniqueInput[]
+    update?: logUpdateWithWhereUniqueWithoutUserInput | logUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: logUpdateManyWithWhereWithoutUserInput | logUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: logScalarWhereInput | logScalarWhereInput[]
+  }
+
+  export type messageUpdateManyWithoutReceiverNestedInput = {
+    create?: XOR<messageCreateWithoutReceiverInput, messageUncheckedCreateWithoutReceiverInput> | messageCreateWithoutReceiverInput[] | messageUncheckedCreateWithoutReceiverInput[]
+    connectOrCreate?: messageCreateOrConnectWithoutReceiverInput | messageCreateOrConnectWithoutReceiverInput[]
+    upsert?: messageUpsertWithWhereUniqueWithoutReceiverInput | messageUpsertWithWhereUniqueWithoutReceiverInput[]
+    createMany?: messageCreateManyReceiverInputEnvelope
+    set?: messageWhereUniqueInput | messageWhereUniqueInput[]
+    disconnect?: messageWhereUniqueInput | messageWhereUniqueInput[]
+    delete?: messageWhereUniqueInput | messageWhereUniqueInput[]
+    connect?: messageWhereUniqueInput | messageWhereUniqueInput[]
+    update?: messageUpdateWithWhereUniqueWithoutReceiverInput | messageUpdateWithWhereUniqueWithoutReceiverInput[]
+    updateMany?: messageUpdateManyWithWhereWithoutReceiverInput | messageUpdateManyWithWhereWithoutReceiverInput[]
+    deleteMany?: messageScalarWhereInput | messageScalarWhereInput[]
+  }
+
+  export type messageUpdateManyWithoutSenderNestedInput = {
+    create?: XOR<messageCreateWithoutSenderInput, messageUncheckedCreateWithoutSenderInput> | messageCreateWithoutSenderInput[] | messageUncheckedCreateWithoutSenderInput[]
+    connectOrCreate?: messageCreateOrConnectWithoutSenderInput | messageCreateOrConnectWithoutSenderInput[]
+    upsert?: messageUpsertWithWhereUniqueWithoutSenderInput | messageUpsertWithWhereUniqueWithoutSenderInput[]
+    createMany?: messageCreateManySenderInputEnvelope
+    set?: messageWhereUniqueInput | messageWhereUniqueInput[]
+    disconnect?: messageWhereUniqueInput | messageWhereUniqueInput[]
+    delete?: messageWhereUniqueInput | messageWhereUniqueInput[]
+    connect?: messageWhereUniqueInput | messageWhereUniqueInput[]
+    update?: messageUpdateWithWhereUniqueWithoutSenderInput | messageUpdateWithWhereUniqueWithoutSenderInput[]
+    updateMany?: messageUpdateManyWithWhereWithoutSenderInput | messageUpdateManyWithWhereWithoutSenderInput[]
+    deleteMany?: messageScalarWhereInput | messageScalarWhereInput[]
+  }
+
+  export type participantUpdateManyWithoutUserNestedInput = {
+    create?: XOR<participantCreateWithoutUserInput, participantUncheckedCreateWithoutUserInput> | participantCreateWithoutUserInput[] | participantUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: participantCreateOrConnectWithoutUserInput | participantCreateOrConnectWithoutUserInput[]
+    upsert?: participantUpsertWithWhereUniqueWithoutUserInput | participantUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: participantCreateManyUserInputEnvelope
+    set?: participantWhereUniqueInput | participantWhereUniqueInput[]
+    disconnect?: participantWhereUniqueInput | participantWhereUniqueInput[]
+    delete?: participantWhereUniqueInput | participantWhereUniqueInput[]
+    connect?: participantWhereUniqueInput | participantWhereUniqueInput[]
+    update?: participantUpdateWithWhereUniqueWithoutUserInput | participantUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: participantUpdateManyWithWhereWithoutUserInput | participantUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: participantScalarWhereInput | participantScalarWhereInput[]
+  }
+
+  export type paymentUpdateManyWithoutUserNestedInput = {
+    create?: XOR<paymentCreateWithoutUserInput, paymentUncheckedCreateWithoutUserInput> | paymentCreateWithoutUserInput[] | paymentUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: paymentCreateOrConnectWithoutUserInput | paymentCreateOrConnectWithoutUserInput[]
+    upsert?: paymentUpsertWithWhereUniqueWithoutUserInput | paymentUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: paymentCreateManyUserInputEnvelope
+    set?: paymentWhereUniqueInput | paymentWhereUniqueInput[]
+    disconnect?: paymentWhereUniqueInput | paymentWhereUniqueInput[]
+    delete?: paymentWhereUniqueInput | paymentWhereUniqueInput[]
+    connect?: paymentWhereUniqueInput | paymentWhereUniqueInput[]
+    update?: paymentUpdateWithWhereUniqueWithoutUserInput | paymentUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: paymentUpdateManyWithWhereWithoutUserInput | paymentUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: paymentScalarWhereInput | paymentScalarWhereInput[]
+  }
+
+  export type rrppAssignmentUpdateManyWithoutRrppUserNestedInput = {
+    create?: XOR<rrppAssignmentCreateWithoutRrppUserInput, rrppAssignmentUncheckedCreateWithoutRrppUserInput> | rrppAssignmentCreateWithoutRrppUserInput[] | rrppAssignmentUncheckedCreateWithoutRrppUserInput[]
+    connectOrCreate?: rrppAssignmentCreateOrConnectWithoutRrppUserInput | rrppAssignmentCreateOrConnectWithoutRrppUserInput[]
+    upsert?: rrppAssignmentUpsertWithWhereUniqueWithoutRrppUserInput | rrppAssignmentUpsertWithWhereUniqueWithoutRrppUserInput[]
+    createMany?: rrppAssignmentCreateManyRrppUserInputEnvelope
+    set?: rrppAssignmentWhereUniqueInput | rrppAssignmentWhereUniqueInput[]
+    disconnect?: rrppAssignmentWhereUniqueInput | rrppAssignmentWhereUniqueInput[]
+    delete?: rrppAssignmentWhereUniqueInput | rrppAssignmentWhereUniqueInput[]
+    connect?: rrppAssignmentWhereUniqueInput | rrppAssignmentWhereUniqueInput[]
+    update?: rrppAssignmentUpdateWithWhereUniqueWithoutRrppUserInput | rrppAssignmentUpdateWithWhereUniqueWithoutRrppUserInput[]
+    updateMany?: rrppAssignmentUpdateManyWithWhereWithoutRrppUserInput | rrppAssignmentUpdateManyWithWhereWithoutRrppUserInput[]
+    deleteMany?: rrppAssignmentScalarWhereInput | rrppAssignmentScalarWhereInput[]
+  }
+
+  export type sessionUpdateManyWithoutUserNestedInput = {
+    create?: XOR<sessionCreateWithoutUserInput, sessionUncheckedCreateWithoutUserInput> | sessionCreateWithoutUserInput[] | sessionUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: sessionCreateOrConnectWithoutUserInput | sessionCreateOrConnectWithoutUserInput[]
+    upsert?: sessionUpsertWithWhereUniqueWithoutUserInput | sessionUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: sessionCreateManyUserInputEnvelope
+    set?: sessionWhereUniqueInput | sessionWhereUniqueInput[]
+    disconnect?: sessionWhereUniqueInput | sessionWhereUniqueInput[]
+    delete?: sessionWhereUniqueInput | sessionWhereUniqueInput[]
+    connect?: sessionWhereUniqueInput | sessionWhereUniqueInput[]
+    update?: sessionUpdateWithWhereUniqueWithoutUserInput | sessionUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: sessionUpdateManyWithWhereWithoutUserInput | sessionUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: sessionScalarWhereInput | sessionScalarWhereInput[]
   }
 
   export type ticketUpdateManyWithoutOwnerNestedInput = {
@@ -22679,35 +24711,35 @@ export namespace Prisma {
     deleteMany?: ticketScalarWhereInput | ticketScalarWhereInput[]
   }
 
-  export type participantUpdateManyWithoutUserNestedInput = {
-    create?: XOR<participantCreateWithoutUserInput, participantUncheckedCreateWithoutUserInput> | participantCreateWithoutUserInput[] | participantUncheckedCreateWithoutUserInput[]
-    connectOrCreate?: participantCreateOrConnectWithoutUserInput | participantCreateOrConnectWithoutUserInput[]
-    upsert?: participantUpsertWithWhereUniqueWithoutUserInput | participantUpsertWithWhereUniqueWithoutUserInput[]
-    createMany?: participantCreateManyUserInputEnvelope
-    set?: participantWhereUniqueInput | participantWhereUniqueInput[]
-    disconnect?: participantWhereUniqueInput | participantWhereUniqueInput[]
-    delete?: participantWhereUniqueInput | participantWhereUniqueInput[]
-    connect?: participantWhereUniqueInput | participantWhereUniqueInput[]
-    update?: participantUpdateWithWhereUniqueWithoutUserInput | participantUpdateWithWhereUniqueWithoutUserInput[]
-    updateMany?: participantUpdateManyWithWhereWithoutUserInput | participantUpdateManyWithWhereWithoutUserInput[]
-    deleteMany?: participantScalarWhereInput | participantScalarWhereInput[]
+  export type guestListUpdateManyWithoutImportedByUserNestedInput = {
+    create?: XOR<guestListCreateWithoutImportedByUserInput, guestListUncheckedCreateWithoutImportedByUserInput> | guestListCreateWithoutImportedByUserInput[] | guestListUncheckedCreateWithoutImportedByUserInput[]
+    connectOrCreate?: guestListCreateOrConnectWithoutImportedByUserInput | guestListCreateOrConnectWithoutImportedByUserInput[]
+    upsert?: guestListUpsertWithWhereUniqueWithoutImportedByUserInput | guestListUpsertWithWhereUniqueWithoutImportedByUserInput[]
+    createMany?: guestListCreateManyImportedByUserInputEnvelope
+    set?: guestListWhereUniqueInput | guestListWhereUniqueInput[]
+    disconnect?: guestListWhereUniqueInput | guestListWhereUniqueInput[]
+    delete?: guestListWhereUniqueInput | guestListWhereUniqueInput[]
+    connect?: guestListWhereUniqueInput | guestListWhereUniqueInput[]
+    update?: guestListUpdateWithWhereUniqueWithoutImportedByUserInput | guestListUpdateWithWhereUniqueWithoutImportedByUserInput[]
+    updateMany?: guestListUpdateManyWithWhereWithoutImportedByUserInput | guestListUpdateManyWithWhereWithoutImportedByUserInput[]
+    deleteMany?: guestListScalarWhereInput | guestListScalarWhereInput[]
   }
 
-  export type rrppAssignmentUpdateManyWithoutRrppUserNestedInput = {
-    create?: XOR<rrppAssignmentCreateWithoutRrppUserInput, rrppAssignmentUncheckedCreateWithoutRrppUserInput> | rrppAssignmentCreateWithoutRrppUserInput[] | rrppAssignmentUncheckedCreateWithoutRrppUserInput[]
-    connectOrCreate?: rrppAssignmentCreateOrConnectWithoutRrppUserInput | rrppAssignmentCreateOrConnectWithoutRrppUserInput[]
-    upsert?: rrppAssignmentUpsertWithWhereUniqueWithoutRrppUserInput | rrppAssignmentUpsertWithWhereUniqueWithoutRrppUserInput[]
-    createMany?: rrppAssignmentCreateManyRrppUserInputEnvelope
-    set?: rrppAssignmentWhereUniqueInput | rrppAssignmentWhereUniqueInput[]
-    disconnect?: rrppAssignmentWhereUniqueInput | rrppAssignmentWhereUniqueInput[]
-    delete?: rrppAssignmentWhereUniqueInput | rrppAssignmentWhereUniqueInput[]
-    connect?: rrppAssignmentWhereUniqueInput | rrppAssignmentWhereUniqueInput[]
-    update?: rrppAssignmentUpdateWithWhereUniqueWithoutRrppUserInput | rrppAssignmentUpdateWithWhereUniqueWithoutRrppUserInput[]
-    updateMany?: rrppAssignmentUpdateManyWithWhereWithoutRrppUserInput | rrppAssignmentUpdateManyWithWhereWithoutRrppUserInput[]
-    deleteMany?: rrppAssignmentScalarWhereInput | rrppAssignmentScalarWhereInput[]
+  export type guestListUpdateManyWithoutCheckedInByUserNestedInput = {
+    create?: XOR<guestListCreateWithoutCheckedInByUserInput, guestListUncheckedCreateWithoutCheckedInByUserInput> | guestListCreateWithoutCheckedInByUserInput[] | guestListUncheckedCreateWithoutCheckedInByUserInput[]
+    connectOrCreate?: guestListCreateOrConnectWithoutCheckedInByUserInput | guestListCreateOrConnectWithoutCheckedInByUserInput[]
+    upsert?: guestListUpsertWithWhereUniqueWithoutCheckedInByUserInput | guestListUpsertWithWhereUniqueWithoutCheckedInByUserInput[]
+    createMany?: guestListCreateManyCheckedInByUserInputEnvelope
+    set?: guestListWhereUniqueInput | guestListWhereUniqueInput[]
+    disconnect?: guestListWhereUniqueInput | guestListWhereUniqueInput[]
+    delete?: guestListWhereUniqueInput | guestListWhereUniqueInput[]
+    connect?: guestListWhereUniqueInput | guestListWhereUniqueInput[]
+    update?: guestListUpdateWithWhereUniqueWithoutCheckedInByUserInput | guestListUpdateWithWhereUniqueWithoutCheckedInByUserInput[]
+    updateMany?: guestListUpdateManyWithWhereWithoutCheckedInByUserInput | guestListUpdateManyWithWhereWithoutCheckedInByUserInput[]
+    deleteMany?: guestListScalarWhereInput | guestListScalarWhereInput[]
   }
 
-  export type accountUpdateManyWithoutUserNestedInput = {
+  export type accountUncheckedUpdateManyWithoutUserNestedInput = {
     create?: XOR<accountCreateWithoutUserInput, accountUncheckedCreateWithoutUserInput> | accountCreateWithoutUserInput[] | accountUncheckedCreateWithoutUserInput[]
     connectOrCreate?: accountCreateOrConnectWithoutUserInput | accountCreateOrConnectWithoutUserInput[]
     upsert?: accountUpsertWithWhereUniqueWithoutUserInput | accountUpsertWithWhereUniqueWithoutUserInput[]
@@ -22721,21 +24753,7 @@ export namespace Prisma {
     deleteMany?: accountScalarWhereInput | accountScalarWhereInput[]
   }
 
-  export type sessionUpdateManyWithoutUserNestedInput = {
-    create?: XOR<sessionCreateWithoutUserInput, sessionUncheckedCreateWithoutUserInput> | sessionCreateWithoutUserInput[] | sessionUncheckedCreateWithoutUserInput[]
-    connectOrCreate?: sessionCreateOrConnectWithoutUserInput | sessionCreateOrConnectWithoutUserInput[]
-    upsert?: sessionUpsertWithWhereUniqueWithoutUserInput | sessionUpsertWithWhereUniqueWithoutUserInput[]
-    createMany?: sessionCreateManyUserInputEnvelope
-    set?: sessionWhereUniqueInput | sessionWhereUniqueInput[]
-    disconnect?: sessionWhereUniqueInput | sessionWhereUniqueInput[]
-    delete?: sessionWhereUniqueInput | sessionWhereUniqueInput[]
-    connect?: sessionWhereUniqueInput | sessionWhereUniqueInput[]
-    update?: sessionUpdateWithWhereUniqueWithoutUserInput | sessionUpdateWithWhereUniqueWithoutUserInput[]
-    updateMany?: sessionUpdateManyWithWhereWithoutUserInput | sessionUpdateManyWithWhereWithoutUserInput[]
-    deleteMany?: sessionScalarWhereInput | sessionScalarWhereInput[]
-  }
-
-  export type logUpdateManyWithoutUserNestedInput = {
+  export type logUncheckedUpdateManyWithoutUserNestedInput = {
     create?: XOR<logCreateWithoutUserInput, logUncheckedCreateWithoutUserInput> | logCreateWithoutUserInput[] | logUncheckedCreateWithoutUserInput[]
     connectOrCreate?: logCreateOrConnectWithoutUserInput | logCreateOrConnectWithoutUserInput[]
     upsert?: logUpsertWithWhereUniqueWithoutUserInput | logUpsertWithWhereUniqueWithoutUserInput[]
@@ -22749,21 +24767,7 @@ export namespace Prisma {
     deleteMany?: logScalarWhereInput | logScalarWhereInput[]
   }
 
-  export type messageUpdateManyWithoutSenderNestedInput = {
-    create?: XOR<messageCreateWithoutSenderInput, messageUncheckedCreateWithoutSenderInput> | messageCreateWithoutSenderInput[] | messageUncheckedCreateWithoutSenderInput[]
-    connectOrCreate?: messageCreateOrConnectWithoutSenderInput | messageCreateOrConnectWithoutSenderInput[]
-    upsert?: messageUpsertWithWhereUniqueWithoutSenderInput | messageUpsertWithWhereUniqueWithoutSenderInput[]
-    createMany?: messageCreateManySenderInputEnvelope
-    set?: messageWhereUniqueInput | messageWhereUniqueInput[]
-    disconnect?: messageWhereUniqueInput | messageWhereUniqueInput[]
-    delete?: messageWhereUniqueInput | messageWhereUniqueInput[]
-    connect?: messageWhereUniqueInput | messageWhereUniqueInput[]
-    update?: messageUpdateWithWhereUniqueWithoutSenderInput | messageUpdateWithWhereUniqueWithoutSenderInput[]
-    updateMany?: messageUpdateManyWithWhereWithoutSenderInput | messageUpdateManyWithWhereWithoutSenderInput[]
-    deleteMany?: messageScalarWhereInput | messageScalarWhereInput[]
-  }
-
-  export type messageUpdateManyWithoutReceiverNestedInput = {
+  export type messageUncheckedUpdateManyWithoutReceiverNestedInput = {
     create?: XOR<messageCreateWithoutReceiverInput, messageUncheckedCreateWithoutReceiverInput> | messageCreateWithoutReceiverInput[] | messageUncheckedCreateWithoutReceiverInput[]
     connectOrCreate?: messageCreateOrConnectWithoutReceiverInput | messageCreateOrConnectWithoutReceiverInput[]
     upsert?: messageUpsertWithWhereUniqueWithoutReceiverInput | messageUpsertWithWhereUniqueWithoutReceiverInput[]
@@ -22777,7 +24781,35 @@ export namespace Prisma {
     deleteMany?: messageScalarWhereInput | messageScalarWhereInput[]
   }
 
-  export type paymentUpdateManyWithoutUserNestedInput = {
+  export type messageUncheckedUpdateManyWithoutSenderNestedInput = {
+    create?: XOR<messageCreateWithoutSenderInput, messageUncheckedCreateWithoutSenderInput> | messageCreateWithoutSenderInput[] | messageUncheckedCreateWithoutSenderInput[]
+    connectOrCreate?: messageCreateOrConnectWithoutSenderInput | messageCreateOrConnectWithoutSenderInput[]
+    upsert?: messageUpsertWithWhereUniqueWithoutSenderInput | messageUpsertWithWhereUniqueWithoutSenderInput[]
+    createMany?: messageCreateManySenderInputEnvelope
+    set?: messageWhereUniqueInput | messageWhereUniqueInput[]
+    disconnect?: messageWhereUniqueInput | messageWhereUniqueInput[]
+    delete?: messageWhereUniqueInput | messageWhereUniqueInput[]
+    connect?: messageWhereUniqueInput | messageWhereUniqueInput[]
+    update?: messageUpdateWithWhereUniqueWithoutSenderInput | messageUpdateWithWhereUniqueWithoutSenderInput[]
+    updateMany?: messageUpdateManyWithWhereWithoutSenderInput | messageUpdateManyWithWhereWithoutSenderInput[]
+    deleteMany?: messageScalarWhereInput | messageScalarWhereInput[]
+  }
+
+  export type participantUncheckedUpdateManyWithoutUserNestedInput = {
+    create?: XOR<participantCreateWithoutUserInput, participantUncheckedCreateWithoutUserInput> | participantCreateWithoutUserInput[] | participantUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: participantCreateOrConnectWithoutUserInput | participantCreateOrConnectWithoutUserInput[]
+    upsert?: participantUpsertWithWhereUniqueWithoutUserInput | participantUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: participantCreateManyUserInputEnvelope
+    set?: participantWhereUniqueInput | participantWhereUniqueInput[]
+    disconnect?: participantWhereUniqueInput | participantWhereUniqueInput[]
+    delete?: participantWhereUniqueInput | participantWhereUniqueInput[]
+    connect?: participantWhereUniqueInput | participantWhereUniqueInput[]
+    update?: participantUpdateWithWhereUniqueWithoutUserInput | participantUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: participantUpdateManyWithWhereWithoutUserInput | participantUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: participantScalarWhereInput | participantScalarWhereInput[]
+  }
+
+  export type paymentUncheckedUpdateManyWithoutUserNestedInput = {
     create?: XOR<paymentCreateWithoutUserInput, paymentUncheckedCreateWithoutUserInput> | paymentCreateWithoutUserInput[] | paymentUncheckedCreateWithoutUserInput[]
     connectOrCreate?: paymentCreateOrConnectWithoutUserInput | paymentCreateOrConnectWithoutUserInput[]
     upsert?: paymentUpsertWithWhereUniqueWithoutUserInput | paymentUpsertWithWhereUniqueWithoutUserInput[]
@@ -22789,6 +24821,34 @@ export namespace Prisma {
     update?: paymentUpdateWithWhereUniqueWithoutUserInput | paymentUpdateWithWhereUniqueWithoutUserInput[]
     updateMany?: paymentUpdateManyWithWhereWithoutUserInput | paymentUpdateManyWithWhereWithoutUserInput[]
     deleteMany?: paymentScalarWhereInput | paymentScalarWhereInput[]
+  }
+
+  export type rrppAssignmentUncheckedUpdateManyWithoutRrppUserNestedInput = {
+    create?: XOR<rrppAssignmentCreateWithoutRrppUserInput, rrppAssignmentUncheckedCreateWithoutRrppUserInput> | rrppAssignmentCreateWithoutRrppUserInput[] | rrppAssignmentUncheckedCreateWithoutRrppUserInput[]
+    connectOrCreate?: rrppAssignmentCreateOrConnectWithoutRrppUserInput | rrppAssignmentCreateOrConnectWithoutRrppUserInput[]
+    upsert?: rrppAssignmentUpsertWithWhereUniqueWithoutRrppUserInput | rrppAssignmentUpsertWithWhereUniqueWithoutRrppUserInput[]
+    createMany?: rrppAssignmentCreateManyRrppUserInputEnvelope
+    set?: rrppAssignmentWhereUniqueInput | rrppAssignmentWhereUniqueInput[]
+    disconnect?: rrppAssignmentWhereUniqueInput | rrppAssignmentWhereUniqueInput[]
+    delete?: rrppAssignmentWhereUniqueInput | rrppAssignmentWhereUniqueInput[]
+    connect?: rrppAssignmentWhereUniqueInput | rrppAssignmentWhereUniqueInput[]
+    update?: rrppAssignmentUpdateWithWhereUniqueWithoutRrppUserInput | rrppAssignmentUpdateWithWhereUniqueWithoutRrppUserInput[]
+    updateMany?: rrppAssignmentUpdateManyWithWhereWithoutRrppUserInput | rrppAssignmentUpdateManyWithWhereWithoutRrppUserInput[]
+    deleteMany?: rrppAssignmentScalarWhereInput | rrppAssignmentScalarWhereInput[]
+  }
+
+  export type sessionUncheckedUpdateManyWithoutUserNestedInput = {
+    create?: XOR<sessionCreateWithoutUserInput, sessionUncheckedCreateWithoutUserInput> | sessionCreateWithoutUserInput[] | sessionUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: sessionCreateOrConnectWithoutUserInput | sessionCreateOrConnectWithoutUserInput[]
+    upsert?: sessionUpsertWithWhereUniqueWithoutUserInput | sessionUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: sessionCreateManyUserInputEnvelope
+    set?: sessionWhereUniqueInput | sessionWhereUniqueInput[]
+    disconnect?: sessionWhereUniqueInput | sessionWhereUniqueInput[]
+    delete?: sessionWhereUniqueInput | sessionWhereUniqueInput[]
+    connect?: sessionWhereUniqueInput | sessionWhereUniqueInput[]
+    update?: sessionUpdateWithWhereUniqueWithoutUserInput | sessionUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: sessionUpdateManyWithWhereWithoutUserInput | sessionUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: sessionScalarWhereInput | sessionScalarWhereInput[]
   }
 
   export type ticketUncheckedUpdateManyWithoutOwnerNestedInput = {
@@ -22819,128 +24879,44 @@ export namespace Prisma {
     deleteMany?: ticketScalarWhereInput | ticketScalarWhereInput[]
   }
 
-  export type participantUncheckedUpdateManyWithoutUserNestedInput = {
-    create?: XOR<participantCreateWithoutUserInput, participantUncheckedCreateWithoutUserInput> | participantCreateWithoutUserInput[] | participantUncheckedCreateWithoutUserInput[]
-    connectOrCreate?: participantCreateOrConnectWithoutUserInput | participantCreateOrConnectWithoutUserInput[]
-    upsert?: participantUpsertWithWhereUniqueWithoutUserInput | participantUpsertWithWhereUniqueWithoutUserInput[]
-    createMany?: participantCreateManyUserInputEnvelope
-    set?: participantWhereUniqueInput | participantWhereUniqueInput[]
-    disconnect?: participantWhereUniqueInput | participantWhereUniqueInput[]
-    delete?: participantWhereUniqueInput | participantWhereUniqueInput[]
-    connect?: participantWhereUniqueInput | participantWhereUniqueInput[]
-    update?: participantUpdateWithWhereUniqueWithoutUserInput | participantUpdateWithWhereUniqueWithoutUserInput[]
-    updateMany?: participantUpdateManyWithWhereWithoutUserInput | participantUpdateManyWithWhereWithoutUserInput[]
-    deleteMany?: participantScalarWhereInput | participantScalarWhereInput[]
+  export type guestListUncheckedUpdateManyWithoutImportedByUserNestedInput = {
+    create?: XOR<guestListCreateWithoutImportedByUserInput, guestListUncheckedCreateWithoutImportedByUserInput> | guestListCreateWithoutImportedByUserInput[] | guestListUncheckedCreateWithoutImportedByUserInput[]
+    connectOrCreate?: guestListCreateOrConnectWithoutImportedByUserInput | guestListCreateOrConnectWithoutImportedByUserInput[]
+    upsert?: guestListUpsertWithWhereUniqueWithoutImportedByUserInput | guestListUpsertWithWhereUniqueWithoutImportedByUserInput[]
+    createMany?: guestListCreateManyImportedByUserInputEnvelope
+    set?: guestListWhereUniqueInput | guestListWhereUniqueInput[]
+    disconnect?: guestListWhereUniqueInput | guestListWhereUniqueInput[]
+    delete?: guestListWhereUniqueInput | guestListWhereUniqueInput[]
+    connect?: guestListWhereUniqueInput | guestListWhereUniqueInput[]
+    update?: guestListUpdateWithWhereUniqueWithoutImportedByUserInput | guestListUpdateWithWhereUniqueWithoutImportedByUserInput[]
+    updateMany?: guestListUpdateManyWithWhereWithoutImportedByUserInput | guestListUpdateManyWithWhereWithoutImportedByUserInput[]
+    deleteMany?: guestListScalarWhereInput | guestListScalarWhereInput[]
   }
 
-  export type rrppAssignmentUncheckedUpdateManyWithoutRrppUserNestedInput = {
-    create?: XOR<rrppAssignmentCreateWithoutRrppUserInput, rrppAssignmentUncheckedCreateWithoutRrppUserInput> | rrppAssignmentCreateWithoutRrppUserInput[] | rrppAssignmentUncheckedCreateWithoutRrppUserInput[]
-    connectOrCreate?: rrppAssignmentCreateOrConnectWithoutRrppUserInput | rrppAssignmentCreateOrConnectWithoutRrppUserInput[]
-    upsert?: rrppAssignmentUpsertWithWhereUniqueWithoutRrppUserInput | rrppAssignmentUpsertWithWhereUniqueWithoutRrppUserInput[]
-    createMany?: rrppAssignmentCreateManyRrppUserInputEnvelope
-    set?: rrppAssignmentWhereUniqueInput | rrppAssignmentWhereUniqueInput[]
-    disconnect?: rrppAssignmentWhereUniqueInput | rrppAssignmentWhereUniqueInput[]
-    delete?: rrppAssignmentWhereUniqueInput | rrppAssignmentWhereUniqueInput[]
-    connect?: rrppAssignmentWhereUniqueInput | rrppAssignmentWhereUniqueInput[]
-    update?: rrppAssignmentUpdateWithWhereUniqueWithoutRrppUserInput | rrppAssignmentUpdateWithWhereUniqueWithoutRrppUserInput[]
-    updateMany?: rrppAssignmentUpdateManyWithWhereWithoutRrppUserInput | rrppAssignmentUpdateManyWithWhereWithoutRrppUserInput[]
-    deleteMany?: rrppAssignmentScalarWhereInput | rrppAssignmentScalarWhereInput[]
-  }
-
-  export type accountUncheckedUpdateManyWithoutUserNestedInput = {
-    create?: XOR<accountCreateWithoutUserInput, accountUncheckedCreateWithoutUserInput> | accountCreateWithoutUserInput[] | accountUncheckedCreateWithoutUserInput[]
-    connectOrCreate?: accountCreateOrConnectWithoutUserInput | accountCreateOrConnectWithoutUserInput[]
-    upsert?: accountUpsertWithWhereUniqueWithoutUserInput | accountUpsertWithWhereUniqueWithoutUserInput[]
-    createMany?: accountCreateManyUserInputEnvelope
-    set?: accountWhereUniqueInput | accountWhereUniqueInput[]
-    disconnect?: accountWhereUniqueInput | accountWhereUniqueInput[]
-    delete?: accountWhereUniqueInput | accountWhereUniqueInput[]
-    connect?: accountWhereUniqueInput | accountWhereUniqueInput[]
-    update?: accountUpdateWithWhereUniqueWithoutUserInput | accountUpdateWithWhereUniqueWithoutUserInput[]
-    updateMany?: accountUpdateManyWithWhereWithoutUserInput | accountUpdateManyWithWhereWithoutUserInput[]
-    deleteMany?: accountScalarWhereInput | accountScalarWhereInput[]
-  }
-
-  export type sessionUncheckedUpdateManyWithoutUserNestedInput = {
-    create?: XOR<sessionCreateWithoutUserInput, sessionUncheckedCreateWithoutUserInput> | sessionCreateWithoutUserInput[] | sessionUncheckedCreateWithoutUserInput[]
-    connectOrCreate?: sessionCreateOrConnectWithoutUserInput | sessionCreateOrConnectWithoutUserInput[]
-    upsert?: sessionUpsertWithWhereUniqueWithoutUserInput | sessionUpsertWithWhereUniqueWithoutUserInput[]
-    createMany?: sessionCreateManyUserInputEnvelope
-    set?: sessionWhereUniqueInput | sessionWhereUniqueInput[]
-    disconnect?: sessionWhereUniqueInput | sessionWhereUniqueInput[]
-    delete?: sessionWhereUniqueInput | sessionWhereUniqueInput[]
-    connect?: sessionWhereUniqueInput | sessionWhereUniqueInput[]
-    update?: sessionUpdateWithWhereUniqueWithoutUserInput | sessionUpdateWithWhereUniqueWithoutUserInput[]
-    updateMany?: sessionUpdateManyWithWhereWithoutUserInput | sessionUpdateManyWithWhereWithoutUserInput[]
-    deleteMany?: sessionScalarWhereInput | sessionScalarWhereInput[]
-  }
-
-  export type logUncheckedUpdateManyWithoutUserNestedInput = {
-    create?: XOR<logCreateWithoutUserInput, logUncheckedCreateWithoutUserInput> | logCreateWithoutUserInput[] | logUncheckedCreateWithoutUserInput[]
-    connectOrCreate?: logCreateOrConnectWithoutUserInput | logCreateOrConnectWithoutUserInput[]
-    upsert?: logUpsertWithWhereUniqueWithoutUserInput | logUpsertWithWhereUniqueWithoutUserInput[]
-    createMany?: logCreateManyUserInputEnvelope
-    set?: logWhereUniqueInput | logWhereUniqueInput[]
-    disconnect?: logWhereUniqueInput | logWhereUniqueInput[]
-    delete?: logWhereUniqueInput | logWhereUniqueInput[]
-    connect?: logWhereUniqueInput | logWhereUniqueInput[]
-    update?: logUpdateWithWhereUniqueWithoutUserInput | logUpdateWithWhereUniqueWithoutUserInput[]
-    updateMany?: logUpdateManyWithWhereWithoutUserInput | logUpdateManyWithWhereWithoutUserInput[]
-    deleteMany?: logScalarWhereInput | logScalarWhereInput[]
-  }
-
-  export type messageUncheckedUpdateManyWithoutSenderNestedInput = {
-    create?: XOR<messageCreateWithoutSenderInput, messageUncheckedCreateWithoutSenderInput> | messageCreateWithoutSenderInput[] | messageUncheckedCreateWithoutSenderInput[]
-    connectOrCreate?: messageCreateOrConnectWithoutSenderInput | messageCreateOrConnectWithoutSenderInput[]
-    upsert?: messageUpsertWithWhereUniqueWithoutSenderInput | messageUpsertWithWhereUniqueWithoutSenderInput[]
-    createMany?: messageCreateManySenderInputEnvelope
-    set?: messageWhereUniqueInput | messageWhereUniqueInput[]
-    disconnect?: messageWhereUniqueInput | messageWhereUniqueInput[]
-    delete?: messageWhereUniqueInput | messageWhereUniqueInput[]
-    connect?: messageWhereUniqueInput | messageWhereUniqueInput[]
-    update?: messageUpdateWithWhereUniqueWithoutSenderInput | messageUpdateWithWhereUniqueWithoutSenderInput[]
-    updateMany?: messageUpdateManyWithWhereWithoutSenderInput | messageUpdateManyWithWhereWithoutSenderInput[]
-    deleteMany?: messageScalarWhereInput | messageScalarWhereInput[]
-  }
-
-  export type messageUncheckedUpdateManyWithoutReceiverNestedInput = {
-    create?: XOR<messageCreateWithoutReceiverInput, messageUncheckedCreateWithoutReceiverInput> | messageCreateWithoutReceiverInput[] | messageUncheckedCreateWithoutReceiverInput[]
-    connectOrCreate?: messageCreateOrConnectWithoutReceiverInput | messageCreateOrConnectWithoutReceiverInput[]
-    upsert?: messageUpsertWithWhereUniqueWithoutReceiverInput | messageUpsertWithWhereUniqueWithoutReceiverInput[]
-    createMany?: messageCreateManyReceiverInputEnvelope
-    set?: messageWhereUniqueInput | messageWhereUniqueInput[]
-    disconnect?: messageWhereUniqueInput | messageWhereUniqueInput[]
-    delete?: messageWhereUniqueInput | messageWhereUniqueInput[]
-    connect?: messageWhereUniqueInput | messageWhereUniqueInput[]
-    update?: messageUpdateWithWhereUniqueWithoutReceiverInput | messageUpdateWithWhereUniqueWithoutReceiverInput[]
-    updateMany?: messageUpdateManyWithWhereWithoutReceiverInput | messageUpdateManyWithWhereWithoutReceiverInput[]
-    deleteMany?: messageScalarWhereInput | messageScalarWhereInput[]
-  }
-
-  export type paymentUncheckedUpdateManyWithoutUserNestedInput = {
-    create?: XOR<paymentCreateWithoutUserInput, paymentUncheckedCreateWithoutUserInput> | paymentCreateWithoutUserInput[] | paymentUncheckedCreateWithoutUserInput[]
-    connectOrCreate?: paymentCreateOrConnectWithoutUserInput | paymentCreateOrConnectWithoutUserInput[]
-    upsert?: paymentUpsertWithWhereUniqueWithoutUserInput | paymentUpsertWithWhereUniqueWithoutUserInput[]
-    createMany?: paymentCreateManyUserInputEnvelope
-    set?: paymentWhereUniqueInput | paymentWhereUniqueInput[]
-    disconnect?: paymentWhereUniqueInput | paymentWhereUniqueInput[]
-    delete?: paymentWhereUniqueInput | paymentWhereUniqueInput[]
-    connect?: paymentWhereUniqueInput | paymentWhereUniqueInput[]
-    update?: paymentUpdateWithWhereUniqueWithoutUserInput | paymentUpdateWithWhereUniqueWithoutUserInput[]
-    updateMany?: paymentUpdateManyWithWhereWithoutUserInput | paymentUpdateManyWithWhereWithoutUserInput[]
-    deleteMany?: paymentScalarWhereInput | paymentScalarWhereInput[]
-  }
-
-  export type userCreateNestedOneWithoutPaymentsInput = {
-    create?: XOR<userCreateWithoutPaymentsInput, userUncheckedCreateWithoutPaymentsInput>
-    connectOrCreate?: userCreateOrConnectWithoutPaymentsInput
-    connect?: userWhereUniqueInput
+  export type guestListUncheckedUpdateManyWithoutCheckedInByUserNestedInput = {
+    create?: XOR<guestListCreateWithoutCheckedInByUserInput, guestListUncheckedCreateWithoutCheckedInByUserInput> | guestListCreateWithoutCheckedInByUserInput[] | guestListUncheckedCreateWithoutCheckedInByUserInput[]
+    connectOrCreate?: guestListCreateOrConnectWithoutCheckedInByUserInput | guestListCreateOrConnectWithoutCheckedInByUserInput[]
+    upsert?: guestListUpsertWithWhereUniqueWithoutCheckedInByUserInput | guestListUpsertWithWhereUniqueWithoutCheckedInByUserInput[]
+    createMany?: guestListCreateManyCheckedInByUserInputEnvelope
+    set?: guestListWhereUniqueInput | guestListWhereUniqueInput[]
+    disconnect?: guestListWhereUniqueInput | guestListWhereUniqueInput[]
+    delete?: guestListWhereUniqueInput | guestListWhereUniqueInput[]
+    connect?: guestListWhereUniqueInput | guestListWhereUniqueInput[]
+    update?: guestListUpdateWithWhereUniqueWithoutCheckedInByUserInput | guestListUpdateWithWhereUniqueWithoutCheckedInByUserInput[]
+    updateMany?: guestListUpdateManyWithWhereWithoutCheckedInByUserInput | guestListUpdateManyWithWhereWithoutCheckedInByUserInput[]
+    deleteMany?: guestListScalarWhereInput | guestListScalarWhereInput[]
   }
 
   export type eventCreateNestedOneWithoutPaymentsInput = {
     create?: XOR<eventCreateWithoutPaymentsInput, eventUncheckedCreateWithoutPaymentsInput>
     connectOrCreate?: eventCreateOrConnectWithoutPaymentsInput
     connect?: eventWhereUniqueInput
+  }
+
+  export type userCreateNestedOneWithoutPaymentsInput = {
+    create?: XOR<userCreateWithoutPaymentsInput, userUncheckedCreateWithoutPaymentsInput>
+    connectOrCreate?: userCreateOrConnectWithoutPaymentsInput
+    connect?: userWhereUniqueInput
   }
 
   export type ticketCreateNestedManyWithoutPaymentInput = {
@@ -22969,20 +24945,20 @@ export namespace Prisma {
     divide?: Decimal | DecimalJsLike | number | string
   }
 
-  export type userUpdateOneRequiredWithoutPaymentsNestedInput = {
-    create?: XOR<userCreateWithoutPaymentsInput, userUncheckedCreateWithoutPaymentsInput>
-    connectOrCreate?: userCreateOrConnectWithoutPaymentsInput
-    upsert?: userUpsertWithoutPaymentsInput
-    connect?: userWhereUniqueInput
-    update?: XOR<XOR<userUpdateToOneWithWhereWithoutPaymentsInput, userUpdateWithoutPaymentsInput>, userUncheckedUpdateWithoutPaymentsInput>
-  }
-
   export type eventUpdateOneRequiredWithoutPaymentsNestedInput = {
     create?: XOR<eventCreateWithoutPaymentsInput, eventUncheckedCreateWithoutPaymentsInput>
     connectOrCreate?: eventCreateOrConnectWithoutPaymentsInput
     upsert?: eventUpsertWithoutPaymentsInput
     connect?: eventWhereUniqueInput
     update?: XOR<XOR<eventUpdateToOneWithWhereWithoutPaymentsInput, eventUpdateWithoutPaymentsInput>, eventUncheckedUpdateWithoutPaymentsInput>
+  }
+
+  export type userUpdateOneRequiredWithoutPaymentsNestedInput = {
+    create?: XOR<userCreateWithoutPaymentsInput, userUncheckedCreateWithoutPaymentsInput>
+    connectOrCreate?: userCreateOrConnectWithoutPaymentsInput
+    upsert?: userUpsertWithoutPaymentsInput
+    connect?: userWhereUniqueInput
+    update?: XOR<XOR<userUpdateToOneWithWhereWithoutPaymentsInput, userUpdateWithoutPaymentsInput>, userUncheckedUpdateWithoutPaymentsInput>
   }
 
   export type ticketUpdateManyWithoutPaymentNestedInput = {
@@ -23021,25 +24997,11 @@ export namespace Prisma {
     deleteMany?: ticketScalarWhereInput | ticketScalarWhereInput[]
   }
 
-  export type ticketTypeCreateNestedManyWithoutEventInput = {
-    create?: XOR<ticketTypeCreateWithoutEventInput, ticketTypeUncheckedCreateWithoutEventInput> | ticketTypeCreateWithoutEventInput[] | ticketTypeUncheckedCreateWithoutEventInput[]
-    connectOrCreate?: ticketTypeCreateOrConnectWithoutEventInput | ticketTypeCreateOrConnectWithoutEventInput[]
-    createMany?: ticketTypeCreateManyEventInputEnvelope
-    connect?: ticketTypeWhereUniqueInput | ticketTypeWhereUniqueInput[]
-  }
-
   export type eventArtistCreateNestedManyWithoutEventInput = {
     create?: XOR<eventArtistCreateWithoutEventInput, eventArtistUncheckedCreateWithoutEventInput> | eventArtistCreateWithoutEventInput[] | eventArtistUncheckedCreateWithoutEventInput[]
     connectOrCreate?: eventArtistCreateOrConnectWithoutEventInput | eventArtistCreateOrConnectWithoutEventInput[]
     createMany?: eventArtistCreateManyEventInputEnvelope
     connect?: eventArtistWhereUniqueInput | eventArtistWhereUniqueInput[]
-  }
-
-  export type ticketCreateNestedManyWithoutEventInput = {
-    create?: XOR<ticketCreateWithoutEventInput, ticketUncheckedCreateWithoutEventInput> | ticketCreateWithoutEventInput[] | ticketUncheckedCreateWithoutEventInput[]
-    connectOrCreate?: ticketCreateOrConnectWithoutEventInput | ticketCreateOrConnectWithoutEventInput[]
-    createMany?: ticketCreateManyEventInputEnvelope
-    connect?: ticketWhereUniqueInput | ticketWhereUniqueInput[]
   }
 
   export type participantCreateNestedManyWithoutEventInput = {
@@ -23049,13 +25011,6 @@ export namespace Prisma {
     connect?: participantWhereUniqueInput | participantWhereUniqueInput[]
   }
 
-  export type rrppAssignmentCreateNestedManyWithoutEventInput = {
-    create?: XOR<rrppAssignmentCreateWithoutEventInput, rrppAssignmentUncheckedCreateWithoutEventInput> | rrppAssignmentCreateWithoutEventInput[] | rrppAssignmentUncheckedCreateWithoutEventInput[]
-    connectOrCreate?: rrppAssignmentCreateOrConnectWithoutEventInput | rrppAssignmentCreateOrConnectWithoutEventInput[]
-    createMany?: rrppAssignmentCreateManyEventInputEnvelope
-    connect?: rrppAssignmentWhereUniqueInput | rrppAssignmentWhereUniqueInput[]
-  }
-
   export type paymentCreateNestedManyWithoutEventInput = {
     create?: XOR<paymentCreateWithoutEventInput, paymentUncheckedCreateWithoutEventInput> | paymentCreateWithoutEventInput[] | paymentUncheckedCreateWithoutEventInput[]
     connectOrCreate?: paymentCreateOrConnectWithoutEventInput | paymentCreateOrConnectWithoutEventInput[]
@@ -23063,11 +25018,32 @@ export namespace Prisma {
     connect?: paymentWhereUniqueInput | paymentWhereUniqueInput[]
   }
 
-  export type ticketTypeUncheckedCreateNestedManyWithoutEventInput = {
+  export type rrppAssignmentCreateNestedManyWithoutEventInput = {
+    create?: XOR<rrppAssignmentCreateWithoutEventInput, rrppAssignmentUncheckedCreateWithoutEventInput> | rrppAssignmentCreateWithoutEventInput[] | rrppAssignmentUncheckedCreateWithoutEventInput[]
+    connectOrCreate?: rrppAssignmentCreateOrConnectWithoutEventInput | rrppAssignmentCreateOrConnectWithoutEventInput[]
+    createMany?: rrppAssignmentCreateManyEventInputEnvelope
+    connect?: rrppAssignmentWhereUniqueInput | rrppAssignmentWhereUniqueInput[]
+  }
+
+  export type ticketCreateNestedManyWithoutEventInput = {
+    create?: XOR<ticketCreateWithoutEventInput, ticketUncheckedCreateWithoutEventInput> | ticketCreateWithoutEventInput[] | ticketUncheckedCreateWithoutEventInput[]
+    connectOrCreate?: ticketCreateOrConnectWithoutEventInput | ticketCreateOrConnectWithoutEventInput[]
+    createMany?: ticketCreateManyEventInputEnvelope
+    connect?: ticketWhereUniqueInput | ticketWhereUniqueInput[]
+  }
+
+  export type ticketTypeCreateNestedManyWithoutEventInput = {
     create?: XOR<ticketTypeCreateWithoutEventInput, ticketTypeUncheckedCreateWithoutEventInput> | ticketTypeCreateWithoutEventInput[] | ticketTypeUncheckedCreateWithoutEventInput[]
     connectOrCreate?: ticketTypeCreateOrConnectWithoutEventInput | ticketTypeCreateOrConnectWithoutEventInput[]
     createMany?: ticketTypeCreateManyEventInputEnvelope
     connect?: ticketTypeWhereUniqueInput | ticketTypeWhereUniqueInput[]
+  }
+
+  export type guestListCreateNestedManyWithoutEventInput = {
+    create?: XOR<guestListCreateWithoutEventInput, guestListUncheckedCreateWithoutEventInput> | guestListCreateWithoutEventInput[] | guestListUncheckedCreateWithoutEventInput[]
+    connectOrCreate?: guestListCreateOrConnectWithoutEventInput | guestListCreateOrConnectWithoutEventInput[]
+    createMany?: guestListCreateManyEventInputEnvelope
+    connect?: guestListWhereUniqueInput | guestListWhereUniqueInput[]
   }
 
   export type eventArtistUncheckedCreateNestedManyWithoutEventInput = {
@@ -23077,18 +25053,18 @@ export namespace Prisma {
     connect?: eventArtistWhereUniqueInput | eventArtistWhereUniqueInput[]
   }
 
-  export type ticketUncheckedCreateNestedManyWithoutEventInput = {
-    create?: XOR<ticketCreateWithoutEventInput, ticketUncheckedCreateWithoutEventInput> | ticketCreateWithoutEventInput[] | ticketUncheckedCreateWithoutEventInput[]
-    connectOrCreate?: ticketCreateOrConnectWithoutEventInput | ticketCreateOrConnectWithoutEventInput[]
-    createMany?: ticketCreateManyEventInputEnvelope
-    connect?: ticketWhereUniqueInput | ticketWhereUniqueInput[]
-  }
-
   export type participantUncheckedCreateNestedManyWithoutEventInput = {
     create?: XOR<participantCreateWithoutEventInput, participantUncheckedCreateWithoutEventInput> | participantCreateWithoutEventInput[] | participantUncheckedCreateWithoutEventInput[]
     connectOrCreate?: participantCreateOrConnectWithoutEventInput | participantCreateOrConnectWithoutEventInput[]
     createMany?: participantCreateManyEventInputEnvelope
     connect?: participantWhereUniqueInput | participantWhereUniqueInput[]
+  }
+
+  export type paymentUncheckedCreateNestedManyWithoutEventInput = {
+    create?: XOR<paymentCreateWithoutEventInput, paymentUncheckedCreateWithoutEventInput> | paymentCreateWithoutEventInput[] | paymentUncheckedCreateWithoutEventInput[]
+    connectOrCreate?: paymentCreateOrConnectWithoutEventInput | paymentCreateOrConnectWithoutEventInput[]
+    createMany?: paymentCreateManyEventInputEnvelope
+    connect?: paymentWhereUniqueInput | paymentWhereUniqueInput[]
   }
 
   export type rrppAssignmentUncheckedCreateNestedManyWithoutEventInput = {
@@ -23098,11 +25074,25 @@ export namespace Prisma {
     connect?: rrppAssignmentWhereUniqueInput | rrppAssignmentWhereUniqueInput[]
   }
 
-  export type paymentUncheckedCreateNestedManyWithoutEventInput = {
-    create?: XOR<paymentCreateWithoutEventInput, paymentUncheckedCreateWithoutEventInput> | paymentCreateWithoutEventInput[] | paymentUncheckedCreateWithoutEventInput[]
-    connectOrCreate?: paymentCreateOrConnectWithoutEventInput | paymentCreateOrConnectWithoutEventInput[]
-    createMany?: paymentCreateManyEventInputEnvelope
-    connect?: paymentWhereUniqueInput | paymentWhereUniqueInput[]
+  export type ticketUncheckedCreateNestedManyWithoutEventInput = {
+    create?: XOR<ticketCreateWithoutEventInput, ticketUncheckedCreateWithoutEventInput> | ticketCreateWithoutEventInput[] | ticketUncheckedCreateWithoutEventInput[]
+    connectOrCreate?: ticketCreateOrConnectWithoutEventInput | ticketCreateOrConnectWithoutEventInput[]
+    createMany?: ticketCreateManyEventInputEnvelope
+    connect?: ticketWhereUniqueInput | ticketWhereUniqueInput[]
+  }
+
+  export type ticketTypeUncheckedCreateNestedManyWithoutEventInput = {
+    create?: XOR<ticketTypeCreateWithoutEventInput, ticketTypeUncheckedCreateWithoutEventInput> | ticketTypeCreateWithoutEventInput[] | ticketTypeUncheckedCreateWithoutEventInput[]
+    connectOrCreate?: ticketTypeCreateOrConnectWithoutEventInput | ticketTypeCreateOrConnectWithoutEventInput[]
+    createMany?: ticketTypeCreateManyEventInputEnvelope
+    connect?: ticketTypeWhereUniqueInput | ticketTypeWhereUniqueInput[]
+  }
+
+  export type guestListUncheckedCreateNestedManyWithoutEventInput = {
+    create?: XOR<guestListCreateWithoutEventInput, guestListUncheckedCreateWithoutEventInput> | guestListCreateWithoutEventInput[] | guestListUncheckedCreateWithoutEventInput[]
+    connectOrCreate?: guestListCreateOrConnectWithoutEventInput | guestListCreateOrConnectWithoutEventInput[]
+    createMany?: guestListCreateManyEventInputEnvelope
+    connect?: guestListWhereUniqueInput | guestListWhereUniqueInput[]
   }
 
   export type EnumEventStatusFieldUpdateOperationsInput = {
@@ -23115,20 +25105,6 @@ export namespace Prisma {
     decrement?: number
     multiply?: number
     divide?: number
-  }
-
-  export type ticketTypeUpdateManyWithoutEventNestedInput = {
-    create?: XOR<ticketTypeCreateWithoutEventInput, ticketTypeUncheckedCreateWithoutEventInput> | ticketTypeCreateWithoutEventInput[] | ticketTypeUncheckedCreateWithoutEventInput[]
-    connectOrCreate?: ticketTypeCreateOrConnectWithoutEventInput | ticketTypeCreateOrConnectWithoutEventInput[]
-    upsert?: ticketTypeUpsertWithWhereUniqueWithoutEventInput | ticketTypeUpsertWithWhereUniqueWithoutEventInput[]
-    createMany?: ticketTypeCreateManyEventInputEnvelope
-    set?: ticketTypeWhereUniqueInput | ticketTypeWhereUniqueInput[]
-    disconnect?: ticketTypeWhereUniqueInput | ticketTypeWhereUniqueInput[]
-    delete?: ticketTypeWhereUniqueInput | ticketTypeWhereUniqueInput[]
-    connect?: ticketTypeWhereUniqueInput | ticketTypeWhereUniqueInput[]
-    update?: ticketTypeUpdateWithWhereUniqueWithoutEventInput | ticketTypeUpdateWithWhereUniqueWithoutEventInput[]
-    updateMany?: ticketTypeUpdateManyWithWhereWithoutEventInput | ticketTypeUpdateManyWithWhereWithoutEventInput[]
-    deleteMany?: ticketTypeScalarWhereInput | ticketTypeScalarWhereInput[]
   }
 
   export type eventArtistUpdateManyWithoutEventNestedInput = {
@@ -23145,20 +25121,6 @@ export namespace Prisma {
     deleteMany?: eventArtistScalarWhereInput | eventArtistScalarWhereInput[]
   }
 
-  export type ticketUpdateManyWithoutEventNestedInput = {
-    create?: XOR<ticketCreateWithoutEventInput, ticketUncheckedCreateWithoutEventInput> | ticketCreateWithoutEventInput[] | ticketUncheckedCreateWithoutEventInput[]
-    connectOrCreate?: ticketCreateOrConnectWithoutEventInput | ticketCreateOrConnectWithoutEventInput[]
-    upsert?: ticketUpsertWithWhereUniqueWithoutEventInput | ticketUpsertWithWhereUniqueWithoutEventInput[]
-    createMany?: ticketCreateManyEventInputEnvelope
-    set?: ticketWhereUniqueInput | ticketWhereUniqueInput[]
-    disconnect?: ticketWhereUniqueInput | ticketWhereUniqueInput[]
-    delete?: ticketWhereUniqueInput | ticketWhereUniqueInput[]
-    connect?: ticketWhereUniqueInput | ticketWhereUniqueInput[]
-    update?: ticketUpdateWithWhereUniqueWithoutEventInput | ticketUpdateWithWhereUniqueWithoutEventInput[]
-    updateMany?: ticketUpdateManyWithWhereWithoutEventInput | ticketUpdateManyWithWhereWithoutEventInput[]
-    deleteMany?: ticketScalarWhereInput | ticketScalarWhereInput[]
-  }
-
   export type participantUpdateManyWithoutEventNestedInput = {
     create?: XOR<participantCreateWithoutEventInput, participantUncheckedCreateWithoutEventInput> | participantCreateWithoutEventInput[] | participantUncheckedCreateWithoutEventInput[]
     connectOrCreate?: participantCreateOrConnectWithoutEventInput | participantCreateOrConnectWithoutEventInput[]
@@ -23171,20 +25133,6 @@ export namespace Prisma {
     update?: participantUpdateWithWhereUniqueWithoutEventInput | participantUpdateWithWhereUniqueWithoutEventInput[]
     updateMany?: participantUpdateManyWithWhereWithoutEventInput | participantUpdateManyWithWhereWithoutEventInput[]
     deleteMany?: participantScalarWhereInput | participantScalarWhereInput[]
-  }
-
-  export type rrppAssignmentUpdateManyWithoutEventNestedInput = {
-    create?: XOR<rrppAssignmentCreateWithoutEventInput, rrppAssignmentUncheckedCreateWithoutEventInput> | rrppAssignmentCreateWithoutEventInput[] | rrppAssignmentUncheckedCreateWithoutEventInput[]
-    connectOrCreate?: rrppAssignmentCreateOrConnectWithoutEventInput | rrppAssignmentCreateOrConnectWithoutEventInput[]
-    upsert?: rrppAssignmentUpsertWithWhereUniqueWithoutEventInput | rrppAssignmentUpsertWithWhereUniqueWithoutEventInput[]
-    createMany?: rrppAssignmentCreateManyEventInputEnvelope
-    set?: rrppAssignmentWhereUniqueInput | rrppAssignmentWhereUniqueInput[]
-    disconnect?: rrppAssignmentWhereUniqueInput | rrppAssignmentWhereUniqueInput[]
-    delete?: rrppAssignmentWhereUniqueInput | rrppAssignmentWhereUniqueInput[]
-    connect?: rrppAssignmentWhereUniqueInput | rrppAssignmentWhereUniqueInput[]
-    update?: rrppAssignmentUpdateWithWhereUniqueWithoutEventInput | rrppAssignmentUpdateWithWhereUniqueWithoutEventInput[]
-    updateMany?: rrppAssignmentUpdateManyWithWhereWithoutEventInput | rrppAssignmentUpdateManyWithWhereWithoutEventInput[]
-    deleteMany?: rrppAssignmentScalarWhereInput | rrppAssignmentScalarWhereInput[]
   }
 
   export type paymentUpdateManyWithoutEventNestedInput = {
@@ -23201,7 +25149,35 @@ export namespace Prisma {
     deleteMany?: paymentScalarWhereInput | paymentScalarWhereInput[]
   }
 
-  export type ticketTypeUncheckedUpdateManyWithoutEventNestedInput = {
+  export type rrppAssignmentUpdateManyWithoutEventNestedInput = {
+    create?: XOR<rrppAssignmentCreateWithoutEventInput, rrppAssignmentUncheckedCreateWithoutEventInput> | rrppAssignmentCreateWithoutEventInput[] | rrppAssignmentUncheckedCreateWithoutEventInput[]
+    connectOrCreate?: rrppAssignmentCreateOrConnectWithoutEventInput | rrppAssignmentCreateOrConnectWithoutEventInput[]
+    upsert?: rrppAssignmentUpsertWithWhereUniqueWithoutEventInput | rrppAssignmentUpsertWithWhereUniqueWithoutEventInput[]
+    createMany?: rrppAssignmentCreateManyEventInputEnvelope
+    set?: rrppAssignmentWhereUniqueInput | rrppAssignmentWhereUniqueInput[]
+    disconnect?: rrppAssignmentWhereUniqueInput | rrppAssignmentWhereUniqueInput[]
+    delete?: rrppAssignmentWhereUniqueInput | rrppAssignmentWhereUniqueInput[]
+    connect?: rrppAssignmentWhereUniqueInput | rrppAssignmentWhereUniqueInput[]
+    update?: rrppAssignmentUpdateWithWhereUniqueWithoutEventInput | rrppAssignmentUpdateWithWhereUniqueWithoutEventInput[]
+    updateMany?: rrppAssignmentUpdateManyWithWhereWithoutEventInput | rrppAssignmentUpdateManyWithWhereWithoutEventInput[]
+    deleteMany?: rrppAssignmentScalarWhereInput | rrppAssignmentScalarWhereInput[]
+  }
+
+  export type ticketUpdateManyWithoutEventNestedInput = {
+    create?: XOR<ticketCreateWithoutEventInput, ticketUncheckedCreateWithoutEventInput> | ticketCreateWithoutEventInput[] | ticketUncheckedCreateWithoutEventInput[]
+    connectOrCreate?: ticketCreateOrConnectWithoutEventInput | ticketCreateOrConnectWithoutEventInput[]
+    upsert?: ticketUpsertWithWhereUniqueWithoutEventInput | ticketUpsertWithWhereUniqueWithoutEventInput[]
+    createMany?: ticketCreateManyEventInputEnvelope
+    set?: ticketWhereUniqueInput | ticketWhereUniqueInput[]
+    disconnect?: ticketWhereUniqueInput | ticketWhereUniqueInput[]
+    delete?: ticketWhereUniqueInput | ticketWhereUniqueInput[]
+    connect?: ticketWhereUniqueInput | ticketWhereUniqueInput[]
+    update?: ticketUpdateWithWhereUniqueWithoutEventInput | ticketUpdateWithWhereUniqueWithoutEventInput[]
+    updateMany?: ticketUpdateManyWithWhereWithoutEventInput | ticketUpdateManyWithWhereWithoutEventInput[]
+    deleteMany?: ticketScalarWhereInput | ticketScalarWhereInput[]
+  }
+
+  export type ticketTypeUpdateManyWithoutEventNestedInput = {
     create?: XOR<ticketTypeCreateWithoutEventInput, ticketTypeUncheckedCreateWithoutEventInput> | ticketTypeCreateWithoutEventInput[] | ticketTypeUncheckedCreateWithoutEventInput[]
     connectOrCreate?: ticketTypeCreateOrConnectWithoutEventInput | ticketTypeCreateOrConnectWithoutEventInput[]
     upsert?: ticketTypeUpsertWithWhereUniqueWithoutEventInput | ticketTypeUpsertWithWhereUniqueWithoutEventInput[]
@@ -23213,6 +25189,20 @@ export namespace Prisma {
     update?: ticketTypeUpdateWithWhereUniqueWithoutEventInput | ticketTypeUpdateWithWhereUniqueWithoutEventInput[]
     updateMany?: ticketTypeUpdateManyWithWhereWithoutEventInput | ticketTypeUpdateManyWithWhereWithoutEventInput[]
     deleteMany?: ticketTypeScalarWhereInput | ticketTypeScalarWhereInput[]
+  }
+
+  export type guestListUpdateManyWithoutEventNestedInput = {
+    create?: XOR<guestListCreateWithoutEventInput, guestListUncheckedCreateWithoutEventInput> | guestListCreateWithoutEventInput[] | guestListUncheckedCreateWithoutEventInput[]
+    connectOrCreate?: guestListCreateOrConnectWithoutEventInput | guestListCreateOrConnectWithoutEventInput[]
+    upsert?: guestListUpsertWithWhereUniqueWithoutEventInput | guestListUpsertWithWhereUniqueWithoutEventInput[]
+    createMany?: guestListCreateManyEventInputEnvelope
+    set?: guestListWhereUniqueInput | guestListWhereUniqueInput[]
+    disconnect?: guestListWhereUniqueInput | guestListWhereUniqueInput[]
+    delete?: guestListWhereUniqueInput | guestListWhereUniqueInput[]
+    connect?: guestListWhereUniqueInput | guestListWhereUniqueInput[]
+    update?: guestListUpdateWithWhereUniqueWithoutEventInput | guestListUpdateWithWhereUniqueWithoutEventInput[]
+    updateMany?: guestListUpdateManyWithWhereWithoutEventInput | guestListUpdateManyWithWhereWithoutEventInput[]
+    deleteMany?: guestListScalarWhereInput | guestListScalarWhereInput[]
   }
 
   export type eventArtistUncheckedUpdateManyWithoutEventNestedInput = {
@@ -23229,20 +25219,6 @@ export namespace Prisma {
     deleteMany?: eventArtistScalarWhereInput | eventArtistScalarWhereInput[]
   }
 
-  export type ticketUncheckedUpdateManyWithoutEventNestedInput = {
-    create?: XOR<ticketCreateWithoutEventInput, ticketUncheckedCreateWithoutEventInput> | ticketCreateWithoutEventInput[] | ticketUncheckedCreateWithoutEventInput[]
-    connectOrCreate?: ticketCreateOrConnectWithoutEventInput | ticketCreateOrConnectWithoutEventInput[]
-    upsert?: ticketUpsertWithWhereUniqueWithoutEventInput | ticketUpsertWithWhereUniqueWithoutEventInput[]
-    createMany?: ticketCreateManyEventInputEnvelope
-    set?: ticketWhereUniqueInput | ticketWhereUniqueInput[]
-    disconnect?: ticketWhereUniqueInput | ticketWhereUniqueInput[]
-    delete?: ticketWhereUniqueInput | ticketWhereUniqueInput[]
-    connect?: ticketWhereUniqueInput | ticketWhereUniqueInput[]
-    update?: ticketUpdateWithWhereUniqueWithoutEventInput | ticketUpdateWithWhereUniqueWithoutEventInput[]
-    updateMany?: ticketUpdateManyWithWhereWithoutEventInput | ticketUpdateManyWithWhereWithoutEventInput[]
-    deleteMany?: ticketScalarWhereInput | ticketScalarWhereInput[]
-  }
-
   export type participantUncheckedUpdateManyWithoutEventNestedInput = {
     create?: XOR<participantCreateWithoutEventInput, participantUncheckedCreateWithoutEventInput> | participantCreateWithoutEventInput[] | participantUncheckedCreateWithoutEventInput[]
     connectOrCreate?: participantCreateOrConnectWithoutEventInput | participantCreateOrConnectWithoutEventInput[]
@@ -23255,6 +25231,20 @@ export namespace Prisma {
     update?: participantUpdateWithWhereUniqueWithoutEventInput | participantUpdateWithWhereUniqueWithoutEventInput[]
     updateMany?: participantUpdateManyWithWhereWithoutEventInput | participantUpdateManyWithWhereWithoutEventInput[]
     deleteMany?: participantScalarWhereInput | participantScalarWhereInput[]
+  }
+
+  export type paymentUncheckedUpdateManyWithoutEventNestedInput = {
+    create?: XOR<paymentCreateWithoutEventInput, paymentUncheckedCreateWithoutEventInput> | paymentCreateWithoutEventInput[] | paymentUncheckedCreateWithoutEventInput[]
+    connectOrCreate?: paymentCreateOrConnectWithoutEventInput | paymentCreateOrConnectWithoutEventInput[]
+    upsert?: paymentUpsertWithWhereUniqueWithoutEventInput | paymentUpsertWithWhereUniqueWithoutEventInput[]
+    createMany?: paymentCreateManyEventInputEnvelope
+    set?: paymentWhereUniqueInput | paymentWhereUniqueInput[]
+    disconnect?: paymentWhereUniqueInput | paymentWhereUniqueInput[]
+    delete?: paymentWhereUniqueInput | paymentWhereUniqueInput[]
+    connect?: paymentWhereUniqueInput | paymentWhereUniqueInput[]
+    update?: paymentUpdateWithWhereUniqueWithoutEventInput | paymentUpdateWithWhereUniqueWithoutEventInput[]
+    updateMany?: paymentUpdateManyWithWhereWithoutEventInput | paymentUpdateManyWithWhereWithoutEventInput[]
+    deleteMany?: paymentScalarWhereInput | paymentScalarWhereInput[]
   }
 
   export type rrppAssignmentUncheckedUpdateManyWithoutEventNestedInput = {
@@ -23271,18 +25261,46 @@ export namespace Prisma {
     deleteMany?: rrppAssignmentScalarWhereInput | rrppAssignmentScalarWhereInput[]
   }
 
-  export type paymentUncheckedUpdateManyWithoutEventNestedInput = {
-    create?: XOR<paymentCreateWithoutEventInput, paymentUncheckedCreateWithoutEventInput> | paymentCreateWithoutEventInput[] | paymentUncheckedCreateWithoutEventInput[]
-    connectOrCreate?: paymentCreateOrConnectWithoutEventInput | paymentCreateOrConnectWithoutEventInput[]
-    upsert?: paymentUpsertWithWhereUniqueWithoutEventInput | paymentUpsertWithWhereUniqueWithoutEventInput[]
-    createMany?: paymentCreateManyEventInputEnvelope
-    set?: paymentWhereUniqueInput | paymentWhereUniqueInput[]
-    disconnect?: paymentWhereUniqueInput | paymentWhereUniqueInput[]
-    delete?: paymentWhereUniqueInput | paymentWhereUniqueInput[]
-    connect?: paymentWhereUniqueInput | paymentWhereUniqueInput[]
-    update?: paymentUpdateWithWhereUniqueWithoutEventInput | paymentUpdateWithWhereUniqueWithoutEventInput[]
-    updateMany?: paymentUpdateManyWithWhereWithoutEventInput | paymentUpdateManyWithWhereWithoutEventInput[]
-    deleteMany?: paymentScalarWhereInput | paymentScalarWhereInput[]
+  export type ticketUncheckedUpdateManyWithoutEventNestedInput = {
+    create?: XOR<ticketCreateWithoutEventInput, ticketUncheckedCreateWithoutEventInput> | ticketCreateWithoutEventInput[] | ticketUncheckedCreateWithoutEventInput[]
+    connectOrCreate?: ticketCreateOrConnectWithoutEventInput | ticketCreateOrConnectWithoutEventInput[]
+    upsert?: ticketUpsertWithWhereUniqueWithoutEventInput | ticketUpsertWithWhereUniqueWithoutEventInput[]
+    createMany?: ticketCreateManyEventInputEnvelope
+    set?: ticketWhereUniqueInput | ticketWhereUniqueInput[]
+    disconnect?: ticketWhereUniqueInput | ticketWhereUniqueInput[]
+    delete?: ticketWhereUniqueInput | ticketWhereUniqueInput[]
+    connect?: ticketWhereUniqueInput | ticketWhereUniqueInput[]
+    update?: ticketUpdateWithWhereUniqueWithoutEventInput | ticketUpdateWithWhereUniqueWithoutEventInput[]
+    updateMany?: ticketUpdateManyWithWhereWithoutEventInput | ticketUpdateManyWithWhereWithoutEventInput[]
+    deleteMany?: ticketScalarWhereInput | ticketScalarWhereInput[]
+  }
+
+  export type ticketTypeUncheckedUpdateManyWithoutEventNestedInput = {
+    create?: XOR<ticketTypeCreateWithoutEventInput, ticketTypeUncheckedCreateWithoutEventInput> | ticketTypeCreateWithoutEventInput[] | ticketTypeUncheckedCreateWithoutEventInput[]
+    connectOrCreate?: ticketTypeCreateOrConnectWithoutEventInput | ticketTypeCreateOrConnectWithoutEventInput[]
+    upsert?: ticketTypeUpsertWithWhereUniqueWithoutEventInput | ticketTypeUpsertWithWhereUniqueWithoutEventInput[]
+    createMany?: ticketTypeCreateManyEventInputEnvelope
+    set?: ticketTypeWhereUniqueInput | ticketTypeWhereUniqueInput[]
+    disconnect?: ticketTypeWhereUniqueInput | ticketTypeWhereUniqueInput[]
+    delete?: ticketTypeWhereUniqueInput | ticketTypeWhereUniqueInput[]
+    connect?: ticketTypeWhereUniqueInput | ticketTypeWhereUniqueInput[]
+    update?: ticketTypeUpdateWithWhereUniqueWithoutEventInput | ticketTypeUpdateWithWhereUniqueWithoutEventInput[]
+    updateMany?: ticketTypeUpdateManyWithWhereWithoutEventInput | ticketTypeUpdateManyWithWhereWithoutEventInput[]
+    deleteMany?: ticketTypeScalarWhereInput | ticketTypeScalarWhereInput[]
+  }
+
+  export type guestListUncheckedUpdateManyWithoutEventNestedInput = {
+    create?: XOR<guestListCreateWithoutEventInput, guestListUncheckedCreateWithoutEventInput> | guestListCreateWithoutEventInput[] | guestListUncheckedCreateWithoutEventInput[]
+    connectOrCreate?: guestListCreateOrConnectWithoutEventInput | guestListCreateOrConnectWithoutEventInput[]
+    upsert?: guestListUpsertWithWhereUniqueWithoutEventInput | guestListUpsertWithWhereUniqueWithoutEventInput[]
+    createMany?: guestListCreateManyEventInputEnvelope
+    set?: guestListWhereUniqueInput | guestListWhereUniqueInput[]
+    disconnect?: guestListWhereUniqueInput | guestListWhereUniqueInput[]
+    delete?: guestListWhereUniqueInput | guestListWhereUniqueInput[]
+    connect?: guestListWhereUniqueInput | guestListWhereUniqueInput[]
+    update?: guestListUpdateWithWhereUniqueWithoutEventInput | guestListUpdateWithWhereUniqueWithoutEventInput[]
+    updateMany?: guestListUpdateManyWithWhereWithoutEventInput | guestListUpdateManyWithWhereWithoutEventInput[]
+    deleteMany?: guestListScalarWhereInput | guestListScalarWhereInput[]
   }
 
   export type eventArtistCreateNestedManyWithoutArtistInput = {
@@ -23355,12 +25373,6 @@ export namespace Prisma {
     update?: XOR<XOR<eventUpdateToOneWithWhereWithoutEventArtistsInput, eventUpdateWithoutEventArtistsInput>, eventUncheckedUpdateWithoutEventArtistsInput>
   }
 
-  export type eventCreateNestedOneWithoutTicketTypesInput = {
-    create?: XOR<eventCreateWithoutTicketTypesInput, eventUncheckedCreateWithoutTicketTypesInput>
-    connectOrCreate?: eventCreateOrConnectWithoutTicketTypesInput
-    connect?: eventWhereUniqueInput
-  }
-
   export type ticketCreateNestedManyWithoutTypeInput = {
     create?: XOR<ticketCreateWithoutTypeInput, ticketUncheckedCreateWithoutTypeInput> | ticketCreateWithoutTypeInput[] | ticketUncheckedCreateWithoutTypeInput[]
     connectOrCreate?: ticketCreateOrConnectWithoutTypeInput | ticketCreateOrConnectWithoutTypeInput[]
@@ -23368,19 +25380,17 @@ export namespace Prisma {
     connect?: ticketWhereUniqueInput | ticketWhereUniqueInput[]
   }
 
+  export type eventCreateNestedOneWithoutTicketTypesInput = {
+    create?: XOR<eventCreateWithoutTicketTypesInput, eventUncheckedCreateWithoutTicketTypesInput>
+    connectOrCreate?: eventCreateOrConnectWithoutTicketTypesInput
+    connect?: eventWhereUniqueInput
+  }
+
   export type ticketUncheckedCreateNestedManyWithoutTypeInput = {
     create?: XOR<ticketCreateWithoutTypeInput, ticketUncheckedCreateWithoutTypeInput> | ticketCreateWithoutTypeInput[] | ticketUncheckedCreateWithoutTypeInput[]
     connectOrCreate?: ticketCreateOrConnectWithoutTypeInput | ticketCreateOrConnectWithoutTypeInput[]
     createMany?: ticketCreateManyTypeInputEnvelope
     connect?: ticketWhereUniqueInput | ticketWhereUniqueInput[]
-  }
-
-  export type eventUpdateOneRequiredWithoutTicketTypesNestedInput = {
-    create?: XOR<eventCreateWithoutTicketTypesInput, eventUncheckedCreateWithoutTicketTypesInput>
-    connectOrCreate?: eventCreateOrConnectWithoutTicketTypesInput
-    upsert?: eventUpsertWithoutTicketTypesInput
-    connect?: eventWhereUniqueInput
-    update?: XOR<XOR<eventUpdateToOneWithWhereWithoutTicketTypesInput, eventUpdateWithoutTicketTypesInput>, eventUncheckedUpdateWithoutTicketTypesInput>
   }
 
   export type ticketUpdateManyWithoutTypeNestedInput = {
@@ -23395,6 +25405,14 @@ export namespace Prisma {
     update?: ticketUpdateWithWhereUniqueWithoutTypeInput | ticketUpdateWithWhereUniqueWithoutTypeInput[]
     updateMany?: ticketUpdateManyWithWhereWithoutTypeInput | ticketUpdateManyWithWhereWithoutTypeInput[]
     deleteMany?: ticketScalarWhereInput | ticketScalarWhereInput[]
+  }
+
+  export type eventUpdateOneRequiredWithoutTicketTypesNestedInput = {
+    create?: XOR<eventCreateWithoutTicketTypesInput, eventUncheckedCreateWithoutTicketTypesInput>
+    connectOrCreate?: eventCreateOrConnectWithoutTicketTypesInput
+    upsert?: eventUpsertWithoutTicketTypesInput
+    connect?: eventWhereUniqueInput
+    update?: XOR<XOR<eventUpdateToOneWithWhereWithoutTicketTypesInput, eventUpdateWithoutTicketTypesInput>, eventUncheckedUpdateWithoutTicketTypesInput>
   }
 
   export type ticketUncheckedUpdateManyWithoutTypeNestedInput = {
@@ -23423,10 +25441,10 @@ export namespace Prisma {
     connect?: userWhereUniqueInput
   }
 
-  export type ticketTypeCreateNestedOneWithoutTicketsInput = {
-    create?: XOR<ticketTypeCreateWithoutTicketsInput, ticketTypeUncheckedCreateWithoutTicketsInput>
-    connectOrCreate?: ticketTypeCreateOrConnectWithoutTicketsInput
-    connect?: ticketTypeWhereUniqueInput
+  export type paymentCreateNestedOneWithoutTicketsInput = {
+    create?: XOR<paymentCreateWithoutTicketsInput, paymentUncheckedCreateWithoutTicketsInput>
+    connectOrCreate?: paymentCreateOrConnectWithoutTicketsInput
+    connect?: paymentWhereUniqueInput
   }
 
   export type userCreateNestedOneWithoutTransferredTicketsInput = {
@@ -23435,10 +25453,10 @@ export namespace Prisma {
     connect?: userWhereUniqueInput
   }
 
-  export type paymentCreateNestedOneWithoutTicketsInput = {
-    create?: XOR<paymentCreateWithoutTicketsInput, paymentUncheckedCreateWithoutTicketsInput>
-    connectOrCreate?: paymentCreateOrConnectWithoutTicketsInput
-    connect?: paymentWhereUniqueInput
+  export type ticketTypeCreateNestedOneWithoutTicketsInput = {
+    create?: XOR<ticketTypeCreateWithoutTicketsInput, ticketTypeUncheckedCreateWithoutTicketsInput>
+    connectOrCreate?: ticketTypeCreateOrConnectWithoutTicketsInput
+    connect?: ticketTypeWhereUniqueInput
   }
 
   export type EnumTicketStatusFieldUpdateOperationsInput = {
@@ -23461,12 +25479,14 @@ export namespace Prisma {
     update?: XOR<XOR<userUpdateToOneWithWhereWithoutTicketsInput, userUpdateWithoutTicketsInput>, userUncheckedUpdateWithoutTicketsInput>
   }
 
-  export type ticketTypeUpdateOneRequiredWithoutTicketsNestedInput = {
-    create?: XOR<ticketTypeCreateWithoutTicketsInput, ticketTypeUncheckedCreateWithoutTicketsInput>
-    connectOrCreate?: ticketTypeCreateOrConnectWithoutTicketsInput
-    upsert?: ticketTypeUpsertWithoutTicketsInput
-    connect?: ticketTypeWhereUniqueInput
-    update?: XOR<XOR<ticketTypeUpdateToOneWithWhereWithoutTicketsInput, ticketTypeUpdateWithoutTicketsInput>, ticketTypeUncheckedUpdateWithoutTicketsInput>
+  export type paymentUpdateOneWithoutTicketsNestedInput = {
+    create?: XOR<paymentCreateWithoutTicketsInput, paymentUncheckedCreateWithoutTicketsInput>
+    connectOrCreate?: paymentCreateOrConnectWithoutTicketsInput
+    upsert?: paymentUpsertWithoutTicketsInput
+    disconnect?: paymentWhereInput | boolean
+    delete?: paymentWhereInput | boolean
+    connect?: paymentWhereUniqueInput
+    update?: XOR<XOR<paymentUpdateToOneWithWhereWithoutTicketsInput, paymentUpdateWithoutTicketsInput>, paymentUncheckedUpdateWithoutTicketsInput>
   }
 
   export type userUpdateOneWithoutTransferredTicketsNestedInput = {
@@ -23479,20 +25499,12 @@ export namespace Prisma {
     update?: XOR<XOR<userUpdateToOneWithWhereWithoutTransferredTicketsInput, userUpdateWithoutTransferredTicketsInput>, userUncheckedUpdateWithoutTransferredTicketsInput>
   }
 
-  export type paymentUpdateOneWithoutTicketsNestedInput = {
-    create?: XOR<paymentCreateWithoutTicketsInput, paymentUncheckedCreateWithoutTicketsInput>
-    connectOrCreate?: paymentCreateOrConnectWithoutTicketsInput
-    upsert?: paymentUpsertWithoutTicketsInput
-    disconnect?: paymentWhereInput | boolean
-    delete?: paymentWhereInput | boolean
-    connect?: paymentWhereUniqueInput
-    update?: XOR<XOR<paymentUpdateToOneWithWhereWithoutTicketsInput, paymentUpdateWithoutTicketsInput>, paymentUncheckedUpdateWithoutTicketsInput>
-  }
-
-  export type userCreateNestedOneWithoutRrppAssignmentsInput = {
-    create?: XOR<userCreateWithoutRrppAssignmentsInput, userUncheckedCreateWithoutRrppAssignmentsInput>
-    connectOrCreate?: userCreateOrConnectWithoutRrppAssignmentsInput
-    connect?: userWhereUniqueInput
+  export type ticketTypeUpdateOneRequiredWithoutTicketsNestedInput = {
+    create?: XOR<ticketTypeCreateWithoutTicketsInput, ticketTypeUncheckedCreateWithoutTicketsInput>
+    connectOrCreate?: ticketTypeCreateOrConnectWithoutTicketsInput
+    upsert?: ticketTypeUpsertWithoutTicketsInput
+    connect?: ticketTypeWhereUniqueInput
+    update?: XOR<XOR<ticketTypeUpdateToOneWithWhereWithoutTicketsInput, ticketTypeUpdateWithoutTicketsInput>, ticketTypeUncheckedUpdateWithoutTicketsInput>
   }
 
   export type eventCreateNestedOneWithoutRrppAssignmentsInput = {
@@ -23501,12 +25513,10 @@ export namespace Prisma {
     connect?: eventWhereUniqueInput
   }
 
-  export type userUpdateOneRequiredWithoutRrppAssignmentsNestedInput = {
+  export type userCreateNestedOneWithoutRrppAssignmentsInput = {
     create?: XOR<userCreateWithoutRrppAssignmentsInput, userUncheckedCreateWithoutRrppAssignmentsInput>
     connectOrCreate?: userCreateOrConnectWithoutRrppAssignmentsInput
-    upsert?: userUpsertWithoutRrppAssignmentsInput
     connect?: userWhereUniqueInput
-    update?: XOR<XOR<userUpdateToOneWithWhereWithoutRrppAssignmentsInput, userUpdateWithoutRrppAssignmentsInput>, userUncheckedUpdateWithoutRrppAssignmentsInput>
   }
 
   export type eventUpdateOneRequiredWithoutRrppAssignmentsNestedInput = {
@@ -23517,10 +25527,12 @@ export namespace Prisma {
     update?: XOR<XOR<eventUpdateToOneWithWhereWithoutRrppAssignmentsInput, eventUpdateWithoutRrppAssignmentsInput>, eventUncheckedUpdateWithoutRrppAssignmentsInput>
   }
 
-  export type userCreateNestedOneWithoutParticipantsInput = {
-    create?: XOR<userCreateWithoutParticipantsInput, userUncheckedCreateWithoutParticipantsInput>
-    connectOrCreate?: userCreateOrConnectWithoutParticipantsInput
+  export type userUpdateOneRequiredWithoutRrppAssignmentsNestedInput = {
+    create?: XOR<userCreateWithoutRrppAssignmentsInput, userUncheckedCreateWithoutRrppAssignmentsInput>
+    connectOrCreate?: userCreateOrConnectWithoutRrppAssignmentsInput
+    upsert?: userUpsertWithoutRrppAssignmentsInput
     connect?: userWhereUniqueInput
+    update?: XOR<XOR<userUpdateToOneWithWhereWithoutRrppAssignmentsInput, userUpdateWithoutRrppAssignmentsInput>, userUncheckedUpdateWithoutRrppAssignmentsInput>
   }
 
   export type eventCreateNestedOneWithoutParticipantsInput = {
@@ -23529,12 +25541,10 @@ export namespace Prisma {
     connect?: eventWhereUniqueInput
   }
 
-  export type userUpdateOneRequiredWithoutParticipantsNestedInput = {
+  export type userCreateNestedOneWithoutParticipantsInput = {
     create?: XOR<userCreateWithoutParticipantsInput, userUncheckedCreateWithoutParticipantsInput>
     connectOrCreate?: userCreateOrConnectWithoutParticipantsInput
-    upsert?: userUpsertWithoutParticipantsInput
     connect?: userWhereUniqueInput
-    update?: XOR<XOR<userUpdateToOneWithWhereWithoutParticipantsInput, userUpdateWithoutParticipantsInput>, userUncheckedUpdateWithoutParticipantsInput>
   }
 
   export type eventUpdateOneRequiredWithoutParticipantsNestedInput = {
@@ -23543,6 +25553,14 @@ export namespace Prisma {
     upsert?: eventUpsertWithoutParticipantsInput
     connect?: eventWhereUniqueInput
     update?: XOR<XOR<eventUpdateToOneWithWhereWithoutParticipantsInput, eventUpdateWithoutParticipantsInput>, eventUncheckedUpdateWithoutParticipantsInput>
+  }
+
+  export type userUpdateOneRequiredWithoutParticipantsNestedInput = {
+    create?: XOR<userCreateWithoutParticipantsInput, userUncheckedCreateWithoutParticipantsInput>
+    connectOrCreate?: userCreateOrConnectWithoutParticipantsInput
+    upsert?: userUpsertWithoutParticipantsInput
+    connect?: userWhereUniqueInput
+    update?: XOR<XOR<userUpdateToOneWithWhereWithoutParticipantsInput, userUpdateWithoutParticipantsInput>, userUncheckedUpdateWithoutParticipantsInput>
   }
 
   export type userCreateNestedOneWithoutLogsInput = {
@@ -23561,16 +25579,24 @@ export namespace Prisma {
     update?: XOR<XOR<userUpdateToOneWithWhereWithoutLogsInput, userUpdateWithoutLogsInput>, userUncheckedUpdateWithoutLogsInput>
   }
 
+  export type userCreateNestedOneWithoutReceivedMessagesInput = {
+    create?: XOR<userCreateWithoutReceivedMessagesInput, userUncheckedCreateWithoutReceivedMessagesInput>
+    connectOrCreate?: userCreateOrConnectWithoutReceivedMessagesInput
+    connect?: userWhereUniqueInput
+  }
+
   export type userCreateNestedOneWithoutSentMessagesInput = {
     create?: XOR<userCreateWithoutSentMessagesInput, userUncheckedCreateWithoutSentMessagesInput>
     connectOrCreate?: userCreateOrConnectWithoutSentMessagesInput
     connect?: userWhereUniqueInput
   }
 
-  export type userCreateNestedOneWithoutReceivedMessagesInput = {
+  export type userUpdateOneRequiredWithoutReceivedMessagesNestedInput = {
     create?: XOR<userCreateWithoutReceivedMessagesInput, userUncheckedCreateWithoutReceivedMessagesInput>
     connectOrCreate?: userCreateOrConnectWithoutReceivedMessagesInput
+    upsert?: userUpsertWithoutReceivedMessagesInput
     connect?: userWhereUniqueInput
+    update?: XOR<XOR<userUpdateToOneWithWhereWithoutReceivedMessagesInput, userUpdateWithoutReceivedMessagesInput>, userUncheckedUpdateWithoutReceivedMessagesInput>
   }
 
   export type userUpdateOneRequiredWithoutSentMessagesNestedInput = {
@@ -23581,12 +25607,52 @@ export namespace Prisma {
     update?: XOR<XOR<userUpdateToOneWithWhereWithoutSentMessagesInput, userUpdateWithoutSentMessagesInput>, userUncheckedUpdateWithoutSentMessagesInput>
   }
 
-  export type userUpdateOneRequiredWithoutReceivedMessagesNestedInput = {
-    create?: XOR<userCreateWithoutReceivedMessagesInput, userUncheckedCreateWithoutReceivedMessagesInput>
-    connectOrCreate?: userCreateOrConnectWithoutReceivedMessagesInput
-    upsert?: userUpsertWithoutReceivedMessagesInput
+  export type eventCreateNestedOneWithoutGuestListInput = {
+    create?: XOR<eventCreateWithoutGuestListInput, eventUncheckedCreateWithoutGuestListInput>
+    connectOrCreate?: eventCreateOrConnectWithoutGuestListInput
+    connect?: eventWhereUniqueInput
+  }
+
+  export type userCreateNestedOneWithoutGuestsCheckedInInput = {
+    create?: XOR<userCreateWithoutGuestsCheckedInInput, userUncheckedCreateWithoutGuestsCheckedInInput>
+    connectOrCreate?: userCreateOrConnectWithoutGuestsCheckedInInput
     connect?: userWhereUniqueInput
-    update?: XOR<XOR<userUpdateToOneWithWhereWithoutReceivedMessagesInput, userUpdateWithoutReceivedMessagesInput>, userUncheckedUpdateWithoutReceivedMessagesInput>
+  }
+
+  export type userCreateNestedOneWithoutGuestsImportedInput = {
+    create?: XOR<userCreateWithoutGuestsImportedInput, userUncheckedCreateWithoutGuestsImportedInput>
+    connectOrCreate?: userCreateOrConnectWithoutGuestsImportedInput
+    connect?: userWhereUniqueInput
+  }
+
+  export type EnumGuestStatusFieldUpdateOperationsInput = {
+    set?: $Enums.GuestStatus
+  }
+
+  export type eventUpdateOneRequiredWithoutGuestListNestedInput = {
+    create?: XOR<eventCreateWithoutGuestListInput, eventUncheckedCreateWithoutGuestListInput>
+    connectOrCreate?: eventCreateOrConnectWithoutGuestListInput
+    upsert?: eventUpsertWithoutGuestListInput
+    connect?: eventWhereUniqueInput
+    update?: XOR<XOR<eventUpdateToOneWithWhereWithoutGuestListInput, eventUpdateWithoutGuestListInput>, eventUncheckedUpdateWithoutGuestListInput>
+  }
+
+  export type userUpdateOneWithoutGuestsCheckedInNestedInput = {
+    create?: XOR<userCreateWithoutGuestsCheckedInInput, userUncheckedCreateWithoutGuestsCheckedInInput>
+    connectOrCreate?: userCreateOrConnectWithoutGuestsCheckedInInput
+    upsert?: userUpsertWithoutGuestsCheckedInInput
+    disconnect?: userWhereInput | boolean
+    delete?: userWhereInput | boolean
+    connect?: userWhereUniqueInput
+    update?: XOR<XOR<userUpdateToOneWithWhereWithoutGuestsCheckedInInput, userUpdateWithoutGuestsCheckedInInput>, userUncheckedUpdateWithoutGuestsCheckedInInput>
+  }
+
+  export type userUpdateOneRequiredWithoutGuestsImportedNestedInput = {
+    create?: XOR<userCreateWithoutGuestsImportedInput, userUncheckedCreateWithoutGuestsImportedInput>
+    connectOrCreate?: userCreateOrConnectWithoutGuestsImportedInput
+    upsert?: userUpsertWithoutGuestsImportedInput
+    connect?: userWhereUniqueInput
+    update?: XOR<XOR<userUpdateToOneWithWhereWithoutGuestsImportedInput, userUpdateWithoutGuestsImportedInput>, userUncheckedUpdateWithoutGuestsImportedInput>
   }
 
   export type NestedStringFilter<$PrismaModel = never> = {
@@ -23908,28 +25974,47 @@ export namespace Prisma {
     _max?: NestedEnumTicketStatusFilter<$PrismaModel>
   }
 
+  export type NestedEnumGuestStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.GuestStatus | EnumGuestStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.GuestStatus[] | ListEnumGuestStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.GuestStatus[] | ListEnumGuestStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumGuestStatusFilter<$PrismaModel> | $Enums.GuestStatus
+  }
+
+  export type NestedEnumGuestStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.GuestStatus | EnumGuestStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.GuestStatus[] | ListEnumGuestStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.GuestStatus[] | ListEnumGuestStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumGuestStatusWithAggregatesFilter<$PrismaModel> | $Enums.GuestStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumGuestStatusFilter<$PrismaModel>
+    _max?: NestedEnumGuestStatusFilter<$PrismaModel>
+  }
+
   export type userCreateWithoutAccountInput = {
     id: string
     name: string
     email: string
     emailVerified: boolean
     image?: string | null
-    imageBase64?: string | null
     createdAt: Date | string
     updatedAt: Date | string
     username?: string | null
     dni?: string | null
     birthDate?: Date | string | null
     role?: $Enums.Role
-    tickets?: ticketCreateNestedManyWithoutOwnerInput
-    transferredTickets?: ticketCreateNestedManyWithoutTransferredFromInput
+    image_base64?: string | null
+    logs?: logCreateNestedManyWithoutUserInput
+    receivedMessages?: messageCreateNestedManyWithoutReceiverInput
+    sentMessages?: messageCreateNestedManyWithoutSenderInput
     participants?: participantCreateNestedManyWithoutUserInput
+    payments?: paymentCreateNestedManyWithoutUserInput
     rrppAssignments?: rrppAssignmentCreateNestedManyWithoutRrppUserInput
     session?: sessionCreateNestedManyWithoutUserInput
-    logs?: logCreateNestedManyWithoutUserInput
-    sentMessages?: messageCreateNestedManyWithoutSenderInput
-    receivedMessages?: messageCreateNestedManyWithoutReceiverInput
-    payments?: paymentCreateNestedManyWithoutUserInput
+    tickets?: ticketCreateNestedManyWithoutOwnerInput
+    transferredTickets?: ticketCreateNestedManyWithoutTransferredFromInput
+    guestsImported?: guestListCreateNestedManyWithoutImportedByUserInput
+    guestsCheckedIn?: guestListCreateNestedManyWithoutCheckedInByUserInput
   }
 
   export type userUncheckedCreateWithoutAccountInput = {
@@ -23938,22 +26023,24 @@ export namespace Prisma {
     email: string
     emailVerified: boolean
     image?: string | null
-    imageBase64?: string | null
     createdAt: Date | string
     updatedAt: Date | string
     username?: string | null
     dni?: string | null
     birthDate?: Date | string | null
     role?: $Enums.Role
-    tickets?: ticketUncheckedCreateNestedManyWithoutOwnerInput
-    transferredTickets?: ticketUncheckedCreateNestedManyWithoutTransferredFromInput
+    image_base64?: string | null
+    logs?: logUncheckedCreateNestedManyWithoutUserInput
+    receivedMessages?: messageUncheckedCreateNestedManyWithoutReceiverInput
+    sentMessages?: messageUncheckedCreateNestedManyWithoutSenderInput
     participants?: participantUncheckedCreateNestedManyWithoutUserInput
+    payments?: paymentUncheckedCreateNestedManyWithoutUserInput
     rrppAssignments?: rrppAssignmentUncheckedCreateNestedManyWithoutRrppUserInput
     session?: sessionUncheckedCreateNestedManyWithoutUserInput
-    logs?: logUncheckedCreateNestedManyWithoutUserInput
-    sentMessages?: messageUncheckedCreateNestedManyWithoutSenderInput
-    receivedMessages?: messageUncheckedCreateNestedManyWithoutReceiverInput
-    payments?: paymentUncheckedCreateNestedManyWithoutUserInput
+    tickets?: ticketUncheckedCreateNestedManyWithoutOwnerInput
+    transferredTickets?: ticketUncheckedCreateNestedManyWithoutTransferredFromInput
+    guestsImported?: guestListUncheckedCreateNestedManyWithoutImportedByUserInput
+    guestsCheckedIn?: guestListUncheckedCreateNestedManyWithoutCheckedInByUserInput
   }
 
   export type userCreateOrConnectWithoutAccountInput = {
@@ -23978,22 +26065,24 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: BoolFieldUpdateOperationsInput | boolean
     image?: NullableStringFieldUpdateOperationsInput | string | null
-    imageBase64?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     username?: NullableStringFieldUpdateOperationsInput | string | null
     dni?: NullableStringFieldUpdateOperationsInput | string | null
     birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
-    tickets?: ticketUpdateManyWithoutOwnerNestedInput
-    transferredTickets?: ticketUpdateManyWithoutTransferredFromNestedInput
+    image_base64?: NullableStringFieldUpdateOperationsInput | string | null
+    logs?: logUpdateManyWithoutUserNestedInput
+    receivedMessages?: messageUpdateManyWithoutReceiverNestedInput
+    sentMessages?: messageUpdateManyWithoutSenderNestedInput
     participants?: participantUpdateManyWithoutUserNestedInput
+    payments?: paymentUpdateManyWithoutUserNestedInput
     rrppAssignments?: rrppAssignmentUpdateManyWithoutRrppUserNestedInput
     session?: sessionUpdateManyWithoutUserNestedInput
-    logs?: logUpdateManyWithoutUserNestedInput
-    sentMessages?: messageUpdateManyWithoutSenderNestedInput
-    receivedMessages?: messageUpdateManyWithoutReceiverNestedInput
-    payments?: paymentUpdateManyWithoutUserNestedInput
+    tickets?: ticketUpdateManyWithoutOwnerNestedInput
+    transferredTickets?: ticketUpdateManyWithoutTransferredFromNestedInput
+    guestsImported?: guestListUpdateManyWithoutImportedByUserNestedInput
+    guestsCheckedIn?: guestListUpdateManyWithoutCheckedInByUserNestedInput
   }
 
   export type userUncheckedUpdateWithoutAccountInput = {
@@ -24002,22 +26091,24 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: BoolFieldUpdateOperationsInput | boolean
     image?: NullableStringFieldUpdateOperationsInput | string | null
-    imageBase64?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     username?: NullableStringFieldUpdateOperationsInput | string | null
     dni?: NullableStringFieldUpdateOperationsInput | string | null
     birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
-    tickets?: ticketUncheckedUpdateManyWithoutOwnerNestedInput
-    transferredTickets?: ticketUncheckedUpdateManyWithoutTransferredFromNestedInput
+    image_base64?: NullableStringFieldUpdateOperationsInput | string | null
+    logs?: logUncheckedUpdateManyWithoutUserNestedInput
+    receivedMessages?: messageUncheckedUpdateManyWithoutReceiverNestedInput
+    sentMessages?: messageUncheckedUpdateManyWithoutSenderNestedInput
     participants?: participantUncheckedUpdateManyWithoutUserNestedInput
+    payments?: paymentUncheckedUpdateManyWithoutUserNestedInput
     rrppAssignments?: rrppAssignmentUncheckedUpdateManyWithoutRrppUserNestedInput
     session?: sessionUncheckedUpdateManyWithoutUserNestedInput
-    logs?: logUncheckedUpdateManyWithoutUserNestedInput
-    sentMessages?: messageUncheckedUpdateManyWithoutSenderNestedInput
-    receivedMessages?: messageUncheckedUpdateManyWithoutReceiverNestedInput
-    payments?: paymentUncheckedUpdateManyWithoutUserNestedInput
+    tickets?: ticketUncheckedUpdateManyWithoutOwnerNestedInput
+    transferredTickets?: ticketUncheckedUpdateManyWithoutTransferredFromNestedInput
+    guestsImported?: guestListUncheckedUpdateManyWithoutImportedByUserNestedInput
+    guestsCheckedIn?: guestListUncheckedUpdateManyWithoutCheckedInByUserNestedInput
   }
 
   export type userCreateWithoutSessionInput = {
@@ -24026,22 +26117,24 @@ export namespace Prisma {
     email: string
     emailVerified: boolean
     image?: string | null
-    imageBase64?: string | null
     createdAt: Date | string
     updatedAt: Date | string
     username?: string | null
     dni?: string | null
     birthDate?: Date | string | null
     role?: $Enums.Role
-    tickets?: ticketCreateNestedManyWithoutOwnerInput
-    transferredTickets?: ticketCreateNestedManyWithoutTransferredFromInput
-    participants?: participantCreateNestedManyWithoutUserInput
-    rrppAssignments?: rrppAssignmentCreateNestedManyWithoutRrppUserInput
+    image_base64?: string | null
     account?: accountCreateNestedManyWithoutUserInput
     logs?: logCreateNestedManyWithoutUserInput
-    sentMessages?: messageCreateNestedManyWithoutSenderInput
     receivedMessages?: messageCreateNestedManyWithoutReceiverInput
+    sentMessages?: messageCreateNestedManyWithoutSenderInput
+    participants?: participantCreateNestedManyWithoutUserInput
     payments?: paymentCreateNestedManyWithoutUserInput
+    rrppAssignments?: rrppAssignmentCreateNestedManyWithoutRrppUserInput
+    tickets?: ticketCreateNestedManyWithoutOwnerInput
+    transferredTickets?: ticketCreateNestedManyWithoutTransferredFromInput
+    guestsImported?: guestListCreateNestedManyWithoutImportedByUserInput
+    guestsCheckedIn?: guestListCreateNestedManyWithoutCheckedInByUserInput
   }
 
   export type userUncheckedCreateWithoutSessionInput = {
@@ -24050,22 +26143,24 @@ export namespace Prisma {
     email: string
     emailVerified: boolean
     image?: string | null
-    imageBase64?: string | null
     createdAt: Date | string
     updatedAt: Date | string
     username?: string | null
     dni?: string | null
     birthDate?: Date | string | null
     role?: $Enums.Role
-    tickets?: ticketUncheckedCreateNestedManyWithoutOwnerInput
-    transferredTickets?: ticketUncheckedCreateNestedManyWithoutTransferredFromInput
-    participants?: participantUncheckedCreateNestedManyWithoutUserInput
-    rrppAssignments?: rrppAssignmentUncheckedCreateNestedManyWithoutRrppUserInput
+    image_base64?: string | null
     account?: accountUncheckedCreateNestedManyWithoutUserInput
     logs?: logUncheckedCreateNestedManyWithoutUserInput
-    sentMessages?: messageUncheckedCreateNestedManyWithoutSenderInput
     receivedMessages?: messageUncheckedCreateNestedManyWithoutReceiverInput
+    sentMessages?: messageUncheckedCreateNestedManyWithoutSenderInput
+    participants?: participantUncheckedCreateNestedManyWithoutUserInput
     payments?: paymentUncheckedCreateNestedManyWithoutUserInput
+    rrppAssignments?: rrppAssignmentUncheckedCreateNestedManyWithoutRrppUserInput
+    tickets?: ticketUncheckedCreateNestedManyWithoutOwnerInput
+    transferredTickets?: ticketUncheckedCreateNestedManyWithoutTransferredFromInput
+    guestsImported?: guestListUncheckedCreateNestedManyWithoutImportedByUserInput
+    guestsCheckedIn?: guestListUncheckedCreateNestedManyWithoutCheckedInByUserInput
   }
 
   export type userCreateOrConnectWithoutSessionInput = {
@@ -24090,22 +26185,24 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: BoolFieldUpdateOperationsInput | boolean
     image?: NullableStringFieldUpdateOperationsInput | string | null
-    imageBase64?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     username?: NullableStringFieldUpdateOperationsInput | string | null
     dni?: NullableStringFieldUpdateOperationsInput | string | null
     birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
-    tickets?: ticketUpdateManyWithoutOwnerNestedInput
-    transferredTickets?: ticketUpdateManyWithoutTransferredFromNestedInput
-    participants?: participantUpdateManyWithoutUserNestedInput
-    rrppAssignments?: rrppAssignmentUpdateManyWithoutRrppUserNestedInput
+    image_base64?: NullableStringFieldUpdateOperationsInput | string | null
     account?: accountUpdateManyWithoutUserNestedInput
     logs?: logUpdateManyWithoutUserNestedInput
-    sentMessages?: messageUpdateManyWithoutSenderNestedInput
     receivedMessages?: messageUpdateManyWithoutReceiverNestedInput
+    sentMessages?: messageUpdateManyWithoutSenderNestedInput
+    participants?: participantUpdateManyWithoutUserNestedInput
     payments?: paymentUpdateManyWithoutUserNestedInput
+    rrppAssignments?: rrppAssignmentUpdateManyWithoutRrppUserNestedInput
+    tickets?: ticketUpdateManyWithoutOwnerNestedInput
+    transferredTickets?: ticketUpdateManyWithoutTransferredFromNestedInput
+    guestsImported?: guestListUpdateManyWithoutImportedByUserNestedInput
+    guestsCheckedIn?: guestListUpdateManyWithoutCheckedInByUserNestedInput
   }
 
   export type userUncheckedUpdateWithoutSessionInput = {
@@ -24114,132 +26211,24 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: BoolFieldUpdateOperationsInput | boolean
     image?: NullableStringFieldUpdateOperationsInput | string | null
-    imageBase64?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     username?: NullableStringFieldUpdateOperationsInput | string | null
     dni?: NullableStringFieldUpdateOperationsInput | string | null
     birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
-    tickets?: ticketUncheckedUpdateManyWithoutOwnerNestedInput
-    transferredTickets?: ticketUncheckedUpdateManyWithoutTransferredFromNestedInput
-    participants?: participantUncheckedUpdateManyWithoutUserNestedInput
-    rrppAssignments?: rrppAssignmentUncheckedUpdateManyWithoutRrppUserNestedInput
+    image_base64?: NullableStringFieldUpdateOperationsInput | string | null
     account?: accountUncheckedUpdateManyWithoutUserNestedInput
     logs?: logUncheckedUpdateManyWithoutUserNestedInput
-    sentMessages?: messageUncheckedUpdateManyWithoutSenderNestedInput
     receivedMessages?: messageUncheckedUpdateManyWithoutReceiverNestedInput
+    sentMessages?: messageUncheckedUpdateManyWithoutSenderNestedInput
+    participants?: participantUncheckedUpdateManyWithoutUserNestedInput
     payments?: paymentUncheckedUpdateManyWithoutUserNestedInput
-  }
-
-  export type ticketCreateWithoutOwnerInput = {
-    qrCode: string
-    code?: string | null
-    status?: $Enums.TicketStatus
-    createdAt?: Date | string
-    event: eventCreateNestedOneWithoutTicketsInput
-    type: ticketTypeCreateNestedOneWithoutTicketsInput
-    transferredFrom?: userCreateNestedOneWithoutTransferredTicketsInput
-    payment?: paymentCreateNestedOneWithoutTicketsInput
-  }
-
-  export type ticketUncheckedCreateWithoutOwnerInput = {
-    id?: number
-    eventId: number
-    typeId: number
-    paymentId?: number | null
-    qrCode: string
-    code?: string | null
-    status?: $Enums.TicketStatus
-    transferredFromId?: string | null
-    createdAt?: Date | string
-  }
-
-  export type ticketCreateOrConnectWithoutOwnerInput = {
-    where: ticketWhereUniqueInput
-    create: XOR<ticketCreateWithoutOwnerInput, ticketUncheckedCreateWithoutOwnerInput>
-  }
-
-  export type ticketCreateManyOwnerInputEnvelope = {
-    data: ticketCreateManyOwnerInput | ticketCreateManyOwnerInput[]
-    skipDuplicates?: boolean
-  }
-
-  export type ticketCreateWithoutTransferredFromInput = {
-    qrCode: string
-    code?: string | null
-    status?: $Enums.TicketStatus
-    createdAt?: Date | string
-    event: eventCreateNestedOneWithoutTicketsInput
-    owner: userCreateNestedOneWithoutTicketsInput
-    type: ticketTypeCreateNestedOneWithoutTicketsInput
-    payment?: paymentCreateNestedOneWithoutTicketsInput
-  }
-
-  export type ticketUncheckedCreateWithoutTransferredFromInput = {
-    id?: number
-    eventId: number
-    ownerId: string
-    typeId: number
-    paymentId?: number | null
-    qrCode: string
-    code?: string | null
-    status?: $Enums.TicketStatus
-    createdAt?: Date | string
-  }
-
-  export type ticketCreateOrConnectWithoutTransferredFromInput = {
-    where: ticketWhereUniqueInput
-    create: XOR<ticketCreateWithoutTransferredFromInput, ticketUncheckedCreateWithoutTransferredFromInput>
-  }
-
-  export type ticketCreateManyTransferredFromInputEnvelope = {
-    data: ticketCreateManyTransferredFromInput | ticketCreateManyTransferredFromInput[]
-    skipDuplicates?: boolean
-  }
-
-  export type participantCreateWithoutUserInput = {
-    viaRsvp?: boolean
-    qrCode?: string | null
-    event: eventCreateNestedOneWithoutParticipantsInput
-  }
-
-  export type participantUncheckedCreateWithoutUserInput = {
-    eventId: number
-    viaRsvp?: boolean
-    qrCode?: string | null
-  }
-
-  export type participantCreateOrConnectWithoutUserInput = {
-    where: participantWhereUniqueInput
-    create: XOR<participantCreateWithoutUserInput, participantUncheckedCreateWithoutUserInput>
-  }
-
-  export type participantCreateManyUserInputEnvelope = {
-    data: participantCreateManyUserInput | participantCreateManyUserInput[]
-    skipDuplicates?: boolean
-  }
-
-  export type rrppAssignmentCreateWithoutRrppUserInput = {
-    commissionRate?: Decimal | DecimalJsLike | number | string
-    freesGranted?: number
-    event: eventCreateNestedOneWithoutRrppAssignmentsInput
-  }
-
-  export type rrppAssignmentUncheckedCreateWithoutRrppUserInput = {
-    eventId: number
-    commissionRate?: Decimal | DecimalJsLike | number | string
-    freesGranted?: number
-  }
-
-  export type rrppAssignmentCreateOrConnectWithoutRrppUserInput = {
-    where: rrppAssignmentWhereUniqueInput
-    create: XOR<rrppAssignmentCreateWithoutRrppUserInput, rrppAssignmentUncheckedCreateWithoutRrppUserInput>
-  }
-
-  export type rrppAssignmentCreateManyRrppUserInputEnvelope = {
-    data: rrppAssignmentCreateManyRrppUserInput | rrppAssignmentCreateManyRrppUserInput[]
-    skipDuplicates?: boolean
+    rrppAssignments?: rrppAssignmentUncheckedUpdateManyWithoutRrppUserNestedInput
+    tickets?: ticketUncheckedUpdateManyWithoutOwnerNestedInput
+    transferredTickets?: ticketUncheckedUpdateManyWithoutTransferredFromNestedInput
+    guestsImported?: guestListUncheckedUpdateManyWithoutImportedByUserNestedInput
+    guestsCheckedIn?: guestListUncheckedUpdateManyWithoutCheckedInByUserNestedInput
   }
 
   export type accountCreateWithoutUserInput = {
@@ -24282,36 +26271,6 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
-  export type sessionCreateWithoutUserInput = {
-    id: string
-    expiresAt: Date | string
-    token: string
-    createdAt: Date | string
-    updatedAt: Date | string
-    ipAddress?: string | null
-    userAgent?: string | null
-  }
-
-  export type sessionUncheckedCreateWithoutUserInput = {
-    id: string
-    expiresAt: Date | string
-    token: string
-    createdAt: Date | string
-    updatedAt: Date | string
-    ipAddress?: string | null
-    userAgent?: string | null
-  }
-
-  export type sessionCreateOrConnectWithoutUserInput = {
-    where: sessionWhereUniqueInput
-    create: XOR<sessionCreateWithoutUserInput, sessionUncheckedCreateWithoutUserInput>
-  }
-
-  export type sessionCreateManyUserInputEnvelope = {
-    data: sessionCreateManyUserInput | sessionCreateManyUserInput[]
-    skipDuplicates?: boolean
-  }
-
   export type logCreateWithoutUserInput = {
     action: string
     timestamp?: Date | string
@@ -24332,6 +26291,31 @@ export namespace Prisma {
 
   export type logCreateManyUserInputEnvelope = {
     data: logCreateManyUserInput | logCreateManyUserInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type messageCreateWithoutReceiverInput = {
+    message: string
+    timestamp?: Date | string
+    readStatus?: boolean
+    sender: userCreateNestedOneWithoutSentMessagesInput
+  }
+
+  export type messageUncheckedCreateWithoutReceiverInput = {
+    id?: number
+    senderId: string
+    message: string
+    timestamp?: Date | string
+    readStatus?: boolean
+  }
+
+  export type messageCreateOrConnectWithoutReceiverInput = {
+    where: messageWhereUniqueInput
+    create: XOR<messageCreateWithoutReceiverInput, messageUncheckedCreateWithoutReceiverInput>
+  }
+
+  export type messageCreateManyReceiverInputEnvelope = {
+    data: messageCreateManyReceiverInput | messageCreateManyReceiverInput[]
     skipDuplicates?: boolean
   }
 
@@ -24360,28 +26344,25 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
-  export type messageCreateWithoutReceiverInput = {
-    message: string
-    timestamp?: Date | string
-    readStatus?: boolean
-    sender: userCreateNestedOneWithoutSentMessagesInput
+  export type participantCreateWithoutUserInput = {
+    viaRsvp?: boolean
+    qrCode?: string | null
+    event: eventCreateNestedOneWithoutParticipantsInput
   }
 
-  export type messageUncheckedCreateWithoutReceiverInput = {
-    id?: number
-    senderId: string
-    message: string
-    timestamp?: Date | string
-    readStatus?: boolean
+  export type participantUncheckedCreateWithoutUserInput = {
+    eventId: number
+    viaRsvp?: boolean
+    qrCode?: string | null
   }
 
-  export type messageCreateOrConnectWithoutReceiverInput = {
-    where: messageWhereUniqueInput
-    create: XOR<messageCreateWithoutReceiverInput, messageUncheckedCreateWithoutReceiverInput>
+  export type participantCreateOrConnectWithoutUserInput = {
+    where: participantWhereUniqueInput
+    create: XOR<participantCreateWithoutUserInput, participantUncheckedCreateWithoutUserInput>
   }
 
-  export type messageCreateManyReceiverInputEnvelope = {
-    data: messageCreateManyReceiverInput | messageCreateManyReceiverInput[]
+  export type participantCreateManyUserInputEnvelope = {
+    data: participantCreateManyUserInput | participantCreateManyUserInput[]
     skipDuplicates?: boolean
   }
 
@@ -24426,6 +26407,434 @@ export namespace Prisma {
   export type paymentCreateManyUserInputEnvelope = {
     data: paymentCreateManyUserInput | paymentCreateManyUserInput[]
     skipDuplicates?: boolean
+  }
+
+  export type rrppAssignmentCreateWithoutRrppUserInput = {
+    commissionRate?: Decimal | DecimalJsLike | number | string
+    freesGranted?: number
+    event: eventCreateNestedOneWithoutRrppAssignmentsInput
+  }
+
+  export type rrppAssignmentUncheckedCreateWithoutRrppUserInput = {
+    eventId: number
+    commissionRate?: Decimal | DecimalJsLike | number | string
+    freesGranted?: number
+  }
+
+  export type rrppAssignmentCreateOrConnectWithoutRrppUserInput = {
+    where: rrppAssignmentWhereUniqueInput
+    create: XOR<rrppAssignmentCreateWithoutRrppUserInput, rrppAssignmentUncheckedCreateWithoutRrppUserInput>
+  }
+
+  export type rrppAssignmentCreateManyRrppUserInputEnvelope = {
+    data: rrppAssignmentCreateManyRrppUserInput | rrppAssignmentCreateManyRrppUserInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type sessionCreateWithoutUserInput = {
+    id: string
+    expiresAt: Date | string
+    token: string
+    createdAt: Date | string
+    updatedAt: Date | string
+    ipAddress?: string | null
+    userAgent?: string | null
+  }
+
+  export type sessionUncheckedCreateWithoutUserInput = {
+    id: string
+    expiresAt: Date | string
+    token: string
+    createdAt: Date | string
+    updatedAt: Date | string
+    ipAddress?: string | null
+    userAgent?: string | null
+  }
+
+  export type sessionCreateOrConnectWithoutUserInput = {
+    where: sessionWhereUniqueInput
+    create: XOR<sessionCreateWithoutUserInput, sessionUncheckedCreateWithoutUserInput>
+  }
+
+  export type sessionCreateManyUserInputEnvelope = {
+    data: sessionCreateManyUserInput | sessionCreateManyUserInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type ticketCreateWithoutOwnerInput = {
+    qrCode: string
+    code?: string | null
+    status?: $Enums.TicketStatus
+    createdAt?: Date | string
+    event: eventCreateNestedOneWithoutTicketsInput
+    payment?: paymentCreateNestedOneWithoutTicketsInput
+    transferredFrom?: userCreateNestedOneWithoutTransferredTicketsInput
+    type: ticketTypeCreateNestedOneWithoutTicketsInput
+  }
+
+  export type ticketUncheckedCreateWithoutOwnerInput = {
+    id?: number
+    eventId: number
+    typeId: number
+    paymentId?: number | null
+    qrCode: string
+    code?: string | null
+    status?: $Enums.TicketStatus
+    transferredFromId?: string | null
+    createdAt?: Date | string
+  }
+
+  export type ticketCreateOrConnectWithoutOwnerInput = {
+    where: ticketWhereUniqueInput
+    create: XOR<ticketCreateWithoutOwnerInput, ticketUncheckedCreateWithoutOwnerInput>
+  }
+
+  export type ticketCreateManyOwnerInputEnvelope = {
+    data: ticketCreateManyOwnerInput | ticketCreateManyOwnerInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type ticketCreateWithoutTransferredFromInput = {
+    qrCode: string
+    code?: string | null
+    status?: $Enums.TicketStatus
+    createdAt?: Date | string
+    event: eventCreateNestedOneWithoutTicketsInput
+    owner: userCreateNestedOneWithoutTicketsInput
+    payment?: paymentCreateNestedOneWithoutTicketsInput
+    type: ticketTypeCreateNestedOneWithoutTicketsInput
+  }
+
+  export type ticketUncheckedCreateWithoutTransferredFromInput = {
+    id?: number
+    eventId: number
+    ownerId: string
+    typeId: number
+    paymentId?: number | null
+    qrCode: string
+    code?: string | null
+    status?: $Enums.TicketStatus
+    createdAt?: Date | string
+  }
+
+  export type ticketCreateOrConnectWithoutTransferredFromInput = {
+    where: ticketWhereUniqueInput
+    create: XOR<ticketCreateWithoutTransferredFromInput, ticketUncheckedCreateWithoutTransferredFromInput>
+  }
+
+  export type ticketCreateManyTransferredFromInputEnvelope = {
+    data: ticketCreateManyTransferredFromInput | ticketCreateManyTransferredFromInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type guestListCreateWithoutImportedByUserInput = {
+    fullName: string
+    normalizedName: string
+    email: string
+    age?: string | null
+    invitedBy?: string | null
+    gender?: string | null
+    status?: $Enums.GuestStatus
+    qrCode: string
+    checkedInAt?: Date | string | null
+    importedAt?: Date | string
+    timestamp?: string | null
+    event: eventCreateNestedOneWithoutGuestListInput
+    checkedInByUser?: userCreateNestedOneWithoutGuestsCheckedInInput
+  }
+
+  export type guestListUncheckedCreateWithoutImportedByUserInput = {
+    id?: number
+    eventId: number
+    fullName: string
+    normalizedName: string
+    email: string
+    age?: string | null
+    invitedBy?: string | null
+    gender?: string | null
+    status?: $Enums.GuestStatus
+    qrCode: string
+    checkedInAt?: Date | string | null
+    checkedInBy?: string | null
+    importedAt?: Date | string
+    timestamp?: string | null
+  }
+
+  export type guestListCreateOrConnectWithoutImportedByUserInput = {
+    where: guestListWhereUniqueInput
+    create: XOR<guestListCreateWithoutImportedByUserInput, guestListUncheckedCreateWithoutImportedByUserInput>
+  }
+
+  export type guestListCreateManyImportedByUserInputEnvelope = {
+    data: guestListCreateManyImportedByUserInput | guestListCreateManyImportedByUserInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type guestListCreateWithoutCheckedInByUserInput = {
+    fullName: string
+    normalizedName: string
+    email: string
+    age?: string | null
+    invitedBy?: string | null
+    gender?: string | null
+    status?: $Enums.GuestStatus
+    qrCode: string
+    checkedInAt?: Date | string | null
+    importedAt?: Date | string
+    timestamp?: string | null
+    event: eventCreateNestedOneWithoutGuestListInput
+    importedByUser: userCreateNestedOneWithoutGuestsImportedInput
+  }
+
+  export type guestListUncheckedCreateWithoutCheckedInByUserInput = {
+    id?: number
+    eventId: number
+    fullName: string
+    normalizedName: string
+    email: string
+    age?: string | null
+    invitedBy?: string | null
+    gender?: string | null
+    status?: $Enums.GuestStatus
+    qrCode: string
+    checkedInAt?: Date | string | null
+    importedAt?: Date | string
+    importedBy: string
+    timestamp?: string | null
+  }
+
+  export type guestListCreateOrConnectWithoutCheckedInByUserInput = {
+    where: guestListWhereUniqueInput
+    create: XOR<guestListCreateWithoutCheckedInByUserInput, guestListUncheckedCreateWithoutCheckedInByUserInput>
+  }
+
+  export type guestListCreateManyCheckedInByUserInputEnvelope = {
+    data: guestListCreateManyCheckedInByUserInput | guestListCreateManyCheckedInByUserInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type accountUpsertWithWhereUniqueWithoutUserInput = {
+    where: accountWhereUniqueInput
+    update: XOR<accountUpdateWithoutUserInput, accountUncheckedUpdateWithoutUserInput>
+    create: XOR<accountCreateWithoutUserInput, accountUncheckedCreateWithoutUserInput>
+  }
+
+  export type accountUpdateWithWhereUniqueWithoutUserInput = {
+    where: accountWhereUniqueInput
+    data: XOR<accountUpdateWithoutUserInput, accountUncheckedUpdateWithoutUserInput>
+  }
+
+  export type accountUpdateManyWithWhereWithoutUserInput = {
+    where: accountScalarWhereInput
+    data: XOR<accountUpdateManyMutationInput, accountUncheckedUpdateManyWithoutUserInput>
+  }
+
+  export type accountScalarWhereInput = {
+    AND?: accountScalarWhereInput | accountScalarWhereInput[]
+    OR?: accountScalarWhereInput[]
+    NOT?: accountScalarWhereInput | accountScalarWhereInput[]
+    id?: StringFilter<"account"> | string
+    accountId?: StringFilter<"account"> | string
+    providerId?: StringFilter<"account"> | string
+    userId?: StringFilter<"account"> | string
+    accessToken?: StringNullableFilter<"account"> | string | null
+    refreshToken?: StringNullableFilter<"account"> | string | null
+    idToken?: StringNullableFilter<"account"> | string | null
+    accessTokenExpiresAt?: DateTimeNullableFilter<"account"> | Date | string | null
+    refreshTokenExpiresAt?: DateTimeNullableFilter<"account"> | Date | string | null
+    scope?: StringNullableFilter<"account"> | string | null
+    password?: StringNullableFilter<"account"> | string | null
+    createdAt?: DateTimeFilter<"account"> | Date | string
+    updatedAt?: DateTimeFilter<"account"> | Date | string
+  }
+
+  export type logUpsertWithWhereUniqueWithoutUserInput = {
+    where: logWhereUniqueInput
+    update: XOR<logUpdateWithoutUserInput, logUncheckedUpdateWithoutUserInput>
+    create: XOR<logCreateWithoutUserInput, logUncheckedCreateWithoutUserInput>
+  }
+
+  export type logUpdateWithWhereUniqueWithoutUserInput = {
+    where: logWhereUniqueInput
+    data: XOR<logUpdateWithoutUserInput, logUncheckedUpdateWithoutUserInput>
+  }
+
+  export type logUpdateManyWithWhereWithoutUserInput = {
+    where: logScalarWhereInput
+    data: XOR<logUpdateManyMutationInput, logUncheckedUpdateManyWithoutUserInput>
+  }
+
+  export type logScalarWhereInput = {
+    AND?: logScalarWhereInput | logScalarWhereInput[]
+    OR?: logScalarWhereInput[]
+    NOT?: logScalarWhereInput | logScalarWhereInput[]
+    id?: IntFilter<"log"> | number
+    userId?: StringNullableFilter<"log"> | string | null
+    action?: StringFilter<"log"> | string
+    timestamp?: DateTimeFilter<"log"> | Date | string
+    details?: JsonNullableFilter<"log">
+  }
+
+  export type messageUpsertWithWhereUniqueWithoutReceiverInput = {
+    where: messageWhereUniqueInput
+    update: XOR<messageUpdateWithoutReceiverInput, messageUncheckedUpdateWithoutReceiverInput>
+    create: XOR<messageCreateWithoutReceiverInput, messageUncheckedCreateWithoutReceiverInput>
+  }
+
+  export type messageUpdateWithWhereUniqueWithoutReceiverInput = {
+    where: messageWhereUniqueInput
+    data: XOR<messageUpdateWithoutReceiverInput, messageUncheckedUpdateWithoutReceiverInput>
+  }
+
+  export type messageUpdateManyWithWhereWithoutReceiverInput = {
+    where: messageScalarWhereInput
+    data: XOR<messageUpdateManyMutationInput, messageUncheckedUpdateManyWithoutReceiverInput>
+  }
+
+  export type messageScalarWhereInput = {
+    AND?: messageScalarWhereInput | messageScalarWhereInput[]
+    OR?: messageScalarWhereInput[]
+    NOT?: messageScalarWhereInput | messageScalarWhereInput[]
+    id?: IntFilter<"message"> | number
+    senderId?: StringFilter<"message"> | string
+    receiverId?: StringFilter<"message"> | string
+    message?: StringFilter<"message"> | string
+    timestamp?: DateTimeFilter<"message"> | Date | string
+    readStatus?: BoolFilter<"message"> | boolean
+  }
+
+  export type messageUpsertWithWhereUniqueWithoutSenderInput = {
+    where: messageWhereUniqueInput
+    update: XOR<messageUpdateWithoutSenderInput, messageUncheckedUpdateWithoutSenderInput>
+    create: XOR<messageCreateWithoutSenderInput, messageUncheckedCreateWithoutSenderInput>
+  }
+
+  export type messageUpdateWithWhereUniqueWithoutSenderInput = {
+    where: messageWhereUniqueInput
+    data: XOR<messageUpdateWithoutSenderInput, messageUncheckedUpdateWithoutSenderInput>
+  }
+
+  export type messageUpdateManyWithWhereWithoutSenderInput = {
+    where: messageScalarWhereInput
+    data: XOR<messageUpdateManyMutationInput, messageUncheckedUpdateManyWithoutSenderInput>
+  }
+
+  export type participantUpsertWithWhereUniqueWithoutUserInput = {
+    where: participantWhereUniqueInput
+    update: XOR<participantUpdateWithoutUserInput, participantUncheckedUpdateWithoutUserInput>
+    create: XOR<participantCreateWithoutUserInput, participantUncheckedCreateWithoutUserInput>
+  }
+
+  export type participantUpdateWithWhereUniqueWithoutUserInput = {
+    where: participantWhereUniqueInput
+    data: XOR<participantUpdateWithoutUserInput, participantUncheckedUpdateWithoutUserInput>
+  }
+
+  export type participantUpdateManyWithWhereWithoutUserInput = {
+    where: participantScalarWhereInput
+    data: XOR<participantUpdateManyMutationInput, participantUncheckedUpdateManyWithoutUserInput>
+  }
+
+  export type participantScalarWhereInput = {
+    AND?: participantScalarWhereInput | participantScalarWhereInput[]
+    OR?: participantScalarWhereInput[]
+    NOT?: participantScalarWhereInput | participantScalarWhereInput[]
+    userId?: StringFilter<"participant"> | string
+    eventId?: IntFilter<"participant"> | number
+    viaRsvp?: BoolFilter<"participant"> | boolean
+    qrCode?: StringNullableFilter<"participant"> | string | null
+  }
+
+  export type paymentUpsertWithWhereUniqueWithoutUserInput = {
+    where: paymentWhereUniqueInput
+    update: XOR<paymentUpdateWithoutUserInput, paymentUncheckedUpdateWithoutUserInput>
+    create: XOR<paymentCreateWithoutUserInput, paymentUncheckedCreateWithoutUserInput>
+  }
+
+  export type paymentUpdateWithWhereUniqueWithoutUserInput = {
+    where: paymentWhereUniqueInput
+    data: XOR<paymentUpdateWithoutUserInput, paymentUncheckedUpdateWithoutUserInput>
+  }
+
+  export type paymentUpdateManyWithWhereWithoutUserInput = {
+    where: paymentScalarWhereInput
+    data: XOR<paymentUpdateManyMutationInput, paymentUncheckedUpdateManyWithoutUserInput>
+  }
+
+  export type paymentScalarWhereInput = {
+    AND?: paymentScalarWhereInput | paymentScalarWhereInput[]
+    OR?: paymentScalarWhereInput[]
+    NOT?: paymentScalarWhereInput | paymentScalarWhereInput[]
+    id?: IntFilter<"payment"> | number
+    userId?: StringFilter<"payment"> | string
+    eventId?: IntFilter<"payment"> | number
+    status?: EnumPaymentStatusFilter<"payment"> | $Enums.PaymentStatus
+    amount?: DecimalFilter<"payment"> | Decimal | DecimalJsLike | number | string
+    currency?: StringFilter<"payment"> | string
+    provider?: StringFilter<"payment"> | string
+    externalReference?: StringFilter<"payment"> | string
+    mpPreferenceId?: StringNullableFilter<"payment"> | string | null
+    mpPaymentId?: StringNullableFilter<"payment"> | string | null
+    payerEmail?: StringNullableFilter<"payment"> | string | null
+    payerName?: StringNullableFilter<"payment"> | string | null
+    createdAt?: DateTimeFilter<"payment"> | Date | string
+    updatedAt?: DateTimeFilter<"payment"> | Date | string
+  }
+
+  export type rrppAssignmentUpsertWithWhereUniqueWithoutRrppUserInput = {
+    where: rrppAssignmentWhereUniqueInput
+    update: XOR<rrppAssignmentUpdateWithoutRrppUserInput, rrppAssignmentUncheckedUpdateWithoutRrppUserInput>
+    create: XOR<rrppAssignmentCreateWithoutRrppUserInput, rrppAssignmentUncheckedCreateWithoutRrppUserInput>
+  }
+
+  export type rrppAssignmentUpdateWithWhereUniqueWithoutRrppUserInput = {
+    where: rrppAssignmentWhereUniqueInput
+    data: XOR<rrppAssignmentUpdateWithoutRrppUserInput, rrppAssignmentUncheckedUpdateWithoutRrppUserInput>
+  }
+
+  export type rrppAssignmentUpdateManyWithWhereWithoutRrppUserInput = {
+    where: rrppAssignmentScalarWhereInput
+    data: XOR<rrppAssignmentUpdateManyMutationInput, rrppAssignmentUncheckedUpdateManyWithoutRrppUserInput>
+  }
+
+  export type rrppAssignmentScalarWhereInput = {
+    AND?: rrppAssignmentScalarWhereInput | rrppAssignmentScalarWhereInput[]
+    OR?: rrppAssignmentScalarWhereInput[]
+    NOT?: rrppAssignmentScalarWhereInput | rrppAssignmentScalarWhereInput[]
+    rrppUserId?: StringFilter<"rrppAssignment"> | string
+    eventId?: IntFilter<"rrppAssignment"> | number
+    commissionRate?: DecimalFilter<"rrppAssignment"> | Decimal | DecimalJsLike | number | string
+    freesGranted?: IntFilter<"rrppAssignment"> | number
+  }
+
+  export type sessionUpsertWithWhereUniqueWithoutUserInput = {
+    where: sessionWhereUniqueInput
+    update: XOR<sessionUpdateWithoutUserInput, sessionUncheckedUpdateWithoutUserInput>
+    create: XOR<sessionCreateWithoutUserInput, sessionUncheckedCreateWithoutUserInput>
+  }
+
+  export type sessionUpdateWithWhereUniqueWithoutUserInput = {
+    where: sessionWhereUniqueInput
+    data: XOR<sessionUpdateWithoutUserInput, sessionUncheckedUpdateWithoutUserInput>
+  }
+
+  export type sessionUpdateManyWithWhereWithoutUserInput = {
+    where: sessionScalarWhereInput
+    data: XOR<sessionUpdateManyMutationInput, sessionUncheckedUpdateManyWithoutUserInput>
+  }
+
+  export type sessionScalarWhereInput = {
+    AND?: sessionScalarWhereInput | sessionScalarWhereInput[]
+    OR?: sessionScalarWhereInput[]
+    NOT?: sessionScalarWhereInput | sessionScalarWhereInput[]
+    id?: StringFilter<"session"> | string
+    expiresAt?: DateTimeFilter<"session"> | Date | string
+    token?: StringFilter<"session"> | string
+    createdAt?: DateTimeFilter<"session"> | Date | string
+    updatedAt?: DateTimeFilter<"session"> | Date | string
+    ipAddress?: StringNullableFilter<"session"> | string | null
+    userAgent?: StringNullableFilter<"session"> | string | null
+    userId?: StringFilter<"session"> | string
   }
 
   export type ticketUpsertWithWhereUniqueWithoutOwnerInput = {
@@ -24476,281 +26885,57 @@ export namespace Prisma {
     data: XOR<ticketUpdateManyMutationInput, ticketUncheckedUpdateManyWithoutTransferredFromInput>
   }
 
-  export type participantUpsertWithWhereUniqueWithoutUserInput = {
-    where: participantWhereUniqueInput
-    update: XOR<participantUpdateWithoutUserInput, participantUncheckedUpdateWithoutUserInput>
-    create: XOR<participantCreateWithoutUserInput, participantUncheckedCreateWithoutUserInput>
+  export type guestListUpsertWithWhereUniqueWithoutImportedByUserInput = {
+    where: guestListWhereUniqueInput
+    update: XOR<guestListUpdateWithoutImportedByUserInput, guestListUncheckedUpdateWithoutImportedByUserInput>
+    create: XOR<guestListCreateWithoutImportedByUserInput, guestListUncheckedCreateWithoutImportedByUserInput>
   }
 
-  export type participantUpdateWithWhereUniqueWithoutUserInput = {
-    where: participantWhereUniqueInput
-    data: XOR<participantUpdateWithoutUserInput, participantUncheckedUpdateWithoutUserInput>
+  export type guestListUpdateWithWhereUniqueWithoutImportedByUserInput = {
+    where: guestListWhereUniqueInput
+    data: XOR<guestListUpdateWithoutImportedByUserInput, guestListUncheckedUpdateWithoutImportedByUserInput>
   }
 
-  export type participantUpdateManyWithWhereWithoutUserInput = {
-    where: participantScalarWhereInput
-    data: XOR<participantUpdateManyMutationInput, participantUncheckedUpdateManyWithoutUserInput>
+  export type guestListUpdateManyWithWhereWithoutImportedByUserInput = {
+    where: guestListScalarWhereInput
+    data: XOR<guestListUpdateManyMutationInput, guestListUncheckedUpdateManyWithoutImportedByUserInput>
   }
 
-  export type participantScalarWhereInput = {
-    AND?: participantScalarWhereInput | participantScalarWhereInput[]
-    OR?: participantScalarWhereInput[]
-    NOT?: participantScalarWhereInput | participantScalarWhereInput[]
-    userId?: StringFilter<"participant"> | string
-    eventId?: IntFilter<"participant"> | number
-    viaRsvp?: BoolFilter<"participant"> | boolean
-    qrCode?: StringNullableFilter<"participant"> | string | null
+  export type guestListScalarWhereInput = {
+    AND?: guestListScalarWhereInput | guestListScalarWhereInput[]
+    OR?: guestListScalarWhereInput[]
+    NOT?: guestListScalarWhereInput | guestListScalarWhereInput[]
+    id?: IntFilter<"guestList"> | number
+    eventId?: IntFilter<"guestList"> | number
+    fullName?: StringFilter<"guestList"> | string
+    normalizedName?: StringFilter<"guestList"> | string
+    email?: StringFilter<"guestList"> | string
+    age?: StringNullableFilter<"guestList"> | string | null
+    invitedBy?: StringNullableFilter<"guestList"> | string | null
+    gender?: StringNullableFilter<"guestList"> | string | null
+    status?: EnumGuestStatusFilter<"guestList"> | $Enums.GuestStatus
+    qrCode?: StringFilter<"guestList"> | string
+    checkedInAt?: DateTimeNullableFilter<"guestList"> | Date | string | null
+    checkedInBy?: StringNullableFilter<"guestList"> | string | null
+    importedAt?: DateTimeFilter<"guestList"> | Date | string
+    importedBy?: StringFilter<"guestList"> | string
+    timestamp?: StringNullableFilter<"guestList"> | string | null
   }
 
-  export type rrppAssignmentUpsertWithWhereUniqueWithoutRrppUserInput = {
-    where: rrppAssignmentWhereUniqueInput
-    update: XOR<rrppAssignmentUpdateWithoutRrppUserInput, rrppAssignmentUncheckedUpdateWithoutRrppUserInput>
-    create: XOR<rrppAssignmentCreateWithoutRrppUserInput, rrppAssignmentUncheckedCreateWithoutRrppUserInput>
+  export type guestListUpsertWithWhereUniqueWithoutCheckedInByUserInput = {
+    where: guestListWhereUniqueInput
+    update: XOR<guestListUpdateWithoutCheckedInByUserInput, guestListUncheckedUpdateWithoutCheckedInByUserInput>
+    create: XOR<guestListCreateWithoutCheckedInByUserInput, guestListUncheckedCreateWithoutCheckedInByUserInput>
   }
 
-  export type rrppAssignmentUpdateWithWhereUniqueWithoutRrppUserInput = {
-    where: rrppAssignmentWhereUniqueInput
-    data: XOR<rrppAssignmentUpdateWithoutRrppUserInput, rrppAssignmentUncheckedUpdateWithoutRrppUserInput>
+  export type guestListUpdateWithWhereUniqueWithoutCheckedInByUserInput = {
+    where: guestListWhereUniqueInput
+    data: XOR<guestListUpdateWithoutCheckedInByUserInput, guestListUncheckedUpdateWithoutCheckedInByUserInput>
   }
 
-  export type rrppAssignmentUpdateManyWithWhereWithoutRrppUserInput = {
-    where: rrppAssignmentScalarWhereInput
-    data: XOR<rrppAssignmentUpdateManyMutationInput, rrppAssignmentUncheckedUpdateManyWithoutRrppUserInput>
-  }
-
-  export type rrppAssignmentScalarWhereInput = {
-    AND?: rrppAssignmentScalarWhereInput | rrppAssignmentScalarWhereInput[]
-    OR?: rrppAssignmentScalarWhereInput[]
-    NOT?: rrppAssignmentScalarWhereInput | rrppAssignmentScalarWhereInput[]
-    rrppUserId?: StringFilter<"rrppAssignment"> | string
-    eventId?: IntFilter<"rrppAssignment"> | number
-    commissionRate?: DecimalFilter<"rrppAssignment"> | Decimal | DecimalJsLike | number | string
-    freesGranted?: IntFilter<"rrppAssignment"> | number
-  }
-
-  export type accountUpsertWithWhereUniqueWithoutUserInput = {
-    where: accountWhereUniqueInput
-    update: XOR<accountUpdateWithoutUserInput, accountUncheckedUpdateWithoutUserInput>
-    create: XOR<accountCreateWithoutUserInput, accountUncheckedCreateWithoutUserInput>
-  }
-
-  export type accountUpdateWithWhereUniqueWithoutUserInput = {
-    where: accountWhereUniqueInput
-    data: XOR<accountUpdateWithoutUserInput, accountUncheckedUpdateWithoutUserInput>
-  }
-
-  export type accountUpdateManyWithWhereWithoutUserInput = {
-    where: accountScalarWhereInput
-    data: XOR<accountUpdateManyMutationInput, accountUncheckedUpdateManyWithoutUserInput>
-  }
-
-  export type accountScalarWhereInput = {
-    AND?: accountScalarWhereInput | accountScalarWhereInput[]
-    OR?: accountScalarWhereInput[]
-    NOT?: accountScalarWhereInput | accountScalarWhereInput[]
-    id?: StringFilter<"account"> | string
-    accountId?: StringFilter<"account"> | string
-    providerId?: StringFilter<"account"> | string
-    userId?: StringFilter<"account"> | string
-    accessToken?: StringNullableFilter<"account"> | string | null
-    refreshToken?: StringNullableFilter<"account"> | string | null
-    idToken?: StringNullableFilter<"account"> | string | null
-    accessTokenExpiresAt?: DateTimeNullableFilter<"account"> | Date | string | null
-    refreshTokenExpiresAt?: DateTimeNullableFilter<"account"> | Date | string | null
-    scope?: StringNullableFilter<"account"> | string | null
-    password?: StringNullableFilter<"account"> | string | null
-    createdAt?: DateTimeFilter<"account"> | Date | string
-    updatedAt?: DateTimeFilter<"account"> | Date | string
-  }
-
-  export type sessionUpsertWithWhereUniqueWithoutUserInput = {
-    where: sessionWhereUniqueInput
-    update: XOR<sessionUpdateWithoutUserInput, sessionUncheckedUpdateWithoutUserInput>
-    create: XOR<sessionCreateWithoutUserInput, sessionUncheckedCreateWithoutUserInput>
-  }
-
-  export type sessionUpdateWithWhereUniqueWithoutUserInput = {
-    where: sessionWhereUniqueInput
-    data: XOR<sessionUpdateWithoutUserInput, sessionUncheckedUpdateWithoutUserInput>
-  }
-
-  export type sessionUpdateManyWithWhereWithoutUserInput = {
-    where: sessionScalarWhereInput
-    data: XOR<sessionUpdateManyMutationInput, sessionUncheckedUpdateManyWithoutUserInput>
-  }
-
-  export type sessionScalarWhereInput = {
-    AND?: sessionScalarWhereInput | sessionScalarWhereInput[]
-    OR?: sessionScalarWhereInput[]
-    NOT?: sessionScalarWhereInput | sessionScalarWhereInput[]
-    id?: StringFilter<"session"> | string
-    expiresAt?: DateTimeFilter<"session"> | Date | string
-    token?: StringFilter<"session"> | string
-    createdAt?: DateTimeFilter<"session"> | Date | string
-    updatedAt?: DateTimeFilter<"session"> | Date | string
-    ipAddress?: StringNullableFilter<"session"> | string | null
-    userAgent?: StringNullableFilter<"session"> | string | null
-    userId?: StringFilter<"session"> | string
-  }
-
-  export type logUpsertWithWhereUniqueWithoutUserInput = {
-    where: logWhereUniqueInput
-    update: XOR<logUpdateWithoutUserInput, logUncheckedUpdateWithoutUserInput>
-    create: XOR<logCreateWithoutUserInput, logUncheckedCreateWithoutUserInput>
-  }
-
-  export type logUpdateWithWhereUniqueWithoutUserInput = {
-    where: logWhereUniqueInput
-    data: XOR<logUpdateWithoutUserInput, logUncheckedUpdateWithoutUserInput>
-  }
-
-  export type logUpdateManyWithWhereWithoutUserInput = {
-    where: logScalarWhereInput
-    data: XOR<logUpdateManyMutationInput, logUncheckedUpdateManyWithoutUserInput>
-  }
-
-  export type logScalarWhereInput = {
-    AND?: logScalarWhereInput | logScalarWhereInput[]
-    OR?: logScalarWhereInput[]
-    NOT?: logScalarWhereInput | logScalarWhereInput[]
-    id?: IntFilter<"log"> | number
-    userId?: StringNullableFilter<"log"> | string | null
-    action?: StringFilter<"log"> | string
-    timestamp?: DateTimeFilter<"log"> | Date | string
-    details?: JsonNullableFilter<"log">
-  }
-
-  export type messageUpsertWithWhereUniqueWithoutSenderInput = {
-    where: messageWhereUniqueInput
-    update: XOR<messageUpdateWithoutSenderInput, messageUncheckedUpdateWithoutSenderInput>
-    create: XOR<messageCreateWithoutSenderInput, messageUncheckedCreateWithoutSenderInput>
-  }
-
-  export type messageUpdateWithWhereUniqueWithoutSenderInput = {
-    where: messageWhereUniqueInput
-    data: XOR<messageUpdateWithoutSenderInput, messageUncheckedUpdateWithoutSenderInput>
-  }
-
-  export type messageUpdateManyWithWhereWithoutSenderInput = {
-    where: messageScalarWhereInput
-    data: XOR<messageUpdateManyMutationInput, messageUncheckedUpdateManyWithoutSenderInput>
-  }
-
-  export type messageScalarWhereInput = {
-    AND?: messageScalarWhereInput | messageScalarWhereInput[]
-    OR?: messageScalarWhereInput[]
-    NOT?: messageScalarWhereInput | messageScalarWhereInput[]
-    id?: IntFilter<"message"> | number
-    senderId?: StringFilter<"message"> | string
-    receiverId?: StringFilter<"message"> | string
-    message?: StringFilter<"message"> | string
-    timestamp?: DateTimeFilter<"message"> | Date | string
-    readStatus?: BoolFilter<"message"> | boolean
-  }
-
-  export type messageUpsertWithWhereUniqueWithoutReceiverInput = {
-    where: messageWhereUniqueInput
-    update: XOR<messageUpdateWithoutReceiverInput, messageUncheckedUpdateWithoutReceiverInput>
-    create: XOR<messageCreateWithoutReceiverInput, messageUncheckedCreateWithoutReceiverInput>
-  }
-
-  export type messageUpdateWithWhereUniqueWithoutReceiverInput = {
-    where: messageWhereUniqueInput
-    data: XOR<messageUpdateWithoutReceiverInput, messageUncheckedUpdateWithoutReceiverInput>
-  }
-
-  export type messageUpdateManyWithWhereWithoutReceiverInput = {
-    where: messageScalarWhereInput
-    data: XOR<messageUpdateManyMutationInput, messageUncheckedUpdateManyWithoutReceiverInput>
-  }
-
-  export type paymentUpsertWithWhereUniqueWithoutUserInput = {
-    where: paymentWhereUniqueInput
-    update: XOR<paymentUpdateWithoutUserInput, paymentUncheckedUpdateWithoutUserInput>
-    create: XOR<paymentCreateWithoutUserInput, paymentUncheckedCreateWithoutUserInput>
-  }
-
-  export type paymentUpdateWithWhereUniqueWithoutUserInput = {
-    where: paymentWhereUniqueInput
-    data: XOR<paymentUpdateWithoutUserInput, paymentUncheckedUpdateWithoutUserInput>
-  }
-
-  export type paymentUpdateManyWithWhereWithoutUserInput = {
-    where: paymentScalarWhereInput
-    data: XOR<paymentUpdateManyMutationInput, paymentUncheckedUpdateManyWithoutUserInput>
-  }
-
-  export type paymentScalarWhereInput = {
-    AND?: paymentScalarWhereInput | paymentScalarWhereInput[]
-    OR?: paymentScalarWhereInput[]
-    NOT?: paymentScalarWhereInput | paymentScalarWhereInput[]
-    id?: IntFilter<"payment"> | number
-    userId?: StringFilter<"payment"> | string
-    eventId?: IntFilter<"payment"> | number
-    status?: EnumPaymentStatusFilter<"payment"> | $Enums.PaymentStatus
-    amount?: DecimalFilter<"payment"> | Decimal | DecimalJsLike | number | string
-    currency?: StringFilter<"payment"> | string
-    provider?: StringFilter<"payment"> | string
-    externalReference?: StringFilter<"payment"> | string
-    mpPreferenceId?: StringNullableFilter<"payment"> | string | null
-    mpPaymentId?: StringNullableFilter<"payment"> | string | null
-    payerEmail?: StringNullableFilter<"payment"> | string | null
-    payerName?: StringNullableFilter<"payment"> | string | null
-    createdAt?: DateTimeFilter<"payment"> | Date | string
-    updatedAt?: DateTimeFilter<"payment"> | Date | string
-  }
-
-  export type userCreateWithoutPaymentsInput = {
-    id: string
-    name: string
-    email: string
-    emailVerified: boolean
-    image?: string | null
-    imageBase64?: string | null
-    createdAt: Date | string
-    updatedAt: Date | string
-    username?: string | null
-    dni?: string | null
-    birthDate?: Date | string | null
-    role?: $Enums.Role
-    tickets?: ticketCreateNestedManyWithoutOwnerInput
-    transferredTickets?: ticketCreateNestedManyWithoutTransferredFromInput
-    participants?: participantCreateNestedManyWithoutUserInput
-    rrppAssignments?: rrppAssignmentCreateNestedManyWithoutRrppUserInput
-    account?: accountCreateNestedManyWithoutUserInput
-    session?: sessionCreateNestedManyWithoutUserInput
-    logs?: logCreateNestedManyWithoutUserInput
-    sentMessages?: messageCreateNestedManyWithoutSenderInput
-    receivedMessages?: messageCreateNestedManyWithoutReceiverInput
-  }
-
-  export type userUncheckedCreateWithoutPaymentsInput = {
-    id: string
-    name: string
-    email: string
-    emailVerified: boolean
-    image?: string | null
-    imageBase64?: string | null
-    createdAt: Date | string
-    updatedAt: Date | string
-    username?: string | null
-    dni?: string | null
-    birthDate?: Date | string | null
-    role?: $Enums.Role
-    tickets?: ticketUncheckedCreateNestedManyWithoutOwnerInput
-    transferredTickets?: ticketUncheckedCreateNestedManyWithoutTransferredFromInput
-    participants?: participantUncheckedCreateNestedManyWithoutUserInput
-    rrppAssignments?: rrppAssignmentUncheckedCreateNestedManyWithoutRrppUserInput
-    account?: accountUncheckedCreateNestedManyWithoutUserInput
-    session?: sessionUncheckedCreateNestedManyWithoutUserInput
-    logs?: logUncheckedCreateNestedManyWithoutUserInput
-    sentMessages?: messageUncheckedCreateNestedManyWithoutSenderInput
-    receivedMessages?: messageUncheckedCreateNestedManyWithoutReceiverInput
-  }
-
-  export type userCreateOrConnectWithoutPaymentsInput = {
-    where: userWhereUniqueInput
-    create: XOR<userCreateWithoutPaymentsInput, userUncheckedCreateWithoutPaymentsInput>
+  export type guestListUpdateManyWithWhereWithoutCheckedInByUserInput = {
+    where: guestListScalarWhereInput
+    data: XOR<guestListUpdateManyMutationInput, guestListUncheckedUpdateManyWithoutCheckedInByUserInput>
   }
 
   export type eventCreateWithoutPaymentsInput = {
@@ -24763,14 +26948,16 @@ export namespace Prisma {
     producerId?: number
     capacityTotal?: number | null
     isRsvpAllowed?: boolean
+    isSoldOut?: boolean
     eventGenre?: string | null
     showRemainingTickets?: boolean
     createdAt?: Date | string
-    ticketTypes?: ticketTypeCreateNestedManyWithoutEventInput
     eventArtists?: eventArtistCreateNestedManyWithoutEventInput
-    tickets?: ticketCreateNestedManyWithoutEventInput
     participants?: participantCreateNestedManyWithoutEventInput
     rrppAssignments?: rrppAssignmentCreateNestedManyWithoutEventInput
+    tickets?: ticketCreateNestedManyWithoutEventInput
+    ticketTypes?: ticketTypeCreateNestedManyWithoutEventInput
+    guestList?: guestListCreateNestedManyWithoutEventInput
   }
 
   export type eventUncheckedCreateWithoutPaymentsInput = {
@@ -24784,19 +26971,78 @@ export namespace Prisma {
     producerId?: number
     capacityTotal?: number | null
     isRsvpAllowed?: boolean
+    isSoldOut?: boolean
     eventGenre?: string | null
     showRemainingTickets?: boolean
     createdAt?: Date | string
-    ticketTypes?: ticketTypeUncheckedCreateNestedManyWithoutEventInput
     eventArtists?: eventArtistUncheckedCreateNestedManyWithoutEventInput
-    tickets?: ticketUncheckedCreateNestedManyWithoutEventInput
     participants?: participantUncheckedCreateNestedManyWithoutEventInput
     rrppAssignments?: rrppAssignmentUncheckedCreateNestedManyWithoutEventInput
+    tickets?: ticketUncheckedCreateNestedManyWithoutEventInput
+    ticketTypes?: ticketTypeUncheckedCreateNestedManyWithoutEventInput
+    guestList?: guestListUncheckedCreateNestedManyWithoutEventInput
   }
 
   export type eventCreateOrConnectWithoutPaymentsInput = {
     where: eventWhereUniqueInput
     create: XOR<eventCreateWithoutPaymentsInput, eventUncheckedCreateWithoutPaymentsInput>
+  }
+
+  export type userCreateWithoutPaymentsInput = {
+    id: string
+    name: string
+    email: string
+    emailVerified: boolean
+    image?: string | null
+    createdAt: Date | string
+    updatedAt: Date | string
+    username?: string | null
+    dni?: string | null
+    birthDate?: Date | string | null
+    role?: $Enums.Role
+    image_base64?: string | null
+    account?: accountCreateNestedManyWithoutUserInput
+    logs?: logCreateNestedManyWithoutUserInput
+    receivedMessages?: messageCreateNestedManyWithoutReceiverInput
+    sentMessages?: messageCreateNestedManyWithoutSenderInput
+    participants?: participantCreateNestedManyWithoutUserInput
+    rrppAssignments?: rrppAssignmentCreateNestedManyWithoutRrppUserInput
+    session?: sessionCreateNestedManyWithoutUserInput
+    tickets?: ticketCreateNestedManyWithoutOwnerInput
+    transferredTickets?: ticketCreateNestedManyWithoutTransferredFromInput
+    guestsImported?: guestListCreateNestedManyWithoutImportedByUserInput
+    guestsCheckedIn?: guestListCreateNestedManyWithoutCheckedInByUserInput
+  }
+
+  export type userUncheckedCreateWithoutPaymentsInput = {
+    id: string
+    name: string
+    email: string
+    emailVerified: boolean
+    image?: string | null
+    createdAt: Date | string
+    updatedAt: Date | string
+    username?: string | null
+    dni?: string | null
+    birthDate?: Date | string | null
+    role?: $Enums.Role
+    image_base64?: string | null
+    account?: accountUncheckedCreateNestedManyWithoutUserInput
+    logs?: logUncheckedCreateNestedManyWithoutUserInput
+    receivedMessages?: messageUncheckedCreateNestedManyWithoutReceiverInput
+    sentMessages?: messageUncheckedCreateNestedManyWithoutSenderInput
+    participants?: participantUncheckedCreateNestedManyWithoutUserInput
+    rrppAssignments?: rrppAssignmentUncheckedCreateNestedManyWithoutRrppUserInput
+    session?: sessionUncheckedCreateNestedManyWithoutUserInput
+    tickets?: ticketUncheckedCreateNestedManyWithoutOwnerInput
+    transferredTickets?: ticketUncheckedCreateNestedManyWithoutTransferredFromInput
+    guestsImported?: guestListUncheckedCreateNestedManyWithoutImportedByUserInput
+    guestsCheckedIn?: guestListUncheckedCreateNestedManyWithoutCheckedInByUserInput
+  }
+
+  export type userCreateOrConnectWithoutPaymentsInput = {
+    where: userWhereUniqueInput
+    create: XOR<userCreateWithoutPaymentsInput, userUncheckedCreateWithoutPaymentsInput>
   }
 
   export type ticketCreateWithoutPaymentInput = {
@@ -24806,8 +27052,8 @@ export namespace Prisma {
     createdAt?: Date | string
     event: eventCreateNestedOneWithoutTicketsInput
     owner: userCreateNestedOneWithoutTicketsInput
-    type: ticketTypeCreateNestedOneWithoutTicketsInput
     transferredFrom?: userCreateNestedOneWithoutTransferredTicketsInput
+    type: ticketTypeCreateNestedOneWithoutTicketsInput
   }
 
   export type ticketUncheckedCreateWithoutPaymentInput = {
@@ -24832,65 +27078,6 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
-  export type userUpsertWithoutPaymentsInput = {
-    update: XOR<userUpdateWithoutPaymentsInput, userUncheckedUpdateWithoutPaymentsInput>
-    create: XOR<userCreateWithoutPaymentsInput, userUncheckedCreateWithoutPaymentsInput>
-    where?: userWhereInput
-  }
-
-  export type userUpdateToOneWithWhereWithoutPaymentsInput = {
-    where?: userWhereInput
-    data: XOR<userUpdateWithoutPaymentsInput, userUncheckedUpdateWithoutPaymentsInput>
-  }
-
-  export type userUpdateWithoutPaymentsInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    email?: StringFieldUpdateOperationsInput | string
-    emailVerified?: BoolFieldUpdateOperationsInput | boolean
-    image?: NullableStringFieldUpdateOperationsInput | string | null
-    imageBase64?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    username?: NullableStringFieldUpdateOperationsInput | string | null
-    dni?: NullableStringFieldUpdateOperationsInput | string | null
-    birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
-    tickets?: ticketUpdateManyWithoutOwnerNestedInput
-    transferredTickets?: ticketUpdateManyWithoutTransferredFromNestedInput
-    participants?: participantUpdateManyWithoutUserNestedInput
-    rrppAssignments?: rrppAssignmentUpdateManyWithoutRrppUserNestedInput
-    account?: accountUpdateManyWithoutUserNestedInput
-    session?: sessionUpdateManyWithoutUserNestedInput
-    logs?: logUpdateManyWithoutUserNestedInput
-    sentMessages?: messageUpdateManyWithoutSenderNestedInput
-    receivedMessages?: messageUpdateManyWithoutReceiverNestedInput
-  }
-
-  export type userUncheckedUpdateWithoutPaymentsInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    email?: StringFieldUpdateOperationsInput | string
-    emailVerified?: BoolFieldUpdateOperationsInput | boolean
-    image?: NullableStringFieldUpdateOperationsInput | string | null
-    imageBase64?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    username?: NullableStringFieldUpdateOperationsInput | string | null
-    dni?: NullableStringFieldUpdateOperationsInput | string | null
-    birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
-    tickets?: ticketUncheckedUpdateManyWithoutOwnerNestedInput
-    transferredTickets?: ticketUncheckedUpdateManyWithoutTransferredFromNestedInput
-    participants?: participantUncheckedUpdateManyWithoutUserNestedInput
-    rrppAssignments?: rrppAssignmentUncheckedUpdateManyWithoutRrppUserNestedInput
-    account?: accountUncheckedUpdateManyWithoutUserNestedInput
-    session?: sessionUncheckedUpdateManyWithoutUserNestedInput
-    logs?: logUncheckedUpdateManyWithoutUserNestedInput
-    sentMessages?: messageUncheckedUpdateManyWithoutSenderNestedInput
-    receivedMessages?: messageUncheckedUpdateManyWithoutReceiverNestedInput
-  }
-
   export type eventUpsertWithoutPaymentsInput = {
     update: XOR<eventUpdateWithoutPaymentsInput, eventUncheckedUpdateWithoutPaymentsInput>
     create: XOR<eventCreateWithoutPaymentsInput, eventUncheckedCreateWithoutPaymentsInput>
@@ -24912,14 +27099,16 @@ export namespace Prisma {
     producerId?: IntFieldUpdateOperationsInput | number
     capacityTotal?: NullableIntFieldUpdateOperationsInput | number | null
     isRsvpAllowed?: BoolFieldUpdateOperationsInput | boolean
+    isSoldOut?: BoolFieldUpdateOperationsInput | boolean
     eventGenre?: NullableStringFieldUpdateOperationsInput | string | null
     showRemainingTickets?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    ticketTypes?: ticketTypeUpdateManyWithoutEventNestedInput
     eventArtists?: eventArtistUpdateManyWithoutEventNestedInput
-    tickets?: ticketUpdateManyWithoutEventNestedInput
     participants?: participantUpdateManyWithoutEventNestedInput
     rrppAssignments?: rrppAssignmentUpdateManyWithoutEventNestedInput
+    tickets?: ticketUpdateManyWithoutEventNestedInput
+    ticketTypes?: ticketTypeUpdateManyWithoutEventNestedInput
+    guestList?: guestListUpdateManyWithoutEventNestedInput
   }
 
   export type eventUncheckedUpdateWithoutPaymentsInput = {
@@ -24933,14 +27122,79 @@ export namespace Prisma {
     producerId?: IntFieldUpdateOperationsInput | number
     capacityTotal?: NullableIntFieldUpdateOperationsInput | number | null
     isRsvpAllowed?: BoolFieldUpdateOperationsInput | boolean
+    isSoldOut?: BoolFieldUpdateOperationsInput | boolean
     eventGenre?: NullableStringFieldUpdateOperationsInput | string | null
     showRemainingTickets?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    ticketTypes?: ticketTypeUncheckedUpdateManyWithoutEventNestedInput
     eventArtists?: eventArtistUncheckedUpdateManyWithoutEventNestedInput
-    tickets?: ticketUncheckedUpdateManyWithoutEventNestedInput
     participants?: participantUncheckedUpdateManyWithoutEventNestedInput
     rrppAssignments?: rrppAssignmentUncheckedUpdateManyWithoutEventNestedInput
+    tickets?: ticketUncheckedUpdateManyWithoutEventNestedInput
+    ticketTypes?: ticketTypeUncheckedUpdateManyWithoutEventNestedInput
+    guestList?: guestListUncheckedUpdateManyWithoutEventNestedInput
+  }
+
+  export type userUpsertWithoutPaymentsInput = {
+    update: XOR<userUpdateWithoutPaymentsInput, userUncheckedUpdateWithoutPaymentsInput>
+    create: XOR<userCreateWithoutPaymentsInput, userUncheckedCreateWithoutPaymentsInput>
+    where?: userWhereInput
+  }
+
+  export type userUpdateToOneWithWhereWithoutPaymentsInput = {
+    where?: userWhereInput
+    data: XOR<userUpdateWithoutPaymentsInput, userUncheckedUpdateWithoutPaymentsInput>
+  }
+
+  export type userUpdateWithoutPaymentsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    username?: NullableStringFieldUpdateOperationsInput | string | null
+    dni?: NullableStringFieldUpdateOperationsInput | string | null
+    birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    image_base64?: NullableStringFieldUpdateOperationsInput | string | null
+    account?: accountUpdateManyWithoutUserNestedInput
+    logs?: logUpdateManyWithoutUserNestedInput
+    receivedMessages?: messageUpdateManyWithoutReceiverNestedInput
+    sentMessages?: messageUpdateManyWithoutSenderNestedInput
+    participants?: participantUpdateManyWithoutUserNestedInput
+    rrppAssignments?: rrppAssignmentUpdateManyWithoutRrppUserNestedInput
+    session?: sessionUpdateManyWithoutUserNestedInput
+    tickets?: ticketUpdateManyWithoutOwnerNestedInput
+    transferredTickets?: ticketUpdateManyWithoutTransferredFromNestedInput
+    guestsImported?: guestListUpdateManyWithoutImportedByUserNestedInput
+    guestsCheckedIn?: guestListUpdateManyWithoutCheckedInByUserNestedInput
+  }
+
+  export type userUncheckedUpdateWithoutPaymentsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    username?: NullableStringFieldUpdateOperationsInput | string | null
+    dni?: NullableStringFieldUpdateOperationsInput | string | null
+    birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    image_base64?: NullableStringFieldUpdateOperationsInput | string | null
+    account?: accountUncheckedUpdateManyWithoutUserNestedInput
+    logs?: logUncheckedUpdateManyWithoutUserNestedInput
+    receivedMessages?: messageUncheckedUpdateManyWithoutReceiverNestedInput
+    sentMessages?: messageUncheckedUpdateManyWithoutSenderNestedInput
+    participants?: participantUncheckedUpdateManyWithoutUserNestedInput
+    rrppAssignments?: rrppAssignmentUncheckedUpdateManyWithoutRrppUserNestedInput
+    session?: sessionUncheckedUpdateManyWithoutUserNestedInput
+    tickets?: ticketUncheckedUpdateManyWithoutOwnerNestedInput
+    transferredTickets?: ticketUncheckedUpdateManyWithoutTransferredFromNestedInput
+    guestsImported?: guestListUncheckedUpdateManyWithoutImportedByUserNestedInput
+    guestsCheckedIn?: guestListUncheckedUpdateManyWithoutCheckedInByUserNestedInput
   }
 
   export type ticketUpsertWithWhereUniqueWithoutPaymentInput = {
@@ -24957,43 +27211,6 @@ export namespace Prisma {
   export type ticketUpdateManyWithWhereWithoutPaymentInput = {
     where: ticketScalarWhereInput
     data: XOR<ticketUpdateManyMutationInput, ticketUncheckedUpdateManyWithoutPaymentInput>
-  }
-
-  export type ticketTypeCreateWithoutEventInput = {
-    code: string
-    label: string
-    price: Decimal | DecimalJsLike | number | string
-    stockMax: number
-    stockCurrent: number
-    userMaxPerType?: number
-    scanExpiration?: Date | string | null
-    isVisible?: boolean
-    isDisabled?: boolean
-    tickets?: ticketCreateNestedManyWithoutTypeInput
-  }
-
-  export type ticketTypeUncheckedCreateWithoutEventInput = {
-    id?: number
-    code: string
-    label: string
-    price: Decimal | DecimalJsLike | number | string
-    stockMax: number
-    stockCurrent: number
-    userMaxPerType?: number
-    scanExpiration?: Date | string | null
-    isVisible?: boolean
-    isDisabled?: boolean
-    tickets?: ticketUncheckedCreateNestedManyWithoutTypeInput
-  }
-
-  export type ticketTypeCreateOrConnectWithoutEventInput = {
-    where: ticketTypeWhereUniqueInput
-    create: XOR<ticketTypeCreateWithoutEventInput, ticketTypeUncheckedCreateWithoutEventInput>
-  }
-
-  export type ticketTypeCreateManyEventInputEnvelope = {
-    data: ticketTypeCreateManyEventInput | ticketTypeCreateManyEventInput[]
-    skipDuplicates?: boolean
   }
 
   export type eventArtistCreateWithoutEventInput = {
@@ -25020,39 +27237,6 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
-  export type ticketCreateWithoutEventInput = {
-    qrCode: string
-    code?: string | null
-    status?: $Enums.TicketStatus
-    createdAt?: Date | string
-    owner: userCreateNestedOneWithoutTicketsInput
-    type: ticketTypeCreateNestedOneWithoutTicketsInput
-    transferredFrom?: userCreateNestedOneWithoutTransferredTicketsInput
-    payment?: paymentCreateNestedOneWithoutTicketsInput
-  }
-
-  export type ticketUncheckedCreateWithoutEventInput = {
-    id?: number
-    ownerId: string
-    typeId: number
-    paymentId?: number | null
-    qrCode: string
-    code?: string | null
-    status?: $Enums.TicketStatus
-    transferredFromId?: string | null
-    createdAt?: Date | string
-  }
-
-  export type ticketCreateOrConnectWithoutEventInput = {
-    where: ticketWhereUniqueInput
-    create: XOR<ticketCreateWithoutEventInput, ticketUncheckedCreateWithoutEventInput>
-  }
-
-  export type ticketCreateManyEventInputEnvelope = {
-    data: ticketCreateManyEventInput | ticketCreateManyEventInput[]
-    skipDuplicates?: boolean
-  }
-
   export type participantCreateWithoutEventInput = {
     viaRsvp?: boolean
     qrCode?: string | null
@@ -25072,28 +27256,6 @@ export namespace Prisma {
 
   export type participantCreateManyEventInputEnvelope = {
     data: participantCreateManyEventInput | participantCreateManyEventInput[]
-    skipDuplicates?: boolean
-  }
-
-  export type rrppAssignmentCreateWithoutEventInput = {
-    commissionRate?: Decimal | DecimalJsLike | number | string
-    freesGranted?: number
-    rrppUser: userCreateNestedOneWithoutRrppAssignmentsInput
-  }
-
-  export type rrppAssignmentUncheckedCreateWithoutEventInput = {
-    rrppUserId: string
-    commissionRate?: Decimal | DecimalJsLike | number | string
-    freesGranted?: number
-  }
-
-  export type rrppAssignmentCreateOrConnectWithoutEventInput = {
-    where: rrppAssignmentWhereUniqueInput
-    create: XOR<rrppAssignmentCreateWithoutEventInput, rrppAssignmentUncheckedCreateWithoutEventInput>
-  }
-
-  export type rrppAssignmentCreateManyEventInputEnvelope = {
-    data: rrppAssignmentCreateManyEventInput | rrppAssignmentCreateManyEventInput[]
     skipDuplicates?: boolean
   }
 
@@ -25140,6 +27302,232 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type rrppAssignmentCreateWithoutEventInput = {
+    commissionRate?: Decimal | DecimalJsLike | number | string
+    freesGranted?: number
+    rrppUser: userCreateNestedOneWithoutRrppAssignmentsInput
+  }
+
+  export type rrppAssignmentUncheckedCreateWithoutEventInput = {
+    rrppUserId: string
+    commissionRate?: Decimal | DecimalJsLike | number | string
+    freesGranted?: number
+  }
+
+  export type rrppAssignmentCreateOrConnectWithoutEventInput = {
+    where: rrppAssignmentWhereUniqueInput
+    create: XOR<rrppAssignmentCreateWithoutEventInput, rrppAssignmentUncheckedCreateWithoutEventInput>
+  }
+
+  export type rrppAssignmentCreateManyEventInputEnvelope = {
+    data: rrppAssignmentCreateManyEventInput | rrppAssignmentCreateManyEventInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type ticketCreateWithoutEventInput = {
+    qrCode: string
+    code?: string | null
+    status?: $Enums.TicketStatus
+    createdAt?: Date | string
+    owner: userCreateNestedOneWithoutTicketsInput
+    payment?: paymentCreateNestedOneWithoutTicketsInput
+    transferredFrom?: userCreateNestedOneWithoutTransferredTicketsInput
+    type: ticketTypeCreateNestedOneWithoutTicketsInput
+  }
+
+  export type ticketUncheckedCreateWithoutEventInput = {
+    id?: number
+    ownerId: string
+    typeId: number
+    paymentId?: number | null
+    qrCode: string
+    code?: string | null
+    status?: $Enums.TicketStatus
+    transferredFromId?: string | null
+    createdAt?: Date | string
+  }
+
+  export type ticketCreateOrConnectWithoutEventInput = {
+    where: ticketWhereUniqueInput
+    create: XOR<ticketCreateWithoutEventInput, ticketUncheckedCreateWithoutEventInput>
+  }
+
+  export type ticketCreateManyEventInputEnvelope = {
+    data: ticketCreateManyEventInput | ticketCreateManyEventInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type ticketTypeCreateWithoutEventInput = {
+    code: string
+    label: string
+    price: Decimal | DecimalJsLike | number | string
+    stockMax: number
+    stockCurrent: number
+    userMaxPerType?: number
+    scanExpiration?: Date | string | null
+    isVisible?: boolean
+    isDisabled?: boolean
+    tickets?: ticketCreateNestedManyWithoutTypeInput
+  }
+
+  export type ticketTypeUncheckedCreateWithoutEventInput = {
+    id?: number
+    code: string
+    label: string
+    price: Decimal | DecimalJsLike | number | string
+    stockMax: number
+    stockCurrent: number
+    userMaxPerType?: number
+    scanExpiration?: Date | string | null
+    isVisible?: boolean
+    isDisabled?: boolean
+    tickets?: ticketUncheckedCreateNestedManyWithoutTypeInput
+  }
+
+  export type ticketTypeCreateOrConnectWithoutEventInput = {
+    where: ticketTypeWhereUniqueInput
+    create: XOR<ticketTypeCreateWithoutEventInput, ticketTypeUncheckedCreateWithoutEventInput>
+  }
+
+  export type ticketTypeCreateManyEventInputEnvelope = {
+    data: ticketTypeCreateManyEventInput | ticketTypeCreateManyEventInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type guestListCreateWithoutEventInput = {
+    fullName: string
+    normalizedName: string
+    email: string
+    age?: string | null
+    invitedBy?: string | null
+    gender?: string | null
+    status?: $Enums.GuestStatus
+    qrCode: string
+    checkedInAt?: Date | string | null
+    importedAt?: Date | string
+    timestamp?: string | null
+    checkedInByUser?: userCreateNestedOneWithoutGuestsCheckedInInput
+    importedByUser: userCreateNestedOneWithoutGuestsImportedInput
+  }
+
+  export type guestListUncheckedCreateWithoutEventInput = {
+    id?: number
+    fullName: string
+    normalizedName: string
+    email: string
+    age?: string | null
+    invitedBy?: string | null
+    gender?: string | null
+    status?: $Enums.GuestStatus
+    qrCode: string
+    checkedInAt?: Date | string | null
+    checkedInBy?: string | null
+    importedAt?: Date | string
+    importedBy: string
+    timestamp?: string | null
+  }
+
+  export type guestListCreateOrConnectWithoutEventInput = {
+    where: guestListWhereUniqueInput
+    create: XOR<guestListCreateWithoutEventInput, guestListUncheckedCreateWithoutEventInput>
+  }
+
+  export type guestListCreateManyEventInputEnvelope = {
+    data: guestListCreateManyEventInput | guestListCreateManyEventInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type eventArtistUpsertWithWhereUniqueWithoutEventInput = {
+    where: eventArtistWhereUniqueInput
+    update: XOR<eventArtistUpdateWithoutEventInput, eventArtistUncheckedUpdateWithoutEventInput>
+    create: XOR<eventArtistCreateWithoutEventInput, eventArtistUncheckedCreateWithoutEventInput>
+  }
+
+  export type eventArtistUpdateWithWhereUniqueWithoutEventInput = {
+    where: eventArtistWhereUniqueInput
+    data: XOR<eventArtistUpdateWithoutEventInput, eventArtistUncheckedUpdateWithoutEventInput>
+  }
+
+  export type eventArtistUpdateManyWithWhereWithoutEventInput = {
+    where: eventArtistScalarWhereInput
+    data: XOR<eventArtistUpdateManyMutationInput, eventArtistUncheckedUpdateManyWithoutEventInput>
+  }
+
+  export type eventArtistScalarWhereInput = {
+    AND?: eventArtistScalarWhereInput | eventArtistScalarWhereInput[]
+    OR?: eventArtistScalarWhereInput[]
+    NOT?: eventArtistScalarWhereInput | eventArtistScalarWhereInput[]
+    eventId?: IntFilter<"eventArtist"> | number
+    artistId?: IntFilter<"eventArtist"> | number
+    order?: IntNullableFilter<"eventArtist"> | number | null
+    slotTime?: StringNullableFilter<"eventArtist"> | string | null
+    isHeadliner?: BoolFilter<"eventArtist"> | boolean
+  }
+
+  export type participantUpsertWithWhereUniqueWithoutEventInput = {
+    where: participantWhereUniqueInput
+    update: XOR<participantUpdateWithoutEventInput, participantUncheckedUpdateWithoutEventInput>
+    create: XOR<participantCreateWithoutEventInput, participantUncheckedCreateWithoutEventInput>
+  }
+
+  export type participantUpdateWithWhereUniqueWithoutEventInput = {
+    where: participantWhereUniqueInput
+    data: XOR<participantUpdateWithoutEventInput, participantUncheckedUpdateWithoutEventInput>
+  }
+
+  export type participantUpdateManyWithWhereWithoutEventInput = {
+    where: participantScalarWhereInput
+    data: XOR<participantUpdateManyMutationInput, participantUncheckedUpdateManyWithoutEventInput>
+  }
+
+  export type paymentUpsertWithWhereUniqueWithoutEventInput = {
+    where: paymentWhereUniqueInput
+    update: XOR<paymentUpdateWithoutEventInput, paymentUncheckedUpdateWithoutEventInput>
+    create: XOR<paymentCreateWithoutEventInput, paymentUncheckedCreateWithoutEventInput>
+  }
+
+  export type paymentUpdateWithWhereUniqueWithoutEventInput = {
+    where: paymentWhereUniqueInput
+    data: XOR<paymentUpdateWithoutEventInput, paymentUncheckedUpdateWithoutEventInput>
+  }
+
+  export type paymentUpdateManyWithWhereWithoutEventInput = {
+    where: paymentScalarWhereInput
+    data: XOR<paymentUpdateManyMutationInput, paymentUncheckedUpdateManyWithoutEventInput>
+  }
+
+  export type rrppAssignmentUpsertWithWhereUniqueWithoutEventInput = {
+    where: rrppAssignmentWhereUniqueInput
+    update: XOR<rrppAssignmentUpdateWithoutEventInput, rrppAssignmentUncheckedUpdateWithoutEventInput>
+    create: XOR<rrppAssignmentCreateWithoutEventInput, rrppAssignmentUncheckedCreateWithoutEventInput>
+  }
+
+  export type rrppAssignmentUpdateWithWhereUniqueWithoutEventInput = {
+    where: rrppAssignmentWhereUniqueInput
+    data: XOR<rrppAssignmentUpdateWithoutEventInput, rrppAssignmentUncheckedUpdateWithoutEventInput>
+  }
+
+  export type rrppAssignmentUpdateManyWithWhereWithoutEventInput = {
+    where: rrppAssignmentScalarWhereInput
+    data: XOR<rrppAssignmentUpdateManyMutationInput, rrppAssignmentUncheckedUpdateManyWithoutEventInput>
+  }
+
+  export type ticketUpsertWithWhereUniqueWithoutEventInput = {
+    where: ticketWhereUniqueInput
+    update: XOR<ticketUpdateWithoutEventInput, ticketUncheckedUpdateWithoutEventInput>
+    create: XOR<ticketCreateWithoutEventInput, ticketUncheckedCreateWithoutEventInput>
+  }
+
+  export type ticketUpdateWithWhereUniqueWithoutEventInput = {
+    where: ticketWhereUniqueInput
+    data: XOR<ticketUpdateWithoutEventInput, ticketUncheckedUpdateWithoutEventInput>
+  }
+
+  export type ticketUpdateManyWithWhereWithoutEventInput = {
+    where: ticketScalarWhereInput
+    data: XOR<ticketUpdateManyMutationInput, ticketUncheckedUpdateManyWithoutEventInput>
+  }
+
   export type ticketTypeUpsertWithWhereUniqueWithoutEventInput = {
     where: ticketTypeWhereUniqueInput
     update: XOR<ticketTypeUpdateWithoutEventInput, ticketTypeUncheckedUpdateWithoutEventInput>
@@ -25173,95 +27561,20 @@ export namespace Prisma {
     isDisabled?: BoolFilter<"ticketType"> | boolean
   }
 
-  export type eventArtistUpsertWithWhereUniqueWithoutEventInput = {
-    where: eventArtistWhereUniqueInput
-    update: XOR<eventArtistUpdateWithoutEventInput, eventArtistUncheckedUpdateWithoutEventInput>
-    create: XOR<eventArtistCreateWithoutEventInput, eventArtistUncheckedCreateWithoutEventInput>
+  export type guestListUpsertWithWhereUniqueWithoutEventInput = {
+    where: guestListWhereUniqueInput
+    update: XOR<guestListUpdateWithoutEventInput, guestListUncheckedUpdateWithoutEventInput>
+    create: XOR<guestListCreateWithoutEventInput, guestListUncheckedCreateWithoutEventInput>
   }
 
-  export type eventArtistUpdateWithWhereUniqueWithoutEventInput = {
-    where: eventArtistWhereUniqueInput
-    data: XOR<eventArtistUpdateWithoutEventInput, eventArtistUncheckedUpdateWithoutEventInput>
+  export type guestListUpdateWithWhereUniqueWithoutEventInput = {
+    where: guestListWhereUniqueInput
+    data: XOR<guestListUpdateWithoutEventInput, guestListUncheckedUpdateWithoutEventInput>
   }
 
-  export type eventArtistUpdateManyWithWhereWithoutEventInput = {
-    where: eventArtistScalarWhereInput
-    data: XOR<eventArtistUpdateManyMutationInput, eventArtistUncheckedUpdateManyWithoutEventInput>
-  }
-
-  export type eventArtistScalarWhereInput = {
-    AND?: eventArtistScalarWhereInput | eventArtistScalarWhereInput[]
-    OR?: eventArtistScalarWhereInput[]
-    NOT?: eventArtistScalarWhereInput | eventArtistScalarWhereInput[]
-    eventId?: IntFilter<"eventArtist"> | number
-    artistId?: IntFilter<"eventArtist"> | number
-    order?: IntNullableFilter<"eventArtist"> | number | null
-    slotTime?: StringNullableFilter<"eventArtist"> | string | null
-    isHeadliner?: BoolFilter<"eventArtist"> | boolean
-  }
-
-  export type ticketUpsertWithWhereUniqueWithoutEventInput = {
-    where: ticketWhereUniqueInput
-    update: XOR<ticketUpdateWithoutEventInput, ticketUncheckedUpdateWithoutEventInput>
-    create: XOR<ticketCreateWithoutEventInput, ticketUncheckedCreateWithoutEventInput>
-  }
-
-  export type ticketUpdateWithWhereUniqueWithoutEventInput = {
-    where: ticketWhereUniqueInput
-    data: XOR<ticketUpdateWithoutEventInput, ticketUncheckedUpdateWithoutEventInput>
-  }
-
-  export type ticketUpdateManyWithWhereWithoutEventInput = {
-    where: ticketScalarWhereInput
-    data: XOR<ticketUpdateManyMutationInput, ticketUncheckedUpdateManyWithoutEventInput>
-  }
-
-  export type participantUpsertWithWhereUniqueWithoutEventInput = {
-    where: participantWhereUniqueInput
-    update: XOR<participantUpdateWithoutEventInput, participantUncheckedUpdateWithoutEventInput>
-    create: XOR<participantCreateWithoutEventInput, participantUncheckedCreateWithoutEventInput>
-  }
-
-  export type participantUpdateWithWhereUniqueWithoutEventInput = {
-    where: participantWhereUniqueInput
-    data: XOR<participantUpdateWithoutEventInput, participantUncheckedUpdateWithoutEventInput>
-  }
-
-  export type participantUpdateManyWithWhereWithoutEventInput = {
-    where: participantScalarWhereInput
-    data: XOR<participantUpdateManyMutationInput, participantUncheckedUpdateManyWithoutEventInput>
-  }
-
-  export type rrppAssignmentUpsertWithWhereUniqueWithoutEventInput = {
-    where: rrppAssignmentWhereUniqueInput
-    update: XOR<rrppAssignmentUpdateWithoutEventInput, rrppAssignmentUncheckedUpdateWithoutEventInput>
-    create: XOR<rrppAssignmentCreateWithoutEventInput, rrppAssignmentUncheckedCreateWithoutEventInput>
-  }
-
-  export type rrppAssignmentUpdateWithWhereUniqueWithoutEventInput = {
-    where: rrppAssignmentWhereUniqueInput
-    data: XOR<rrppAssignmentUpdateWithoutEventInput, rrppAssignmentUncheckedUpdateWithoutEventInput>
-  }
-
-  export type rrppAssignmentUpdateManyWithWhereWithoutEventInput = {
-    where: rrppAssignmentScalarWhereInput
-    data: XOR<rrppAssignmentUpdateManyMutationInput, rrppAssignmentUncheckedUpdateManyWithoutEventInput>
-  }
-
-  export type paymentUpsertWithWhereUniqueWithoutEventInput = {
-    where: paymentWhereUniqueInput
-    update: XOR<paymentUpdateWithoutEventInput, paymentUncheckedUpdateWithoutEventInput>
-    create: XOR<paymentCreateWithoutEventInput, paymentUncheckedCreateWithoutEventInput>
-  }
-
-  export type paymentUpdateWithWhereUniqueWithoutEventInput = {
-    where: paymentWhereUniqueInput
-    data: XOR<paymentUpdateWithoutEventInput, paymentUncheckedUpdateWithoutEventInput>
-  }
-
-  export type paymentUpdateManyWithWhereWithoutEventInput = {
-    where: paymentScalarWhereInput
-    data: XOR<paymentUpdateManyMutationInput, paymentUncheckedUpdateManyWithoutEventInput>
+  export type guestListUpdateManyWithWhereWithoutEventInput = {
+    where: guestListScalarWhereInput
+    data: XOR<guestListUpdateManyMutationInput, guestListUncheckedUpdateManyWithoutEventInput>
   }
 
   export type eventArtistCreateWithoutArtistInput = {
@@ -25334,14 +27647,16 @@ export namespace Prisma {
     producerId?: number
     capacityTotal?: number | null
     isRsvpAllowed?: boolean
+    isSoldOut?: boolean
     eventGenre?: string | null
     showRemainingTickets?: boolean
     createdAt?: Date | string
-    ticketTypes?: ticketTypeCreateNestedManyWithoutEventInput
-    tickets?: ticketCreateNestedManyWithoutEventInput
     participants?: participantCreateNestedManyWithoutEventInput
-    rrppAssignments?: rrppAssignmentCreateNestedManyWithoutEventInput
     payments?: paymentCreateNestedManyWithoutEventInput
+    rrppAssignments?: rrppAssignmentCreateNestedManyWithoutEventInput
+    tickets?: ticketCreateNestedManyWithoutEventInput
+    ticketTypes?: ticketTypeCreateNestedManyWithoutEventInput
+    guestList?: guestListCreateNestedManyWithoutEventInput
   }
 
   export type eventUncheckedCreateWithoutEventArtistsInput = {
@@ -25355,14 +27670,16 @@ export namespace Prisma {
     producerId?: number
     capacityTotal?: number | null
     isRsvpAllowed?: boolean
+    isSoldOut?: boolean
     eventGenre?: string | null
     showRemainingTickets?: boolean
     createdAt?: Date | string
-    ticketTypes?: ticketTypeUncheckedCreateNestedManyWithoutEventInput
-    tickets?: ticketUncheckedCreateNestedManyWithoutEventInput
     participants?: participantUncheckedCreateNestedManyWithoutEventInput
-    rrppAssignments?: rrppAssignmentUncheckedCreateNestedManyWithoutEventInput
     payments?: paymentUncheckedCreateNestedManyWithoutEventInput
+    rrppAssignments?: rrppAssignmentUncheckedCreateNestedManyWithoutEventInput
+    tickets?: ticketUncheckedCreateNestedManyWithoutEventInput
+    ticketTypes?: ticketTypeUncheckedCreateNestedManyWithoutEventInput
+    guestList?: guestListUncheckedCreateNestedManyWithoutEventInput
   }
 
   export type eventCreateOrConnectWithoutEventArtistsInput = {
@@ -25417,14 +27734,16 @@ export namespace Prisma {
     producerId?: IntFieldUpdateOperationsInput | number
     capacityTotal?: NullableIntFieldUpdateOperationsInput | number | null
     isRsvpAllowed?: BoolFieldUpdateOperationsInput | boolean
+    isSoldOut?: BoolFieldUpdateOperationsInput | boolean
     eventGenre?: NullableStringFieldUpdateOperationsInput | string | null
     showRemainingTickets?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    ticketTypes?: ticketTypeUpdateManyWithoutEventNestedInput
-    tickets?: ticketUpdateManyWithoutEventNestedInput
     participants?: participantUpdateManyWithoutEventNestedInput
-    rrppAssignments?: rrppAssignmentUpdateManyWithoutEventNestedInput
     payments?: paymentUpdateManyWithoutEventNestedInput
+    rrppAssignments?: rrppAssignmentUpdateManyWithoutEventNestedInput
+    tickets?: ticketUpdateManyWithoutEventNestedInput
+    ticketTypes?: ticketTypeUpdateManyWithoutEventNestedInput
+    guestList?: guestListUpdateManyWithoutEventNestedInput
   }
 
   export type eventUncheckedUpdateWithoutEventArtistsInput = {
@@ -25438,60 +27757,16 @@ export namespace Prisma {
     producerId?: IntFieldUpdateOperationsInput | number
     capacityTotal?: NullableIntFieldUpdateOperationsInput | number | null
     isRsvpAllowed?: BoolFieldUpdateOperationsInput | boolean
+    isSoldOut?: BoolFieldUpdateOperationsInput | boolean
     eventGenre?: NullableStringFieldUpdateOperationsInput | string | null
     showRemainingTickets?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    ticketTypes?: ticketTypeUncheckedUpdateManyWithoutEventNestedInput
-    tickets?: ticketUncheckedUpdateManyWithoutEventNestedInput
     participants?: participantUncheckedUpdateManyWithoutEventNestedInput
-    rrppAssignments?: rrppAssignmentUncheckedUpdateManyWithoutEventNestedInput
     payments?: paymentUncheckedUpdateManyWithoutEventNestedInput
-  }
-
-  export type eventCreateWithoutTicketTypesInput = {
-    name: string
-    date: Date | string
-    location: string
-    description?: string | null
-    bannerUrl?: string | null
-    status?: $Enums.EventStatus
-    producerId?: number
-    capacityTotal?: number | null
-    isRsvpAllowed?: boolean
-    eventGenre?: string | null
-    showRemainingTickets?: boolean
-    createdAt?: Date | string
-    eventArtists?: eventArtistCreateNestedManyWithoutEventInput
-    tickets?: ticketCreateNestedManyWithoutEventInput
-    participants?: participantCreateNestedManyWithoutEventInput
-    rrppAssignments?: rrppAssignmentCreateNestedManyWithoutEventInput
-    payments?: paymentCreateNestedManyWithoutEventInput
-  }
-
-  export type eventUncheckedCreateWithoutTicketTypesInput = {
-    id?: number
-    name: string
-    date: Date | string
-    location: string
-    description?: string | null
-    bannerUrl?: string | null
-    status?: $Enums.EventStatus
-    producerId?: number
-    capacityTotal?: number | null
-    isRsvpAllowed?: boolean
-    eventGenre?: string | null
-    showRemainingTickets?: boolean
-    createdAt?: Date | string
-    eventArtists?: eventArtistUncheckedCreateNestedManyWithoutEventInput
-    tickets?: ticketUncheckedCreateNestedManyWithoutEventInput
-    participants?: participantUncheckedCreateNestedManyWithoutEventInput
-    rrppAssignments?: rrppAssignmentUncheckedCreateNestedManyWithoutEventInput
-    payments?: paymentUncheckedCreateNestedManyWithoutEventInput
-  }
-
-  export type eventCreateOrConnectWithoutTicketTypesInput = {
-    where: eventWhereUniqueInput
-    create: XOR<eventCreateWithoutTicketTypesInput, eventUncheckedCreateWithoutTicketTypesInput>
+    rrppAssignments?: rrppAssignmentUncheckedUpdateManyWithoutEventNestedInput
+    tickets?: ticketUncheckedUpdateManyWithoutEventNestedInput
+    ticketTypes?: ticketTypeUncheckedUpdateManyWithoutEventNestedInput
+    guestList?: guestListUncheckedUpdateManyWithoutEventNestedInput
   }
 
   export type ticketCreateWithoutTypeInput = {
@@ -25501,8 +27776,8 @@ export namespace Prisma {
     createdAt?: Date | string
     event: eventCreateNestedOneWithoutTicketsInput
     owner: userCreateNestedOneWithoutTicketsInput
-    transferredFrom?: userCreateNestedOneWithoutTransferredTicketsInput
     payment?: paymentCreateNestedOneWithoutTicketsInput
+    transferredFrom?: userCreateNestedOneWithoutTransferredTicketsInput
   }
 
   export type ticketUncheckedCreateWithoutTypeInput = {
@@ -25527,6 +27802,72 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type eventCreateWithoutTicketTypesInput = {
+    name: string
+    date: Date | string
+    location: string
+    description?: string | null
+    bannerUrl?: string | null
+    status?: $Enums.EventStatus
+    producerId?: number
+    capacityTotal?: number | null
+    isRsvpAllowed?: boolean
+    isSoldOut?: boolean
+    eventGenre?: string | null
+    showRemainingTickets?: boolean
+    createdAt?: Date | string
+    eventArtists?: eventArtistCreateNestedManyWithoutEventInput
+    participants?: participantCreateNestedManyWithoutEventInput
+    payments?: paymentCreateNestedManyWithoutEventInput
+    rrppAssignments?: rrppAssignmentCreateNestedManyWithoutEventInput
+    tickets?: ticketCreateNestedManyWithoutEventInput
+    guestList?: guestListCreateNestedManyWithoutEventInput
+  }
+
+  export type eventUncheckedCreateWithoutTicketTypesInput = {
+    id?: number
+    name: string
+    date: Date | string
+    location: string
+    description?: string | null
+    bannerUrl?: string | null
+    status?: $Enums.EventStatus
+    producerId?: number
+    capacityTotal?: number | null
+    isRsvpAllowed?: boolean
+    isSoldOut?: boolean
+    eventGenre?: string | null
+    showRemainingTickets?: boolean
+    createdAt?: Date | string
+    eventArtists?: eventArtistUncheckedCreateNestedManyWithoutEventInput
+    participants?: participantUncheckedCreateNestedManyWithoutEventInput
+    payments?: paymentUncheckedCreateNestedManyWithoutEventInput
+    rrppAssignments?: rrppAssignmentUncheckedCreateNestedManyWithoutEventInput
+    tickets?: ticketUncheckedCreateNestedManyWithoutEventInput
+    guestList?: guestListUncheckedCreateNestedManyWithoutEventInput
+  }
+
+  export type eventCreateOrConnectWithoutTicketTypesInput = {
+    where: eventWhereUniqueInput
+    create: XOR<eventCreateWithoutTicketTypesInput, eventUncheckedCreateWithoutTicketTypesInput>
+  }
+
+  export type ticketUpsertWithWhereUniqueWithoutTypeInput = {
+    where: ticketWhereUniqueInput
+    update: XOR<ticketUpdateWithoutTypeInput, ticketUncheckedUpdateWithoutTypeInput>
+    create: XOR<ticketCreateWithoutTypeInput, ticketUncheckedCreateWithoutTypeInput>
+  }
+
+  export type ticketUpdateWithWhereUniqueWithoutTypeInput = {
+    where: ticketWhereUniqueInput
+    data: XOR<ticketUpdateWithoutTypeInput, ticketUncheckedUpdateWithoutTypeInput>
+  }
+
+  export type ticketUpdateManyWithWhereWithoutTypeInput = {
+    where: ticketScalarWhereInput
+    data: XOR<ticketUpdateManyMutationInput, ticketUncheckedUpdateManyWithoutTypeInput>
+  }
+
   export type eventUpsertWithoutTicketTypesInput = {
     update: XOR<eventUpdateWithoutTicketTypesInput, eventUncheckedUpdateWithoutTicketTypesInput>
     create: XOR<eventCreateWithoutTicketTypesInput, eventUncheckedCreateWithoutTicketTypesInput>
@@ -25548,14 +27889,16 @@ export namespace Prisma {
     producerId?: IntFieldUpdateOperationsInput | number
     capacityTotal?: NullableIntFieldUpdateOperationsInput | number | null
     isRsvpAllowed?: BoolFieldUpdateOperationsInput | boolean
+    isSoldOut?: BoolFieldUpdateOperationsInput | boolean
     eventGenre?: NullableStringFieldUpdateOperationsInput | string | null
     showRemainingTickets?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     eventArtists?: eventArtistUpdateManyWithoutEventNestedInput
-    tickets?: ticketUpdateManyWithoutEventNestedInput
     participants?: participantUpdateManyWithoutEventNestedInput
-    rrppAssignments?: rrppAssignmentUpdateManyWithoutEventNestedInput
     payments?: paymentUpdateManyWithoutEventNestedInput
+    rrppAssignments?: rrppAssignmentUpdateManyWithoutEventNestedInput
+    tickets?: ticketUpdateManyWithoutEventNestedInput
+    guestList?: guestListUpdateManyWithoutEventNestedInput
   }
 
   export type eventUncheckedUpdateWithoutTicketTypesInput = {
@@ -25569,30 +27912,16 @@ export namespace Prisma {
     producerId?: IntFieldUpdateOperationsInput | number
     capacityTotal?: NullableIntFieldUpdateOperationsInput | number | null
     isRsvpAllowed?: BoolFieldUpdateOperationsInput | boolean
+    isSoldOut?: BoolFieldUpdateOperationsInput | boolean
     eventGenre?: NullableStringFieldUpdateOperationsInput | string | null
     showRemainingTickets?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     eventArtists?: eventArtistUncheckedUpdateManyWithoutEventNestedInput
-    tickets?: ticketUncheckedUpdateManyWithoutEventNestedInput
     participants?: participantUncheckedUpdateManyWithoutEventNestedInput
-    rrppAssignments?: rrppAssignmentUncheckedUpdateManyWithoutEventNestedInput
     payments?: paymentUncheckedUpdateManyWithoutEventNestedInput
-  }
-
-  export type ticketUpsertWithWhereUniqueWithoutTypeInput = {
-    where: ticketWhereUniqueInput
-    update: XOR<ticketUpdateWithoutTypeInput, ticketUncheckedUpdateWithoutTypeInput>
-    create: XOR<ticketCreateWithoutTypeInput, ticketUncheckedCreateWithoutTypeInput>
-  }
-
-  export type ticketUpdateWithWhereUniqueWithoutTypeInput = {
-    where: ticketWhereUniqueInput
-    data: XOR<ticketUpdateWithoutTypeInput, ticketUncheckedUpdateWithoutTypeInput>
-  }
-
-  export type ticketUpdateManyWithWhereWithoutTypeInput = {
-    where: ticketScalarWhereInput
-    data: XOR<ticketUpdateManyMutationInput, ticketUncheckedUpdateManyWithoutTypeInput>
+    rrppAssignments?: rrppAssignmentUncheckedUpdateManyWithoutEventNestedInput
+    tickets?: ticketUncheckedUpdateManyWithoutEventNestedInput
+    guestList?: guestListUncheckedUpdateManyWithoutEventNestedInput
   }
 
   export type eventCreateWithoutTicketsInput = {
@@ -25605,14 +27934,16 @@ export namespace Prisma {
     producerId?: number
     capacityTotal?: number | null
     isRsvpAllowed?: boolean
+    isSoldOut?: boolean
     eventGenre?: string | null
     showRemainingTickets?: boolean
     createdAt?: Date | string
-    ticketTypes?: ticketTypeCreateNestedManyWithoutEventInput
     eventArtists?: eventArtistCreateNestedManyWithoutEventInput
     participants?: participantCreateNestedManyWithoutEventInput
-    rrppAssignments?: rrppAssignmentCreateNestedManyWithoutEventInput
     payments?: paymentCreateNestedManyWithoutEventInput
+    rrppAssignments?: rrppAssignmentCreateNestedManyWithoutEventInput
+    ticketTypes?: ticketTypeCreateNestedManyWithoutEventInput
+    guestList?: guestListCreateNestedManyWithoutEventInput
   }
 
   export type eventUncheckedCreateWithoutTicketsInput = {
@@ -25626,14 +27957,16 @@ export namespace Prisma {
     producerId?: number
     capacityTotal?: number | null
     isRsvpAllowed?: boolean
+    isSoldOut?: boolean
     eventGenre?: string | null
     showRemainingTickets?: boolean
     createdAt?: Date | string
-    ticketTypes?: ticketTypeUncheckedCreateNestedManyWithoutEventInput
     eventArtists?: eventArtistUncheckedCreateNestedManyWithoutEventInput
     participants?: participantUncheckedCreateNestedManyWithoutEventInput
-    rrppAssignments?: rrppAssignmentUncheckedCreateNestedManyWithoutEventInput
     payments?: paymentUncheckedCreateNestedManyWithoutEventInput
+    rrppAssignments?: rrppAssignmentUncheckedCreateNestedManyWithoutEventInput
+    ticketTypes?: ticketTypeUncheckedCreateNestedManyWithoutEventInput
+    guestList?: guestListUncheckedCreateNestedManyWithoutEventInput
   }
 
   export type eventCreateOrConnectWithoutTicketsInput = {
@@ -25647,22 +27980,24 @@ export namespace Prisma {
     email: string
     emailVerified: boolean
     image?: string | null
-    imageBase64?: string | null
     createdAt: Date | string
     updatedAt: Date | string
     username?: string | null
     dni?: string | null
     birthDate?: Date | string | null
     role?: $Enums.Role
-    transferredTickets?: ticketCreateNestedManyWithoutTransferredFromInput
-    participants?: participantCreateNestedManyWithoutUserInput
-    rrppAssignments?: rrppAssignmentCreateNestedManyWithoutRrppUserInput
+    image_base64?: string | null
     account?: accountCreateNestedManyWithoutUserInput
-    session?: sessionCreateNestedManyWithoutUserInput
     logs?: logCreateNestedManyWithoutUserInput
-    sentMessages?: messageCreateNestedManyWithoutSenderInput
     receivedMessages?: messageCreateNestedManyWithoutReceiverInput
+    sentMessages?: messageCreateNestedManyWithoutSenderInput
+    participants?: participantCreateNestedManyWithoutUserInput
     payments?: paymentCreateNestedManyWithoutUserInput
+    rrppAssignments?: rrppAssignmentCreateNestedManyWithoutRrppUserInput
+    session?: sessionCreateNestedManyWithoutUserInput
+    transferredTickets?: ticketCreateNestedManyWithoutTransferredFromInput
+    guestsImported?: guestListCreateNestedManyWithoutImportedByUserInput
+    guestsCheckedIn?: guestListCreateNestedManyWithoutCheckedInByUserInput
   }
 
   export type userUncheckedCreateWithoutTicketsInput = {
@@ -25671,27 +28006,124 @@ export namespace Prisma {
     email: string
     emailVerified: boolean
     image?: string | null
-    imageBase64?: string | null
     createdAt: Date | string
     updatedAt: Date | string
     username?: string | null
     dni?: string | null
     birthDate?: Date | string | null
     role?: $Enums.Role
-    transferredTickets?: ticketUncheckedCreateNestedManyWithoutTransferredFromInput
-    participants?: participantUncheckedCreateNestedManyWithoutUserInput
-    rrppAssignments?: rrppAssignmentUncheckedCreateNestedManyWithoutRrppUserInput
+    image_base64?: string | null
     account?: accountUncheckedCreateNestedManyWithoutUserInput
-    session?: sessionUncheckedCreateNestedManyWithoutUserInput
     logs?: logUncheckedCreateNestedManyWithoutUserInput
-    sentMessages?: messageUncheckedCreateNestedManyWithoutSenderInput
     receivedMessages?: messageUncheckedCreateNestedManyWithoutReceiverInput
+    sentMessages?: messageUncheckedCreateNestedManyWithoutSenderInput
+    participants?: participantUncheckedCreateNestedManyWithoutUserInput
     payments?: paymentUncheckedCreateNestedManyWithoutUserInput
+    rrppAssignments?: rrppAssignmentUncheckedCreateNestedManyWithoutRrppUserInput
+    session?: sessionUncheckedCreateNestedManyWithoutUserInput
+    transferredTickets?: ticketUncheckedCreateNestedManyWithoutTransferredFromInput
+    guestsImported?: guestListUncheckedCreateNestedManyWithoutImportedByUserInput
+    guestsCheckedIn?: guestListUncheckedCreateNestedManyWithoutCheckedInByUserInput
   }
 
   export type userCreateOrConnectWithoutTicketsInput = {
     where: userWhereUniqueInput
     create: XOR<userCreateWithoutTicketsInput, userUncheckedCreateWithoutTicketsInput>
+  }
+
+  export type paymentCreateWithoutTicketsInput = {
+    status?: $Enums.PaymentStatus
+    amount: Decimal | DecimalJsLike | number | string
+    currency?: string
+    provider?: string
+    externalReference: string
+    mpPreferenceId?: string | null
+    mpPaymentId?: string | null
+    payerEmail?: string | null
+    payerName?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    event: eventCreateNestedOneWithoutPaymentsInput
+    user: userCreateNestedOneWithoutPaymentsInput
+  }
+
+  export type paymentUncheckedCreateWithoutTicketsInput = {
+    id?: number
+    userId: string
+    eventId: number
+    status?: $Enums.PaymentStatus
+    amount: Decimal | DecimalJsLike | number | string
+    currency?: string
+    provider?: string
+    externalReference: string
+    mpPreferenceId?: string | null
+    mpPaymentId?: string | null
+    payerEmail?: string | null
+    payerName?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type paymentCreateOrConnectWithoutTicketsInput = {
+    where: paymentWhereUniqueInput
+    create: XOR<paymentCreateWithoutTicketsInput, paymentUncheckedCreateWithoutTicketsInput>
+  }
+
+  export type userCreateWithoutTransferredTicketsInput = {
+    id: string
+    name: string
+    email: string
+    emailVerified: boolean
+    image?: string | null
+    createdAt: Date | string
+    updatedAt: Date | string
+    username?: string | null
+    dni?: string | null
+    birthDate?: Date | string | null
+    role?: $Enums.Role
+    image_base64?: string | null
+    account?: accountCreateNestedManyWithoutUserInput
+    logs?: logCreateNestedManyWithoutUserInput
+    receivedMessages?: messageCreateNestedManyWithoutReceiverInput
+    sentMessages?: messageCreateNestedManyWithoutSenderInput
+    participants?: participantCreateNestedManyWithoutUserInput
+    payments?: paymentCreateNestedManyWithoutUserInput
+    rrppAssignments?: rrppAssignmentCreateNestedManyWithoutRrppUserInput
+    session?: sessionCreateNestedManyWithoutUserInput
+    tickets?: ticketCreateNestedManyWithoutOwnerInput
+    guestsImported?: guestListCreateNestedManyWithoutImportedByUserInput
+    guestsCheckedIn?: guestListCreateNestedManyWithoutCheckedInByUserInput
+  }
+
+  export type userUncheckedCreateWithoutTransferredTicketsInput = {
+    id: string
+    name: string
+    email: string
+    emailVerified: boolean
+    image?: string | null
+    createdAt: Date | string
+    updatedAt: Date | string
+    username?: string | null
+    dni?: string | null
+    birthDate?: Date | string | null
+    role?: $Enums.Role
+    image_base64?: string | null
+    account?: accountUncheckedCreateNestedManyWithoutUserInput
+    logs?: logUncheckedCreateNestedManyWithoutUserInput
+    receivedMessages?: messageUncheckedCreateNestedManyWithoutReceiverInput
+    sentMessages?: messageUncheckedCreateNestedManyWithoutSenderInput
+    participants?: participantUncheckedCreateNestedManyWithoutUserInput
+    payments?: paymentUncheckedCreateNestedManyWithoutUserInput
+    rrppAssignments?: rrppAssignmentUncheckedCreateNestedManyWithoutRrppUserInput
+    session?: sessionUncheckedCreateNestedManyWithoutUserInput
+    tickets?: ticketUncheckedCreateNestedManyWithoutOwnerInput
+    guestsImported?: guestListUncheckedCreateNestedManyWithoutImportedByUserInput
+    guestsCheckedIn?: guestListUncheckedCreateNestedManyWithoutCheckedInByUserInput
+  }
+
+  export type userCreateOrConnectWithoutTransferredTicketsInput = {
+    where: userWhereUniqueInput
+    create: XOR<userCreateWithoutTransferredTicketsInput, userUncheckedCreateWithoutTransferredTicketsInput>
   }
 
   export type ticketTypeCreateWithoutTicketsInput = {
@@ -25726,97 +28158,6 @@ export namespace Prisma {
     create: XOR<ticketTypeCreateWithoutTicketsInput, ticketTypeUncheckedCreateWithoutTicketsInput>
   }
 
-  export type userCreateWithoutTransferredTicketsInput = {
-    id: string
-    name: string
-    email: string
-    emailVerified: boolean
-    image?: string | null
-    imageBase64?: string | null
-    createdAt: Date | string
-    updatedAt: Date | string
-    username?: string | null
-    dni?: string | null
-    birthDate?: Date | string | null
-    role?: $Enums.Role
-    tickets?: ticketCreateNestedManyWithoutOwnerInput
-    participants?: participantCreateNestedManyWithoutUserInput
-    rrppAssignments?: rrppAssignmentCreateNestedManyWithoutRrppUserInput
-    account?: accountCreateNestedManyWithoutUserInput
-    session?: sessionCreateNestedManyWithoutUserInput
-    logs?: logCreateNestedManyWithoutUserInput
-    sentMessages?: messageCreateNestedManyWithoutSenderInput
-    receivedMessages?: messageCreateNestedManyWithoutReceiverInput
-    payments?: paymentCreateNestedManyWithoutUserInput
-  }
-
-  export type userUncheckedCreateWithoutTransferredTicketsInput = {
-    id: string
-    name: string
-    email: string
-    emailVerified: boolean
-    image?: string | null
-    imageBase64?: string | null
-    createdAt: Date | string
-    updatedAt: Date | string
-    username?: string | null
-    dni?: string | null
-    birthDate?: Date | string | null
-    role?: $Enums.Role
-    tickets?: ticketUncheckedCreateNestedManyWithoutOwnerInput
-    participants?: participantUncheckedCreateNestedManyWithoutUserInput
-    rrppAssignments?: rrppAssignmentUncheckedCreateNestedManyWithoutRrppUserInput
-    account?: accountUncheckedCreateNestedManyWithoutUserInput
-    session?: sessionUncheckedCreateNestedManyWithoutUserInput
-    logs?: logUncheckedCreateNestedManyWithoutUserInput
-    sentMessages?: messageUncheckedCreateNestedManyWithoutSenderInput
-    receivedMessages?: messageUncheckedCreateNestedManyWithoutReceiverInput
-    payments?: paymentUncheckedCreateNestedManyWithoutUserInput
-  }
-
-  export type userCreateOrConnectWithoutTransferredTicketsInput = {
-    where: userWhereUniqueInput
-    create: XOR<userCreateWithoutTransferredTicketsInput, userUncheckedCreateWithoutTransferredTicketsInput>
-  }
-
-  export type paymentCreateWithoutTicketsInput = {
-    status?: $Enums.PaymentStatus
-    amount: Decimal | DecimalJsLike | number | string
-    currency?: string
-    provider?: string
-    externalReference: string
-    mpPreferenceId?: string | null
-    mpPaymentId?: string | null
-    payerEmail?: string | null
-    payerName?: string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    user: userCreateNestedOneWithoutPaymentsInput
-    event: eventCreateNestedOneWithoutPaymentsInput
-  }
-
-  export type paymentUncheckedCreateWithoutTicketsInput = {
-    id?: number
-    userId: string
-    eventId: number
-    status?: $Enums.PaymentStatus
-    amount: Decimal | DecimalJsLike | number | string
-    currency?: string
-    provider?: string
-    externalReference: string
-    mpPreferenceId?: string | null
-    mpPaymentId?: string | null
-    payerEmail?: string | null
-    payerName?: string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-  }
-
-  export type paymentCreateOrConnectWithoutTicketsInput = {
-    where: paymentWhereUniqueInput
-    create: XOR<paymentCreateWithoutTicketsInput, paymentUncheckedCreateWithoutTicketsInput>
-  }
-
   export type eventUpsertWithoutTicketsInput = {
     update: XOR<eventUpdateWithoutTicketsInput, eventUncheckedUpdateWithoutTicketsInput>
     create: XOR<eventCreateWithoutTicketsInput, eventUncheckedCreateWithoutTicketsInput>
@@ -25838,14 +28179,16 @@ export namespace Prisma {
     producerId?: IntFieldUpdateOperationsInput | number
     capacityTotal?: NullableIntFieldUpdateOperationsInput | number | null
     isRsvpAllowed?: BoolFieldUpdateOperationsInput | boolean
+    isSoldOut?: BoolFieldUpdateOperationsInput | boolean
     eventGenre?: NullableStringFieldUpdateOperationsInput | string | null
     showRemainingTickets?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    ticketTypes?: ticketTypeUpdateManyWithoutEventNestedInput
     eventArtists?: eventArtistUpdateManyWithoutEventNestedInput
     participants?: participantUpdateManyWithoutEventNestedInput
-    rrppAssignments?: rrppAssignmentUpdateManyWithoutEventNestedInput
     payments?: paymentUpdateManyWithoutEventNestedInput
+    rrppAssignments?: rrppAssignmentUpdateManyWithoutEventNestedInput
+    ticketTypes?: ticketTypeUpdateManyWithoutEventNestedInput
+    guestList?: guestListUpdateManyWithoutEventNestedInput
   }
 
   export type eventUncheckedUpdateWithoutTicketsInput = {
@@ -25859,14 +28202,16 @@ export namespace Prisma {
     producerId?: IntFieldUpdateOperationsInput | number
     capacityTotal?: NullableIntFieldUpdateOperationsInput | number | null
     isRsvpAllowed?: BoolFieldUpdateOperationsInput | boolean
+    isSoldOut?: BoolFieldUpdateOperationsInput | boolean
     eventGenre?: NullableStringFieldUpdateOperationsInput | string | null
     showRemainingTickets?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    ticketTypes?: ticketTypeUncheckedUpdateManyWithoutEventNestedInput
     eventArtists?: eventArtistUncheckedUpdateManyWithoutEventNestedInput
     participants?: participantUncheckedUpdateManyWithoutEventNestedInput
-    rrppAssignments?: rrppAssignmentUncheckedUpdateManyWithoutEventNestedInput
     payments?: paymentUncheckedUpdateManyWithoutEventNestedInput
+    rrppAssignments?: rrppAssignmentUncheckedUpdateManyWithoutEventNestedInput
+    ticketTypes?: ticketTypeUncheckedUpdateManyWithoutEventNestedInput
+    guestList?: guestListUncheckedUpdateManyWithoutEventNestedInput
   }
 
   export type userUpsertWithoutTicketsInput = {
@@ -25886,22 +28231,24 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: BoolFieldUpdateOperationsInput | boolean
     image?: NullableStringFieldUpdateOperationsInput | string | null
-    imageBase64?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     username?: NullableStringFieldUpdateOperationsInput | string | null
     dni?: NullableStringFieldUpdateOperationsInput | string | null
     birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
-    transferredTickets?: ticketUpdateManyWithoutTransferredFromNestedInput
-    participants?: participantUpdateManyWithoutUserNestedInput
-    rrppAssignments?: rrppAssignmentUpdateManyWithoutRrppUserNestedInput
+    image_base64?: NullableStringFieldUpdateOperationsInput | string | null
     account?: accountUpdateManyWithoutUserNestedInput
-    session?: sessionUpdateManyWithoutUserNestedInput
     logs?: logUpdateManyWithoutUserNestedInput
-    sentMessages?: messageUpdateManyWithoutSenderNestedInput
     receivedMessages?: messageUpdateManyWithoutReceiverNestedInput
+    sentMessages?: messageUpdateManyWithoutSenderNestedInput
+    participants?: participantUpdateManyWithoutUserNestedInput
     payments?: paymentUpdateManyWithoutUserNestedInput
+    rrppAssignments?: rrppAssignmentUpdateManyWithoutRrppUserNestedInput
+    session?: sessionUpdateManyWithoutUserNestedInput
+    transferredTickets?: ticketUpdateManyWithoutTransferredFromNestedInput
+    guestsImported?: guestListUpdateManyWithoutImportedByUserNestedInput
+    guestsCheckedIn?: guestListUpdateManyWithoutCheckedInByUserNestedInput
   }
 
   export type userUncheckedUpdateWithoutTicketsInput = {
@@ -25910,22 +28257,131 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: BoolFieldUpdateOperationsInput | boolean
     image?: NullableStringFieldUpdateOperationsInput | string | null
-    imageBase64?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     username?: NullableStringFieldUpdateOperationsInput | string | null
     dni?: NullableStringFieldUpdateOperationsInput | string | null
     birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
-    transferredTickets?: ticketUncheckedUpdateManyWithoutTransferredFromNestedInput
-    participants?: participantUncheckedUpdateManyWithoutUserNestedInput
-    rrppAssignments?: rrppAssignmentUncheckedUpdateManyWithoutRrppUserNestedInput
+    image_base64?: NullableStringFieldUpdateOperationsInput | string | null
     account?: accountUncheckedUpdateManyWithoutUserNestedInput
-    session?: sessionUncheckedUpdateManyWithoutUserNestedInput
     logs?: logUncheckedUpdateManyWithoutUserNestedInput
-    sentMessages?: messageUncheckedUpdateManyWithoutSenderNestedInput
     receivedMessages?: messageUncheckedUpdateManyWithoutReceiverNestedInput
+    sentMessages?: messageUncheckedUpdateManyWithoutSenderNestedInput
+    participants?: participantUncheckedUpdateManyWithoutUserNestedInput
     payments?: paymentUncheckedUpdateManyWithoutUserNestedInput
+    rrppAssignments?: rrppAssignmentUncheckedUpdateManyWithoutRrppUserNestedInput
+    session?: sessionUncheckedUpdateManyWithoutUserNestedInput
+    transferredTickets?: ticketUncheckedUpdateManyWithoutTransferredFromNestedInput
+    guestsImported?: guestListUncheckedUpdateManyWithoutImportedByUserNestedInput
+    guestsCheckedIn?: guestListUncheckedUpdateManyWithoutCheckedInByUserNestedInput
+  }
+
+  export type paymentUpsertWithoutTicketsInput = {
+    update: XOR<paymentUpdateWithoutTicketsInput, paymentUncheckedUpdateWithoutTicketsInput>
+    create: XOR<paymentCreateWithoutTicketsInput, paymentUncheckedCreateWithoutTicketsInput>
+    where?: paymentWhereInput
+  }
+
+  export type paymentUpdateToOneWithWhereWithoutTicketsInput = {
+    where?: paymentWhereInput
+    data: XOR<paymentUpdateWithoutTicketsInput, paymentUncheckedUpdateWithoutTicketsInput>
+  }
+
+  export type paymentUpdateWithoutTicketsInput = {
+    status?: EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
+    amount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    currency?: StringFieldUpdateOperationsInput | string
+    provider?: StringFieldUpdateOperationsInput | string
+    externalReference?: StringFieldUpdateOperationsInput | string
+    mpPreferenceId?: NullableStringFieldUpdateOperationsInput | string | null
+    mpPaymentId?: NullableStringFieldUpdateOperationsInput | string | null
+    payerEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    payerName?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    event?: eventUpdateOneRequiredWithoutPaymentsNestedInput
+    user?: userUpdateOneRequiredWithoutPaymentsNestedInput
+  }
+
+  export type paymentUncheckedUpdateWithoutTicketsInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    userId?: StringFieldUpdateOperationsInput | string
+    eventId?: IntFieldUpdateOperationsInput | number
+    status?: EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
+    amount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    currency?: StringFieldUpdateOperationsInput | string
+    provider?: StringFieldUpdateOperationsInput | string
+    externalReference?: StringFieldUpdateOperationsInput | string
+    mpPreferenceId?: NullableStringFieldUpdateOperationsInput | string | null
+    mpPaymentId?: NullableStringFieldUpdateOperationsInput | string | null
+    payerEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    payerName?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type userUpsertWithoutTransferredTicketsInput = {
+    update: XOR<userUpdateWithoutTransferredTicketsInput, userUncheckedUpdateWithoutTransferredTicketsInput>
+    create: XOR<userCreateWithoutTransferredTicketsInput, userUncheckedCreateWithoutTransferredTicketsInput>
+    where?: userWhereInput
+  }
+
+  export type userUpdateToOneWithWhereWithoutTransferredTicketsInput = {
+    where?: userWhereInput
+    data: XOR<userUpdateWithoutTransferredTicketsInput, userUncheckedUpdateWithoutTransferredTicketsInput>
+  }
+
+  export type userUpdateWithoutTransferredTicketsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    username?: NullableStringFieldUpdateOperationsInput | string | null
+    dni?: NullableStringFieldUpdateOperationsInput | string | null
+    birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    image_base64?: NullableStringFieldUpdateOperationsInput | string | null
+    account?: accountUpdateManyWithoutUserNestedInput
+    logs?: logUpdateManyWithoutUserNestedInput
+    receivedMessages?: messageUpdateManyWithoutReceiverNestedInput
+    sentMessages?: messageUpdateManyWithoutSenderNestedInput
+    participants?: participantUpdateManyWithoutUserNestedInput
+    payments?: paymentUpdateManyWithoutUserNestedInput
+    rrppAssignments?: rrppAssignmentUpdateManyWithoutRrppUserNestedInput
+    session?: sessionUpdateManyWithoutUserNestedInput
+    tickets?: ticketUpdateManyWithoutOwnerNestedInput
+    guestsImported?: guestListUpdateManyWithoutImportedByUserNestedInput
+    guestsCheckedIn?: guestListUpdateManyWithoutCheckedInByUserNestedInput
+  }
+
+  export type userUncheckedUpdateWithoutTransferredTicketsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    username?: NullableStringFieldUpdateOperationsInput | string | null
+    dni?: NullableStringFieldUpdateOperationsInput | string | null
+    birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    image_base64?: NullableStringFieldUpdateOperationsInput | string | null
+    account?: accountUncheckedUpdateManyWithoutUserNestedInput
+    logs?: logUncheckedUpdateManyWithoutUserNestedInput
+    receivedMessages?: messageUncheckedUpdateManyWithoutReceiverNestedInput
+    sentMessages?: messageUncheckedUpdateManyWithoutSenderNestedInput
+    participants?: participantUncheckedUpdateManyWithoutUserNestedInput
+    payments?: paymentUncheckedUpdateManyWithoutUserNestedInput
+    rrppAssignments?: rrppAssignmentUncheckedUpdateManyWithoutRrppUserNestedInput
+    session?: sessionUncheckedUpdateManyWithoutUserNestedInput
+    tickets?: ticketUncheckedUpdateManyWithoutOwnerNestedInput
+    guestsImported?: guestListUncheckedUpdateManyWithoutImportedByUserNestedInput
+    guestsCheckedIn?: guestListUncheckedUpdateManyWithoutCheckedInByUserNestedInput
   }
 
   export type ticketTypeUpsertWithoutTicketsInput = {
@@ -25966,162 +28422,6 @@ export namespace Prisma {
     isDisabled?: BoolFieldUpdateOperationsInput | boolean
   }
 
-  export type userUpsertWithoutTransferredTicketsInput = {
-    update: XOR<userUpdateWithoutTransferredTicketsInput, userUncheckedUpdateWithoutTransferredTicketsInput>
-    create: XOR<userCreateWithoutTransferredTicketsInput, userUncheckedCreateWithoutTransferredTicketsInput>
-    where?: userWhereInput
-  }
-
-  export type userUpdateToOneWithWhereWithoutTransferredTicketsInput = {
-    where?: userWhereInput
-    data: XOR<userUpdateWithoutTransferredTicketsInput, userUncheckedUpdateWithoutTransferredTicketsInput>
-  }
-
-  export type userUpdateWithoutTransferredTicketsInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    email?: StringFieldUpdateOperationsInput | string
-    emailVerified?: BoolFieldUpdateOperationsInput | boolean
-    image?: NullableStringFieldUpdateOperationsInput | string | null
-    imageBase64?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    username?: NullableStringFieldUpdateOperationsInput | string | null
-    dni?: NullableStringFieldUpdateOperationsInput | string | null
-    birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
-    tickets?: ticketUpdateManyWithoutOwnerNestedInput
-    participants?: participantUpdateManyWithoutUserNestedInput
-    rrppAssignments?: rrppAssignmentUpdateManyWithoutRrppUserNestedInput
-    account?: accountUpdateManyWithoutUserNestedInput
-    session?: sessionUpdateManyWithoutUserNestedInput
-    logs?: logUpdateManyWithoutUserNestedInput
-    sentMessages?: messageUpdateManyWithoutSenderNestedInput
-    receivedMessages?: messageUpdateManyWithoutReceiverNestedInput
-    payments?: paymentUpdateManyWithoutUserNestedInput
-  }
-
-  export type userUncheckedUpdateWithoutTransferredTicketsInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    email?: StringFieldUpdateOperationsInput | string
-    emailVerified?: BoolFieldUpdateOperationsInput | boolean
-    image?: NullableStringFieldUpdateOperationsInput | string | null
-    imageBase64?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    username?: NullableStringFieldUpdateOperationsInput | string | null
-    dni?: NullableStringFieldUpdateOperationsInput | string | null
-    birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
-    tickets?: ticketUncheckedUpdateManyWithoutOwnerNestedInput
-    participants?: participantUncheckedUpdateManyWithoutUserNestedInput
-    rrppAssignments?: rrppAssignmentUncheckedUpdateManyWithoutRrppUserNestedInput
-    account?: accountUncheckedUpdateManyWithoutUserNestedInput
-    session?: sessionUncheckedUpdateManyWithoutUserNestedInput
-    logs?: logUncheckedUpdateManyWithoutUserNestedInput
-    sentMessages?: messageUncheckedUpdateManyWithoutSenderNestedInput
-    receivedMessages?: messageUncheckedUpdateManyWithoutReceiverNestedInput
-    payments?: paymentUncheckedUpdateManyWithoutUserNestedInput
-  }
-
-  export type paymentUpsertWithoutTicketsInput = {
-    update: XOR<paymentUpdateWithoutTicketsInput, paymentUncheckedUpdateWithoutTicketsInput>
-    create: XOR<paymentCreateWithoutTicketsInput, paymentUncheckedCreateWithoutTicketsInput>
-    where?: paymentWhereInput
-  }
-
-  export type paymentUpdateToOneWithWhereWithoutTicketsInput = {
-    where?: paymentWhereInput
-    data: XOR<paymentUpdateWithoutTicketsInput, paymentUncheckedUpdateWithoutTicketsInput>
-  }
-
-  export type paymentUpdateWithoutTicketsInput = {
-    status?: EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
-    amount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
-    currency?: StringFieldUpdateOperationsInput | string
-    provider?: StringFieldUpdateOperationsInput | string
-    externalReference?: StringFieldUpdateOperationsInput | string
-    mpPreferenceId?: NullableStringFieldUpdateOperationsInput | string | null
-    mpPaymentId?: NullableStringFieldUpdateOperationsInput | string | null
-    payerEmail?: NullableStringFieldUpdateOperationsInput | string | null
-    payerName?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    user?: userUpdateOneRequiredWithoutPaymentsNestedInput
-    event?: eventUpdateOneRequiredWithoutPaymentsNestedInput
-  }
-
-  export type paymentUncheckedUpdateWithoutTicketsInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    userId?: StringFieldUpdateOperationsInput | string
-    eventId?: IntFieldUpdateOperationsInput | number
-    status?: EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
-    amount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
-    currency?: StringFieldUpdateOperationsInput | string
-    provider?: StringFieldUpdateOperationsInput | string
-    externalReference?: StringFieldUpdateOperationsInput | string
-    mpPreferenceId?: NullableStringFieldUpdateOperationsInput | string | null
-    mpPaymentId?: NullableStringFieldUpdateOperationsInput | string | null
-    payerEmail?: NullableStringFieldUpdateOperationsInput | string | null
-    payerName?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type userCreateWithoutRrppAssignmentsInput = {
-    id: string
-    name: string
-    email: string
-    emailVerified: boolean
-    image?: string | null
-    imageBase64?: string | null
-    createdAt: Date | string
-    updatedAt: Date | string
-    username?: string | null
-    dni?: string | null
-    birthDate?: Date | string | null
-    role?: $Enums.Role
-    tickets?: ticketCreateNestedManyWithoutOwnerInput
-    transferredTickets?: ticketCreateNestedManyWithoutTransferredFromInput
-    participants?: participantCreateNestedManyWithoutUserInput
-    account?: accountCreateNestedManyWithoutUserInput
-    session?: sessionCreateNestedManyWithoutUserInput
-    logs?: logCreateNestedManyWithoutUserInput
-    sentMessages?: messageCreateNestedManyWithoutSenderInput
-    receivedMessages?: messageCreateNestedManyWithoutReceiverInput
-    payments?: paymentCreateNestedManyWithoutUserInput
-  }
-
-  export type userUncheckedCreateWithoutRrppAssignmentsInput = {
-    id: string
-    name: string
-    email: string
-    emailVerified: boolean
-    image?: string | null
-    imageBase64?: string | null
-    createdAt: Date | string
-    updatedAt: Date | string
-    username?: string | null
-    dni?: string | null
-    birthDate?: Date | string | null
-    role?: $Enums.Role
-    tickets?: ticketUncheckedCreateNestedManyWithoutOwnerInput
-    transferredTickets?: ticketUncheckedCreateNestedManyWithoutTransferredFromInput
-    participants?: participantUncheckedCreateNestedManyWithoutUserInput
-    account?: accountUncheckedCreateNestedManyWithoutUserInput
-    session?: sessionUncheckedCreateNestedManyWithoutUserInput
-    logs?: logUncheckedCreateNestedManyWithoutUserInput
-    sentMessages?: messageUncheckedCreateNestedManyWithoutSenderInput
-    receivedMessages?: messageUncheckedCreateNestedManyWithoutReceiverInput
-    payments?: paymentUncheckedCreateNestedManyWithoutUserInput
-  }
-
-  export type userCreateOrConnectWithoutRrppAssignmentsInput = {
-    where: userWhereUniqueInput
-    create: XOR<userCreateWithoutRrppAssignmentsInput, userUncheckedCreateWithoutRrppAssignmentsInput>
-  }
-
   export type eventCreateWithoutRrppAssignmentsInput = {
     name: string
     date: Date | string
@@ -26132,14 +28432,16 @@ export namespace Prisma {
     producerId?: number
     capacityTotal?: number | null
     isRsvpAllowed?: boolean
+    isSoldOut?: boolean
     eventGenre?: string | null
     showRemainingTickets?: boolean
     createdAt?: Date | string
-    ticketTypes?: ticketTypeCreateNestedManyWithoutEventInput
     eventArtists?: eventArtistCreateNestedManyWithoutEventInput
-    tickets?: ticketCreateNestedManyWithoutEventInput
     participants?: participantCreateNestedManyWithoutEventInput
     payments?: paymentCreateNestedManyWithoutEventInput
+    tickets?: ticketCreateNestedManyWithoutEventInput
+    ticketTypes?: ticketTypeCreateNestedManyWithoutEventInput
+    guestList?: guestListCreateNestedManyWithoutEventInput
   }
 
   export type eventUncheckedCreateWithoutRrppAssignmentsInput = {
@@ -26153,14 +28455,16 @@ export namespace Prisma {
     producerId?: number
     capacityTotal?: number | null
     isRsvpAllowed?: boolean
+    isSoldOut?: boolean
     eventGenre?: string | null
     showRemainingTickets?: boolean
     createdAt?: Date | string
-    ticketTypes?: ticketTypeUncheckedCreateNestedManyWithoutEventInput
     eventArtists?: eventArtistUncheckedCreateNestedManyWithoutEventInput
-    tickets?: ticketUncheckedCreateNestedManyWithoutEventInput
     participants?: participantUncheckedCreateNestedManyWithoutEventInput
     payments?: paymentUncheckedCreateNestedManyWithoutEventInput
+    tickets?: ticketUncheckedCreateNestedManyWithoutEventInput
+    ticketTypes?: ticketTypeUncheckedCreateNestedManyWithoutEventInput
+    guestList?: guestListUncheckedCreateNestedManyWithoutEventInput
   }
 
   export type eventCreateOrConnectWithoutRrppAssignmentsInput = {
@@ -26168,63 +28472,61 @@ export namespace Prisma {
     create: XOR<eventCreateWithoutRrppAssignmentsInput, eventUncheckedCreateWithoutRrppAssignmentsInput>
   }
 
-  export type userUpsertWithoutRrppAssignmentsInput = {
-    update: XOR<userUpdateWithoutRrppAssignmentsInput, userUncheckedUpdateWithoutRrppAssignmentsInput>
+  export type userCreateWithoutRrppAssignmentsInput = {
+    id: string
+    name: string
+    email: string
+    emailVerified: boolean
+    image?: string | null
+    createdAt: Date | string
+    updatedAt: Date | string
+    username?: string | null
+    dni?: string | null
+    birthDate?: Date | string | null
+    role?: $Enums.Role
+    image_base64?: string | null
+    account?: accountCreateNestedManyWithoutUserInput
+    logs?: logCreateNestedManyWithoutUserInput
+    receivedMessages?: messageCreateNestedManyWithoutReceiverInput
+    sentMessages?: messageCreateNestedManyWithoutSenderInput
+    participants?: participantCreateNestedManyWithoutUserInput
+    payments?: paymentCreateNestedManyWithoutUserInput
+    session?: sessionCreateNestedManyWithoutUserInput
+    tickets?: ticketCreateNestedManyWithoutOwnerInput
+    transferredTickets?: ticketCreateNestedManyWithoutTransferredFromInput
+    guestsImported?: guestListCreateNestedManyWithoutImportedByUserInput
+    guestsCheckedIn?: guestListCreateNestedManyWithoutCheckedInByUserInput
+  }
+
+  export type userUncheckedCreateWithoutRrppAssignmentsInput = {
+    id: string
+    name: string
+    email: string
+    emailVerified: boolean
+    image?: string | null
+    createdAt: Date | string
+    updatedAt: Date | string
+    username?: string | null
+    dni?: string | null
+    birthDate?: Date | string | null
+    role?: $Enums.Role
+    image_base64?: string | null
+    account?: accountUncheckedCreateNestedManyWithoutUserInput
+    logs?: logUncheckedCreateNestedManyWithoutUserInput
+    receivedMessages?: messageUncheckedCreateNestedManyWithoutReceiverInput
+    sentMessages?: messageUncheckedCreateNestedManyWithoutSenderInput
+    participants?: participantUncheckedCreateNestedManyWithoutUserInput
+    payments?: paymentUncheckedCreateNestedManyWithoutUserInput
+    session?: sessionUncheckedCreateNestedManyWithoutUserInput
+    tickets?: ticketUncheckedCreateNestedManyWithoutOwnerInput
+    transferredTickets?: ticketUncheckedCreateNestedManyWithoutTransferredFromInput
+    guestsImported?: guestListUncheckedCreateNestedManyWithoutImportedByUserInput
+    guestsCheckedIn?: guestListUncheckedCreateNestedManyWithoutCheckedInByUserInput
+  }
+
+  export type userCreateOrConnectWithoutRrppAssignmentsInput = {
+    where: userWhereUniqueInput
     create: XOR<userCreateWithoutRrppAssignmentsInput, userUncheckedCreateWithoutRrppAssignmentsInput>
-    where?: userWhereInput
-  }
-
-  export type userUpdateToOneWithWhereWithoutRrppAssignmentsInput = {
-    where?: userWhereInput
-    data: XOR<userUpdateWithoutRrppAssignmentsInput, userUncheckedUpdateWithoutRrppAssignmentsInput>
-  }
-
-  export type userUpdateWithoutRrppAssignmentsInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    email?: StringFieldUpdateOperationsInput | string
-    emailVerified?: BoolFieldUpdateOperationsInput | boolean
-    image?: NullableStringFieldUpdateOperationsInput | string | null
-    imageBase64?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    username?: NullableStringFieldUpdateOperationsInput | string | null
-    dni?: NullableStringFieldUpdateOperationsInput | string | null
-    birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
-    tickets?: ticketUpdateManyWithoutOwnerNestedInput
-    transferredTickets?: ticketUpdateManyWithoutTransferredFromNestedInput
-    participants?: participantUpdateManyWithoutUserNestedInput
-    account?: accountUpdateManyWithoutUserNestedInput
-    session?: sessionUpdateManyWithoutUserNestedInput
-    logs?: logUpdateManyWithoutUserNestedInput
-    sentMessages?: messageUpdateManyWithoutSenderNestedInput
-    receivedMessages?: messageUpdateManyWithoutReceiverNestedInput
-    payments?: paymentUpdateManyWithoutUserNestedInput
-  }
-
-  export type userUncheckedUpdateWithoutRrppAssignmentsInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    email?: StringFieldUpdateOperationsInput | string
-    emailVerified?: BoolFieldUpdateOperationsInput | boolean
-    image?: NullableStringFieldUpdateOperationsInput | string | null
-    imageBase64?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    username?: NullableStringFieldUpdateOperationsInput | string | null
-    dni?: NullableStringFieldUpdateOperationsInput | string | null
-    birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
-    tickets?: ticketUncheckedUpdateManyWithoutOwnerNestedInput
-    transferredTickets?: ticketUncheckedUpdateManyWithoutTransferredFromNestedInput
-    participants?: participantUncheckedUpdateManyWithoutUserNestedInput
-    account?: accountUncheckedUpdateManyWithoutUserNestedInput
-    session?: sessionUncheckedUpdateManyWithoutUserNestedInput
-    logs?: logUncheckedUpdateManyWithoutUserNestedInput
-    sentMessages?: messageUncheckedUpdateManyWithoutSenderNestedInput
-    receivedMessages?: messageUncheckedUpdateManyWithoutReceiverNestedInput
-    payments?: paymentUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type eventUpsertWithoutRrppAssignmentsInput = {
@@ -26248,14 +28550,16 @@ export namespace Prisma {
     producerId?: IntFieldUpdateOperationsInput | number
     capacityTotal?: NullableIntFieldUpdateOperationsInput | number | null
     isRsvpAllowed?: BoolFieldUpdateOperationsInput | boolean
+    isSoldOut?: BoolFieldUpdateOperationsInput | boolean
     eventGenre?: NullableStringFieldUpdateOperationsInput | string | null
     showRemainingTickets?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    ticketTypes?: ticketTypeUpdateManyWithoutEventNestedInput
     eventArtists?: eventArtistUpdateManyWithoutEventNestedInput
-    tickets?: ticketUpdateManyWithoutEventNestedInput
     participants?: participantUpdateManyWithoutEventNestedInput
     payments?: paymentUpdateManyWithoutEventNestedInput
+    tickets?: ticketUpdateManyWithoutEventNestedInput
+    ticketTypes?: ticketTypeUpdateManyWithoutEventNestedInput
+    guestList?: guestListUpdateManyWithoutEventNestedInput
   }
 
   export type eventUncheckedUpdateWithoutRrppAssignmentsInput = {
@@ -26269,67 +28573,79 @@ export namespace Prisma {
     producerId?: IntFieldUpdateOperationsInput | number
     capacityTotal?: NullableIntFieldUpdateOperationsInput | number | null
     isRsvpAllowed?: BoolFieldUpdateOperationsInput | boolean
+    isSoldOut?: BoolFieldUpdateOperationsInput | boolean
     eventGenre?: NullableStringFieldUpdateOperationsInput | string | null
     showRemainingTickets?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    ticketTypes?: ticketTypeUncheckedUpdateManyWithoutEventNestedInput
     eventArtists?: eventArtistUncheckedUpdateManyWithoutEventNestedInput
-    tickets?: ticketUncheckedUpdateManyWithoutEventNestedInput
     participants?: participantUncheckedUpdateManyWithoutEventNestedInput
     payments?: paymentUncheckedUpdateManyWithoutEventNestedInput
+    tickets?: ticketUncheckedUpdateManyWithoutEventNestedInput
+    ticketTypes?: ticketTypeUncheckedUpdateManyWithoutEventNestedInput
+    guestList?: guestListUncheckedUpdateManyWithoutEventNestedInput
   }
 
-  export type userCreateWithoutParticipantsInput = {
-    id: string
-    name: string
-    email: string
-    emailVerified: boolean
-    image?: string | null
-    imageBase64?: string | null
-    createdAt: Date | string
-    updatedAt: Date | string
-    username?: string | null
-    dni?: string | null
-    birthDate?: Date | string | null
-    role?: $Enums.Role
-    tickets?: ticketCreateNestedManyWithoutOwnerInput
-    transferredTickets?: ticketCreateNestedManyWithoutTransferredFromInput
-    rrppAssignments?: rrppAssignmentCreateNestedManyWithoutRrppUserInput
-    account?: accountCreateNestedManyWithoutUserInput
-    session?: sessionCreateNestedManyWithoutUserInput
-    logs?: logCreateNestedManyWithoutUserInput
-    sentMessages?: messageCreateNestedManyWithoutSenderInput
-    receivedMessages?: messageCreateNestedManyWithoutReceiverInput
-    payments?: paymentCreateNestedManyWithoutUserInput
+  export type userUpsertWithoutRrppAssignmentsInput = {
+    update: XOR<userUpdateWithoutRrppAssignmentsInput, userUncheckedUpdateWithoutRrppAssignmentsInput>
+    create: XOR<userCreateWithoutRrppAssignmentsInput, userUncheckedCreateWithoutRrppAssignmentsInput>
+    where?: userWhereInput
   }
 
-  export type userUncheckedCreateWithoutParticipantsInput = {
-    id: string
-    name: string
-    email: string
-    emailVerified: boolean
-    image?: string | null
-    imageBase64?: string | null
-    createdAt: Date | string
-    updatedAt: Date | string
-    username?: string | null
-    dni?: string | null
-    birthDate?: Date | string | null
-    role?: $Enums.Role
-    tickets?: ticketUncheckedCreateNestedManyWithoutOwnerInput
-    transferredTickets?: ticketUncheckedCreateNestedManyWithoutTransferredFromInput
-    rrppAssignments?: rrppAssignmentUncheckedCreateNestedManyWithoutRrppUserInput
-    account?: accountUncheckedCreateNestedManyWithoutUserInput
-    session?: sessionUncheckedCreateNestedManyWithoutUserInput
-    logs?: logUncheckedCreateNestedManyWithoutUserInput
-    sentMessages?: messageUncheckedCreateNestedManyWithoutSenderInput
-    receivedMessages?: messageUncheckedCreateNestedManyWithoutReceiverInput
-    payments?: paymentUncheckedCreateNestedManyWithoutUserInput
+  export type userUpdateToOneWithWhereWithoutRrppAssignmentsInput = {
+    where?: userWhereInput
+    data: XOR<userUpdateWithoutRrppAssignmentsInput, userUncheckedUpdateWithoutRrppAssignmentsInput>
   }
 
-  export type userCreateOrConnectWithoutParticipantsInput = {
-    where: userWhereUniqueInput
-    create: XOR<userCreateWithoutParticipantsInput, userUncheckedCreateWithoutParticipantsInput>
+  export type userUpdateWithoutRrppAssignmentsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    username?: NullableStringFieldUpdateOperationsInput | string | null
+    dni?: NullableStringFieldUpdateOperationsInput | string | null
+    birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    image_base64?: NullableStringFieldUpdateOperationsInput | string | null
+    account?: accountUpdateManyWithoutUserNestedInput
+    logs?: logUpdateManyWithoutUserNestedInput
+    receivedMessages?: messageUpdateManyWithoutReceiverNestedInput
+    sentMessages?: messageUpdateManyWithoutSenderNestedInput
+    participants?: participantUpdateManyWithoutUserNestedInput
+    payments?: paymentUpdateManyWithoutUserNestedInput
+    session?: sessionUpdateManyWithoutUserNestedInput
+    tickets?: ticketUpdateManyWithoutOwnerNestedInput
+    transferredTickets?: ticketUpdateManyWithoutTransferredFromNestedInput
+    guestsImported?: guestListUpdateManyWithoutImportedByUserNestedInput
+    guestsCheckedIn?: guestListUpdateManyWithoutCheckedInByUserNestedInput
+  }
+
+  export type userUncheckedUpdateWithoutRrppAssignmentsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    username?: NullableStringFieldUpdateOperationsInput | string | null
+    dni?: NullableStringFieldUpdateOperationsInput | string | null
+    birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    image_base64?: NullableStringFieldUpdateOperationsInput | string | null
+    account?: accountUncheckedUpdateManyWithoutUserNestedInput
+    logs?: logUncheckedUpdateManyWithoutUserNestedInput
+    receivedMessages?: messageUncheckedUpdateManyWithoutReceiverNestedInput
+    sentMessages?: messageUncheckedUpdateManyWithoutSenderNestedInput
+    participants?: participantUncheckedUpdateManyWithoutUserNestedInput
+    payments?: paymentUncheckedUpdateManyWithoutUserNestedInput
+    session?: sessionUncheckedUpdateManyWithoutUserNestedInput
+    tickets?: ticketUncheckedUpdateManyWithoutOwnerNestedInput
+    transferredTickets?: ticketUncheckedUpdateManyWithoutTransferredFromNestedInput
+    guestsImported?: guestListUncheckedUpdateManyWithoutImportedByUserNestedInput
+    guestsCheckedIn?: guestListUncheckedUpdateManyWithoutCheckedInByUserNestedInput
   }
 
   export type eventCreateWithoutParticipantsInput = {
@@ -26342,14 +28658,16 @@ export namespace Prisma {
     producerId?: number
     capacityTotal?: number | null
     isRsvpAllowed?: boolean
+    isSoldOut?: boolean
     eventGenre?: string | null
     showRemainingTickets?: boolean
     createdAt?: Date | string
-    ticketTypes?: ticketTypeCreateNestedManyWithoutEventInput
     eventArtists?: eventArtistCreateNestedManyWithoutEventInput
-    tickets?: ticketCreateNestedManyWithoutEventInput
-    rrppAssignments?: rrppAssignmentCreateNestedManyWithoutEventInput
     payments?: paymentCreateNestedManyWithoutEventInput
+    rrppAssignments?: rrppAssignmentCreateNestedManyWithoutEventInput
+    tickets?: ticketCreateNestedManyWithoutEventInput
+    ticketTypes?: ticketTypeCreateNestedManyWithoutEventInput
+    guestList?: guestListCreateNestedManyWithoutEventInput
   }
 
   export type eventUncheckedCreateWithoutParticipantsInput = {
@@ -26363,14 +28681,16 @@ export namespace Prisma {
     producerId?: number
     capacityTotal?: number | null
     isRsvpAllowed?: boolean
+    isSoldOut?: boolean
     eventGenre?: string | null
     showRemainingTickets?: boolean
     createdAt?: Date | string
-    ticketTypes?: ticketTypeUncheckedCreateNestedManyWithoutEventInput
     eventArtists?: eventArtistUncheckedCreateNestedManyWithoutEventInput
-    tickets?: ticketUncheckedCreateNestedManyWithoutEventInput
-    rrppAssignments?: rrppAssignmentUncheckedCreateNestedManyWithoutEventInput
     payments?: paymentUncheckedCreateNestedManyWithoutEventInput
+    rrppAssignments?: rrppAssignmentUncheckedCreateNestedManyWithoutEventInput
+    tickets?: ticketUncheckedCreateNestedManyWithoutEventInput
+    ticketTypes?: ticketTypeUncheckedCreateNestedManyWithoutEventInput
+    guestList?: guestListUncheckedCreateNestedManyWithoutEventInput
   }
 
   export type eventCreateOrConnectWithoutParticipantsInput = {
@@ -26378,63 +28698,61 @@ export namespace Prisma {
     create: XOR<eventCreateWithoutParticipantsInput, eventUncheckedCreateWithoutParticipantsInput>
   }
 
-  export type userUpsertWithoutParticipantsInput = {
-    update: XOR<userUpdateWithoutParticipantsInput, userUncheckedUpdateWithoutParticipantsInput>
+  export type userCreateWithoutParticipantsInput = {
+    id: string
+    name: string
+    email: string
+    emailVerified: boolean
+    image?: string | null
+    createdAt: Date | string
+    updatedAt: Date | string
+    username?: string | null
+    dni?: string | null
+    birthDate?: Date | string | null
+    role?: $Enums.Role
+    image_base64?: string | null
+    account?: accountCreateNestedManyWithoutUserInput
+    logs?: logCreateNestedManyWithoutUserInput
+    receivedMessages?: messageCreateNestedManyWithoutReceiverInput
+    sentMessages?: messageCreateNestedManyWithoutSenderInput
+    payments?: paymentCreateNestedManyWithoutUserInput
+    rrppAssignments?: rrppAssignmentCreateNestedManyWithoutRrppUserInput
+    session?: sessionCreateNestedManyWithoutUserInput
+    tickets?: ticketCreateNestedManyWithoutOwnerInput
+    transferredTickets?: ticketCreateNestedManyWithoutTransferredFromInput
+    guestsImported?: guestListCreateNestedManyWithoutImportedByUserInput
+    guestsCheckedIn?: guestListCreateNestedManyWithoutCheckedInByUserInput
+  }
+
+  export type userUncheckedCreateWithoutParticipantsInput = {
+    id: string
+    name: string
+    email: string
+    emailVerified: boolean
+    image?: string | null
+    createdAt: Date | string
+    updatedAt: Date | string
+    username?: string | null
+    dni?: string | null
+    birthDate?: Date | string | null
+    role?: $Enums.Role
+    image_base64?: string | null
+    account?: accountUncheckedCreateNestedManyWithoutUserInput
+    logs?: logUncheckedCreateNestedManyWithoutUserInput
+    receivedMessages?: messageUncheckedCreateNestedManyWithoutReceiverInput
+    sentMessages?: messageUncheckedCreateNestedManyWithoutSenderInput
+    payments?: paymentUncheckedCreateNestedManyWithoutUserInput
+    rrppAssignments?: rrppAssignmentUncheckedCreateNestedManyWithoutRrppUserInput
+    session?: sessionUncheckedCreateNestedManyWithoutUserInput
+    tickets?: ticketUncheckedCreateNestedManyWithoutOwnerInput
+    transferredTickets?: ticketUncheckedCreateNestedManyWithoutTransferredFromInput
+    guestsImported?: guestListUncheckedCreateNestedManyWithoutImportedByUserInput
+    guestsCheckedIn?: guestListUncheckedCreateNestedManyWithoutCheckedInByUserInput
+  }
+
+  export type userCreateOrConnectWithoutParticipantsInput = {
+    where: userWhereUniqueInput
     create: XOR<userCreateWithoutParticipantsInput, userUncheckedCreateWithoutParticipantsInput>
-    where?: userWhereInput
-  }
-
-  export type userUpdateToOneWithWhereWithoutParticipantsInput = {
-    where?: userWhereInput
-    data: XOR<userUpdateWithoutParticipantsInput, userUncheckedUpdateWithoutParticipantsInput>
-  }
-
-  export type userUpdateWithoutParticipantsInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    email?: StringFieldUpdateOperationsInput | string
-    emailVerified?: BoolFieldUpdateOperationsInput | boolean
-    image?: NullableStringFieldUpdateOperationsInput | string | null
-    imageBase64?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    username?: NullableStringFieldUpdateOperationsInput | string | null
-    dni?: NullableStringFieldUpdateOperationsInput | string | null
-    birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
-    tickets?: ticketUpdateManyWithoutOwnerNestedInput
-    transferredTickets?: ticketUpdateManyWithoutTransferredFromNestedInput
-    rrppAssignments?: rrppAssignmentUpdateManyWithoutRrppUserNestedInput
-    account?: accountUpdateManyWithoutUserNestedInput
-    session?: sessionUpdateManyWithoutUserNestedInput
-    logs?: logUpdateManyWithoutUserNestedInput
-    sentMessages?: messageUpdateManyWithoutSenderNestedInput
-    receivedMessages?: messageUpdateManyWithoutReceiverNestedInput
-    payments?: paymentUpdateManyWithoutUserNestedInput
-  }
-
-  export type userUncheckedUpdateWithoutParticipantsInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    email?: StringFieldUpdateOperationsInput | string
-    emailVerified?: BoolFieldUpdateOperationsInput | boolean
-    image?: NullableStringFieldUpdateOperationsInput | string | null
-    imageBase64?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    username?: NullableStringFieldUpdateOperationsInput | string | null
-    dni?: NullableStringFieldUpdateOperationsInput | string | null
-    birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
-    tickets?: ticketUncheckedUpdateManyWithoutOwnerNestedInput
-    transferredTickets?: ticketUncheckedUpdateManyWithoutTransferredFromNestedInput
-    rrppAssignments?: rrppAssignmentUncheckedUpdateManyWithoutRrppUserNestedInput
-    account?: accountUncheckedUpdateManyWithoutUserNestedInput
-    session?: sessionUncheckedUpdateManyWithoutUserNestedInput
-    logs?: logUncheckedUpdateManyWithoutUserNestedInput
-    sentMessages?: messageUncheckedUpdateManyWithoutSenderNestedInput
-    receivedMessages?: messageUncheckedUpdateManyWithoutReceiverNestedInput
-    payments?: paymentUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type eventUpsertWithoutParticipantsInput = {
@@ -26458,14 +28776,16 @@ export namespace Prisma {
     producerId?: IntFieldUpdateOperationsInput | number
     capacityTotal?: NullableIntFieldUpdateOperationsInput | number | null
     isRsvpAllowed?: BoolFieldUpdateOperationsInput | boolean
+    isSoldOut?: BoolFieldUpdateOperationsInput | boolean
     eventGenre?: NullableStringFieldUpdateOperationsInput | string | null
     showRemainingTickets?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    ticketTypes?: ticketTypeUpdateManyWithoutEventNestedInput
     eventArtists?: eventArtistUpdateManyWithoutEventNestedInput
-    tickets?: ticketUpdateManyWithoutEventNestedInput
-    rrppAssignments?: rrppAssignmentUpdateManyWithoutEventNestedInput
     payments?: paymentUpdateManyWithoutEventNestedInput
+    rrppAssignments?: rrppAssignmentUpdateManyWithoutEventNestedInput
+    tickets?: ticketUpdateManyWithoutEventNestedInput
+    ticketTypes?: ticketTypeUpdateManyWithoutEventNestedInput
+    guestList?: guestListUpdateManyWithoutEventNestedInput
   }
 
   export type eventUncheckedUpdateWithoutParticipantsInput = {
@@ -26479,14 +28799,79 @@ export namespace Prisma {
     producerId?: IntFieldUpdateOperationsInput | number
     capacityTotal?: NullableIntFieldUpdateOperationsInput | number | null
     isRsvpAllowed?: BoolFieldUpdateOperationsInput | boolean
+    isSoldOut?: BoolFieldUpdateOperationsInput | boolean
     eventGenre?: NullableStringFieldUpdateOperationsInput | string | null
     showRemainingTickets?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    ticketTypes?: ticketTypeUncheckedUpdateManyWithoutEventNestedInput
     eventArtists?: eventArtistUncheckedUpdateManyWithoutEventNestedInput
-    tickets?: ticketUncheckedUpdateManyWithoutEventNestedInput
-    rrppAssignments?: rrppAssignmentUncheckedUpdateManyWithoutEventNestedInput
     payments?: paymentUncheckedUpdateManyWithoutEventNestedInput
+    rrppAssignments?: rrppAssignmentUncheckedUpdateManyWithoutEventNestedInput
+    tickets?: ticketUncheckedUpdateManyWithoutEventNestedInput
+    ticketTypes?: ticketTypeUncheckedUpdateManyWithoutEventNestedInput
+    guestList?: guestListUncheckedUpdateManyWithoutEventNestedInput
+  }
+
+  export type userUpsertWithoutParticipantsInput = {
+    update: XOR<userUpdateWithoutParticipantsInput, userUncheckedUpdateWithoutParticipantsInput>
+    create: XOR<userCreateWithoutParticipantsInput, userUncheckedCreateWithoutParticipantsInput>
+    where?: userWhereInput
+  }
+
+  export type userUpdateToOneWithWhereWithoutParticipantsInput = {
+    where?: userWhereInput
+    data: XOR<userUpdateWithoutParticipantsInput, userUncheckedUpdateWithoutParticipantsInput>
+  }
+
+  export type userUpdateWithoutParticipantsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    username?: NullableStringFieldUpdateOperationsInput | string | null
+    dni?: NullableStringFieldUpdateOperationsInput | string | null
+    birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    image_base64?: NullableStringFieldUpdateOperationsInput | string | null
+    account?: accountUpdateManyWithoutUserNestedInput
+    logs?: logUpdateManyWithoutUserNestedInput
+    receivedMessages?: messageUpdateManyWithoutReceiverNestedInput
+    sentMessages?: messageUpdateManyWithoutSenderNestedInput
+    payments?: paymentUpdateManyWithoutUserNestedInput
+    rrppAssignments?: rrppAssignmentUpdateManyWithoutRrppUserNestedInput
+    session?: sessionUpdateManyWithoutUserNestedInput
+    tickets?: ticketUpdateManyWithoutOwnerNestedInput
+    transferredTickets?: ticketUpdateManyWithoutTransferredFromNestedInput
+    guestsImported?: guestListUpdateManyWithoutImportedByUserNestedInput
+    guestsCheckedIn?: guestListUpdateManyWithoutCheckedInByUserNestedInput
+  }
+
+  export type userUncheckedUpdateWithoutParticipantsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    username?: NullableStringFieldUpdateOperationsInput | string | null
+    dni?: NullableStringFieldUpdateOperationsInput | string | null
+    birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    image_base64?: NullableStringFieldUpdateOperationsInput | string | null
+    account?: accountUncheckedUpdateManyWithoutUserNestedInput
+    logs?: logUncheckedUpdateManyWithoutUserNestedInput
+    receivedMessages?: messageUncheckedUpdateManyWithoutReceiverNestedInput
+    sentMessages?: messageUncheckedUpdateManyWithoutSenderNestedInput
+    payments?: paymentUncheckedUpdateManyWithoutUserNestedInput
+    rrppAssignments?: rrppAssignmentUncheckedUpdateManyWithoutRrppUserNestedInput
+    session?: sessionUncheckedUpdateManyWithoutUserNestedInput
+    tickets?: ticketUncheckedUpdateManyWithoutOwnerNestedInput
+    transferredTickets?: ticketUncheckedUpdateManyWithoutTransferredFromNestedInput
+    guestsImported?: guestListUncheckedUpdateManyWithoutImportedByUserNestedInput
+    guestsCheckedIn?: guestListUncheckedUpdateManyWithoutCheckedInByUserNestedInput
   }
 
   export type userCreateWithoutLogsInput = {
@@ -26495,22 +28880,24 @@ export namespace Prisma {
     email: string
     emailVerified: boolean
     image?: string | null
-    imageBase64?: string | null
     createdAt: Date | string
     updatedAt: Date | string
     username?: string | null
     dni?: string | null
     birthDate?: Date | string | null
     role?: $Enums.Role
+    image_base64?: string | null
+    account?: accountCreateNestedManyWithoutUserInput
+    receivedMessages?: messageCreateNestedManyWithoutReceiverInput
+    sentMessages?: messageCreateNestedManyWithoutSenderInput
+    participants?: participantCreateNestedManyWithoutUserInput
+    payments?: paymentCreateNestedManyWithoutUserInput
+    rrppAssignments?: rrppAssignmentCreateNestedManyWithoutRrppUserInput
+    session?: sessionCreateNestedManyWithoutUserInput
     tickets?: ticketCreateNestedManyWithoutOwnerInput
     transferredTickets?: ticketCreateNestedManyWithoutTransferredFromInput
-    participants?: participantCreateNestedManyWithoutUserInput
-    rrppAssignments?: rrppAssignmentCreateNestedManyWithoutRrppUserInput
-    account?: accountCreateNestedManyWithoutUserInput
-    session?: sessionCreateNestedManyWithoutUserInput
-    sentMessages?: messageCreateNestedManyWithoutSenderInput
-    receivedMessages?: messageCreateNestedManyWithoutReceiverInput
-    payments?: paymentCreateNestedManyWithoutUserInput
+    guestsImported?: guestListCreateNestedManyWithoutImportedByUserInput
+    guestsCheckedIn?: guestListCreateNestedManyWithoutCheckedInByUserInput
   }
 
   export type userUncheckedCreateWithoutLogsInput = {
@@ -26519,22 +28906,24 @@ export namespace Prisma {
     email: string
     emailVerified: boolean
     image?: string | null
-    imageBase64?: string | null
     createdAt: Date | string
     updatedAt: Date | string
     username?: string | null
     dni?: string | null
     birthDate?: Date | string | null
     role?: $Enums.Role
+    image_base64?: string | null
+    account?: accountUncheckedCreateNestedManyWithoutUserInput
+    receivedMessages?: messageUncheckedCreateNestedManyWithoutReceiverInput
+    sentMessages?: messageUncheckedCreateNestedManyWithoutSenderInput
+    participants?: participantUncheckedCreateNestedManyWithoutUserInput
+    payments?: paymentUncheckedCreateNestedManyWithoutUserInput
+    rrppAssignments?: rrppAssignmentUncheckedCreateNestedManyWithoutRrppUserInput
+    session?: sessionUncheckedCreateNestedManyWithoutUserInput
     tickets?: ticketUncheckedCreateNestedManyWithoutOwnerInput
     transferredTickets?: ticketUncheckedCreateNestedManyWithoutTransferredFromInput
-    participants?: participantUncheckedCreateNestedManyWithoutUserInput
-    rrppAssignments?: rrppAssignmentUncheckedCreateNestedManyWithoutRrppUserInput
-    account?: accountUncheckedCreateNestedManyWithoutUserInput
-    session?: sessionUncheckedCreateNestedManyWithoutUserInput
-    sentMessages?: messageUncheckedCreateNestedManyWithoutSenderInput
-    receivedMessages?: messageUncheckedCreateNestedManyWithoutReceiverInput
-    payments?: paymentUncheckedCreateNestedManyWithoutUserInput
+    guestsImported?: guestListUncheckedCreateNestedManyWithoutImportedByUserInput
+    guestsCheckedIn?: guestListUncheckedCreateNestedManyWithoutCheckedInByUserInput
   }
 
   export type userCreateOrConnectWithoutLogsInput = {
@@ -26559,22 +28948,24 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: BoolFieldUpdateOperationsInput | boolean
     image?: NullableStringFieldUpdateOperationsInput | string | null
-    imageBase64?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     username?: NullableStringFieldUpdateOperationsInput | string | null
     dni?: NullableStringFieldUpdateOperationsInput | string | null
     birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    image_base64?: NullableStringFieldUpdateOperationsInput | string | null
+    account?: accountUpdateManyWithoutUserNestedInput
+    receivedMessages?: messageUpdateManyWithoutReceiverNestedInput
+    sentMessages?: messageUpdateManyWithoutSenderNestedInput
+    participants?: participantUpdateManyWithoutUserNestedInput
+    payments?: paymentUpdateManyWithoutUserNestedInput
+    rrppAssignments?: rrppAssignmentUpdateManyWithoutRrppUserNestedInput
+    session?: sessionUpdateManyWithoutUserNestedInput
     tickets?: ticketUpdateManyWithoutOwnerNestedInput
     transferredTickets?: ticketUpdateManyWithoutTransferredFromNestedInput
-    participants?: participantUpdateManyWithoutUserNestedInput
-    rrppAssignments?: rrppAssignmentUpdateManyWithoutRrppUserNestedInput
-    account?: accountUpdateManyWithoutUserNestedInput
-    session?: sessionUpdateManyWithoutUserNestedInput
-    sentMessages?: messageUpdateManyWithoutSenderNestedInput
-    receivedMessages?: messageUpdateManyWithoutReceiverNestedInput
-    payments?: paymentUpdateManyWithoutUserNestedInput
+    guestsImported?: guestListUpdateManyWithoutImportedByUserNestedInput
+    guestsCheckedIn?: guestListUpdateManyWithoutCheckedInByUserNestedInput
   }
 
   export type userUncheckedUpdateWithoutLogsInput = {
@@ -26583,75 +28974,24 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: BoolFieldUpdateOperationsInput | boolean
     image?: NullableStringFieldUpdateOperationsInput | string | null
-    imageBase64?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     username?: NullableStringFieldUpdateOperationsInput | string | null
     dni?: NullableStringFieldUpdateOperationsInput | string | null
     birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    image_base64?: NullableStringFieldUpdateOperationsInput | string | null
+    account?: accountUncheckedUpdateManyWithoutUserNestedInput
+    receivedMessages?: messageUncheckedUpdateManyWithoutReceiverNestedInput
+    sentMessages?: messageUncheckedUpdateManyWithoutSenderNestedInput
+    participants?: participantUncheckedUpdateManyWithoutUserNestedInput
+    payments?: paymentUncheckedUpdateManyWithoutUserNestedInput
+    rrppAssignments?: rrppAssignmentUncheckedUpdateManyWithoutRrppUserNestedInput
+    session?: sessionUncheckedUpdateManyWithoutUserNestedInput
     tickets?: ticketUncheckedUpdateManyWithoutOwnerNestedInput
     transferredTickets?: ticketUncheckedUpdateManyWithoutTransferredFromNestedInput
-    participants?: participantUncheckedUpdateManyWithoutUserNestedInput
-    rrppAssignments?: rrppAssignmentUncheckedUpdateManyWithoutRrppUserNestedInput
-    account?: accountUncheckedUpdateManyWithoutUserNestedInput
-    session?: sessionUncheckedUpdateManyWithoutUserNestedInput
-    sentMessages?: messageUncheckedUpdateManyWithoutSenderNestedInput
-    receivedMessages?: messageUncheckedUpdateManyWithoutReceiverNestedInput
-    payments?: paymentUncheckedUpdateManyWithoutUserNestedInput
-  }
-
-  export type userCreateWithoutSentMessagesInput = {
-    id: string
-    name: string
-    email: string
-    emailVerified: boolean
-    image?: string | null
-    imageBase64?: string | null
-    createdAt: Date | string
-    updatedAt: Date | string
-    username?: string | null
-    dni?: string | null
-    birthDate?: Date | string | null
-    role?: $Enums.Role
-    tickets?: ticketCreateNestedManyWithoutOwnerInput
-    transferredTickets?: ticketCreateNestedManyWithoutTransferredFromInput
-    participants?: participantCreateNestedManyWithoutUserInput
-    rrppAssignments?: rrppAssignmentCreateNestedManyWithoutRrppUserInput
-    account?: accountCreateNestedManyWithoutUserInput
-    session?: sessionCreateNestedManyWithoutUserInput
-    logs?: logCreateNestedManyWithoutUserInput
-    receivedMessages?: messageCreateNestedManyWithoutReceiverInput
-    payments?: paymentCreateNestedManyWithoutUserInput
-  }
-
-  export type userUncheckedCreateWithoutSentMessagesInput = {
-    id: string
-    name: string
-    email: string
-    emailVerified: boolean
-    image?: string | null
-    imageBase64?: string | null
-    createdAt: Date | string
-    updatedAt: Date | string
-    username?: string | null
-    dni?: string | null
-    birthDate?: Date | string | null
-    role?: $Enums.Role
-    tickets?: ticketUncheckedCreateNestedManyWithoutOwnerInput
-    transferredTickets?: ticketUncheckedCreateNestedManyWithoutTransferredFromInput
-    participants?: participantUncheckedCreateNestedManyWithoutUserInput
-    rrppAssignments?: rrppAssignmentUncheckedCreateNestedManyWithoutRrppUserInput
-    account?: accountUncheckedCreateNestedManyWithoutUserInput
-    session?: sessionUncheckedCreateNestedManyWithoutUserInput
-    logs?: logUncheckedCreateNestedManyWithoutUserInput
-    receivedMessages?: messageUncheckedCreateNestedManyWithoutReceiverInput
-    payments?: paymentUncheckedCreateNestedManyWithoutUserInput
-  }
-
-  export type userCreateOrConnectWithoutSentMessagesInput = {
-    where: userWhereUniqueInput
-    create: XOR<userCreateWithoutSentMessagesInput, userUncheckedCreateWithoutSentMessagesInput>
+    guestsImported?: guestListUncheckedUpdateManyWithoutImportedByUserNestedInput
+    guestsCheckedIn?: guestListUncheckedUpdateManyWithoutCheckedInByUserNestedInput
   }
 
   export type userCreateWithoutReceivedMessagesInput = {
@@ -26660,22 +29000,24 @@ export namespace Prisma {
     email: string
     emailVerified: boolean
     image?: string | null
-    imageBase64?: string | null
     createdAt: Date | string
     updatedAt: Date | string
     username?: string | null
     dni?: string | null
     birthDate?: Date | string | null
     role?: $Enums.Role
-    tickets?: ticketCreateNestedManyWithoutOwnerInput
-    transferredTickets?: ticketCreateNestedManyWithoutTransferredFromInput
-    participants?: participantCreateNestedManyWithoutUserInput
-    rrppAssignments?: rrppAssignmentCreateNestedManyWithoutRrppUserInput
+    image_base64?: string | null
     account?: accountCreateNestedManyWithoutUserInput
-    session?: sessionCreateNestedManyWithoutUserInput
     logs?: logCreateNestedManyWithoutUserInput
     sentMessages?: messageCreateNestedManyWithoutSenderInput
+    participants?: participantCreateNestedManyWithoutUserInput
     payments?: paymentCreateNestedManyWithoutUserInput
+    rrppAssignments?: rrppAssignmentCreateNestedManyWithoutRrppUserInput
+    session?: sessionCreateNestedManyWithoutUserInput
+    tickets?: ticketCreateNestedManyWithoutOwnerInput
+    transferredTickets?: ticketCreateNestedManyWithoutTransferredFromInput
+    guestsImported?: guestListCreateNestedManyWithoutImportedByUserInput
+    guestsCheckedIn?: guestListCreateNestedManyWithoutCheckedInByUserInput
   }
 
   export type userUncheckedCreateWithoutReceivedMessagesInput = {
@@ -26684,22 +29026,24 @@ export namespace Prisma {
     email: string
     emailVerified: boolean
     image?: string | null
-    imageBase64?: string | null
     createdAt: Date | string
     updatedAt: Date | string
     username?: string | null
     dni?: string | null
     birthDate?: Date | string | null
     role?: $Enums.Role
-    tickets?: ticketUncheckedCreateNestedManyWithoutOwnerInput
-    transferredTickets?: ticketUncheckedCreateNestedManyWithoutTransferredFromInput
-    participants?: participantUncheckedCreateNestedManyWithoutUserInput
-    rrppAssignments?: rrppAssignmentUncheckedCreateNestedManyWithoutRrppUserInput
+    image_base64?: string | null
     account?: accountUncheckedCreateNestedManyWithoutUserInput
-    session?: sessionUncheckedCreateNestedManyWithoutUserInput
     logs?: logUncheckedCreateNestedManyWithoutUserInput
     sentMessages?: messageUncheckedCreateNestedManyWithoutSenderInput
+    participants?: participantUncheckedCreateNestedManyWithoutUserInput
     payments?: paymentUncheckedCreateNestedManyWithoutUserInput
+    rrppAssignments?: rrppAssignmentUncheckedCreateNestedManyWithoutRrppUserInput
+    session?: sessionUncheckedCreateNestedManyWithoutUserInput
+    tickets?: ticketUncheckedCreateNestedManyWithoutOwnerInput
+    transferredTickets?: ticketUncheckedCreateNestedManyWithoutTransferredFromInput
+    guestsImported?: guestListUncheckedCreateNestedManyWithoutImportedByUserInput
+    guestsCheckedIn?: guestListUncheckedCreateNestedManyWithoutCheckedInByUserInput
   }
 
   export type userCreateOrConnectWithoutReceivedMessagesInput = {
@@ -26707,63 +29051,61 @@ export namespace Prisma {
     create: XOR<userCreateWithoutReceivedMessagesInput, userUncheckedCreateWithoutReceivedMessagesInput>
   }
 
-  export type userUpsertWithoutSentMessagesInput = {
-    update: XOR<userUpdateWithoutSentMessagesInput, userUncheckedUpdateWithoutSentMessagesInput>
+  export type userCreateWithoutSentMessagesInput = {
+    id: string
+    name: string
+    email: string
+    emailVerified: boolean
+    image?: string | null
+    createdAt: Date | string
+    updatedAt: Date | string
+    username?: string | null
+    dni?: string | null
+    birthDate?: Date | string | null
+    role?: $Enums.Role
+    image_base64?: string | null
+    account?: accountCreateNestedManyWithoutUserInput
+    logs?: logCreateNestedManyWithoutUserInput
+    receivedMessages?: messageCreateNestedManyWithoutReceiverInput
+    participants?: participantCreateNestedManyWithoutUserInput
+    payments?: paymentCreateNestedManyWithoutUserInput
+    rrppAssignments?: rrppAssignmentCreateNestedManyWithoutRrppUserInput
+    session?: sessionCreateNestedManyWithoutUserInput
+    tickets?: ticketCreateNestedManyWithoutOwnerInput
+    transferredTickets?: ticketCreateNestedManyWithoutTransferredFromInput
+    guestsImported?: guestListCreateNestedManyWithoutImportedByUserInput
+    guestsCheckedIn?: guestListCreateNestedManyWithoutCheckedInByUserInput
+  }
+
+  export type userUncheckedCreateWithoutSentMessagesInput = {
+    id: string
+    name: string
+    email: string
+    emailVerified: boolean
+    image?: string | null
+    createdAt: Date | string
+    updatedAt: Date | string
+    username?: string | null
+    dni?: string | null
+    birthDate?: Date | string | null
+    role?: $Enums.Role
+    image_base64?: string | null
+    account?: accountUncheckedCreateNestedManyWithoutUserInput
+    logs?: logUncheckedCreateNestedManyWithoutUserInput
+    receivedMessages?: messageUncheckedCreateNestedManyWithoutReceiverInput
+    participants?: participantUncheckedCreateNestedManyWithoutUserInput
+    payments?: paymentUncheckedCreateNestedManyWithoutUserInput
+    rrppAssignments?: rrppAssignmentUncheckedCreateNestedManyWithoutRrppUserInput
+    session?: sessionUncheckedCreateNestedManyWithoutUserInput
+    tickets?: ticketUncheckedCreateNestedManyWithoutOwnerInput
+    transferredTickets?: ticketUncheckedCreateNestedManyWithoutTransferredFromInput
+    guestsImported?: guestListUncheckedCreateNestedManyWithoutImportedByUserInput
+    guestsCheckedIn?: guestListUncheckedCreateNestedManyWithoutCheckedInByUserInput
+  }
+
+  export type userCreateOrConnectWithoutSentMessagesInput = {
+    where: userWhereUniqueInput
     create: XOR<userCreateWithoutSentMessagesInput, userUncheckedCreateWithoutSentMessagesInput>
-    where?: userWhereInput
-  }
-
-  export type userUpdateToOneWithWhereWithoutSentMessagesInput = {
-    where?: userWhereInput
-    data: XOR<userUpdateWithoutSentMessagesInput, userUncheckedUpdateWithoutSentMessagesInput>
-  }
-
-  export type userUpdateWithoutSentMessagesInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    email?: StringFieldUpdateOperationsInput | string
-    emailVerified?: BoolFieldUpdateOperationsInput | boolean
-    image?: NullableStringFieldUpdateOperationsInput | string | null
-    imageBase64?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    username?: NullableStringFieldUpdateOperationsInput | string | null
-    dni?: NullableStringFieldUpdateOperationsInput | string | null
-    birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
-    tickets?: ticketUpdateManyWithoutOwnerNestedInput
-    transferredTickets?: ticketUpdateManyWithoutTransferredFromNestedInput
-    participants?: participantUpdateManyWithoutUserNestedInput
-    rrppAssignments?: rrppAssignmentUpdateManyWithoutRrppUserNestedInput
-    account?: accountUpdateManyWithoutUserNestedInput
-    session?: sessionUpdateManyWithoutUserNestedInput
-    logs?: logUpdateManyWithoutUserNestedInput
-    receivedMessages?: messageUpdateManyWithoutReceiverNestedInput
-    payments?: paymentUpdateManyWithoutUserNestedInput
-  }
-
-  export type userUncheckedUpdateWithoutSentMessagesInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    email?: StringFieldUpdateOperationsInput | string
-    emailVerified?: BoolFieldUpdateOperationsInput | boolean
-    image?: NullableStringFieldUpdateOperationsInput | string | null
-    imageBase64?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    username?: NullableStringFieldUpdateOperationsInput | string | null
-    dni?: NullableStringFieldUpdateOperationsInput | string | null
-    birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
-    tickets?: ticketUncheckedUpdateManyWithoutOwnerNestedInput
-    transferredTickets?: ticketUncheckedUpdateManyWithoutTransferredFromNestedInput
-    participants?: participantUncheckedUpdateManyWithoutUserNestedInput
-    rrppAssignments?: rrppAssignmentUncheckedUpdateManyWithoutRrppUserNestedInput
-    account?: accountUncheckedUpdateManyWithoutUserNestedInput
-    session?: sessionUncheckedUpdateManyWithoutUserNestedInput
-    logs?: logUncheckedUpdateManyWithoutUserNestedInput
-    receivedMessages?: messageUncheckedUpdateManyWithoutReceiverNestedInput
-    payments?: paymentUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type userUpsertWithoutReceivedMessagesInput = {
@@ -26783,22 +29125,24 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: BoolFieldUpdateOperationsInput | boolean
     image?: NullableStringFieldUpdateOperationsInput | string | null
-    imageBase64?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     username?: NullableStringFieldUpdateOperationsInput | string | null
     dni?: NullableStringFieldUpdateOperationsInput | string | null
     birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
-    tickets?: ticketUpdateManyWithoutOwnerNestedInput
-    transferredTickets?: ticketUpdateManyWithoutTransferredFromNestedInput
-    participants?: participantUpdateManyWithoutUserNestedInput
-    rrppAssignments?: rrppAssignmentUpdateManyWithoutRrppUserNestedInput
+    image_base64?: NullableStringFieldUpdateOperationsInput | string | null
     account?: accountUpdateManyWithoutUserNestedInput
-    session?: sessionUpdateManyWithoutUserNestedInput
     logs?: logUpdateManyWithoutUserNestedInput
     sentMessages?: messageUpdateManyWithoutSenderNestedInput
+    participants?: participantUpdateManyWithoutUserNestedInput
     payments?: paymentUpdateManyWithoutUserNestedInput
+    rrppAssignments?: rrppAssignmentUpdateManyWithoutRrppUserNestedInput
+    session?: sessionUpdateManyWithoutUserNestedInput
+    tickets?: ticketUpdateManyWithoutOwnerNestedInput
+    transferredTickets?: ticketUpdateManyWithoutTransferredFromNestedInput
+    guestsImported?: guestListUpdateManyWithoutImportedByUserNestedInput
+    guestsCheckedIn?: guestListUpdateManyWithoutCheckedInByUserNestedInput
   }
 
   export type userUncheckedUpdateWithoutReceivedMessagesInput = {
@@ -26807,22 +29151,509 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     emailVerified?: BoolFieldUpdateOperationsInput | boolean
     image?: NullableStringFieldUpdateOperationsInput | string | null
-    imageBase64?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     username?: NullableStringFieldUpdateOperationsInput | string | null
     dni?: NullableStringFieldUpdateOperationsInput | string | null
     birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
-    tickets?: ticketUncheckedUpdateManyWithoutOwnerNestedInput
-    transferredTickets?: ticketUncheckedUpdateManyWithoutTransferredFromNestedInput
-    participants?: participantUncheckedUpdateManyWithoutUserNestedInput
-    rrppAssignments?: rrppAssignmentUncheckedUpdateManyWithoutRrppUserNestedInput
+    image_base64?: NullableStringFieldUpdateOperationsInput | string | null
     account?: accountUncheckedUpdateManyWithoutUserNestedInput
-    session?: sessionUncheckedUpdateManyWithoutUserNestedInput
     logs?: logUncheckedUpdateManyWithoutUserNestedInput
     sentMessages?: messageUncheckedUpdateManyWithoutSenderNestedInput
+    participants?: participantUncheckedUpdateManyWithoutUserNestedInput
     payments?: paymentUncheckedUpdateManyWithoutUserNestedInput
+    rrppAssignments?: rrppAssignmentUncheckedUpdateManyWithoutRrppUserNestedInput
+    session?: sessionUncheckedUpdateManyWithoutUserNestedInput
+    tickets?: ticketUncheckedUpdateManyWithoutOwnerNestedInput
+    transferredTickets?: ticketUncheckedUpdateManyWithoutTransferredFromNestedInput
+    guestsImported?: guestListUncheckedUpdateManyWithoutImportedByUserNestedInput
+    guestsCheckedIn?: guestListUncheckedUpdateManyWithoutCheckedInByUserNestedInput
+  }
+
+  export type userUpsertWithoutSentMessagesInput = {
+    update: XOR<userUpdateWithoutSentMessagesInput, userUncheckedUpdateWithoutSentMessagesInput>
+    create: XOR<userCreateWithoutSentMessagesInput, userUncheckedCreateWithoutSentMessagesInput>
+    where?: userWhereInput
+  }
+
+  export type userUpdateToOneWithWhereWithoutSentMessagesInput = {
+    where?: userWhereInput
+    data: XOR<userUpdateWithoutSentMessagesInput, userUncheckedUpdateWithoutSentMessagesInput>
+  }
+
+  export type userUpdateWithoutSentMessagesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    username?: NullableStringFieldUpdateOperationsInput | string | null
+    dni?: NullableStringFieldUpdateOperationsInput | string | null
+    birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    image_base64?: NullableStringFieldUpdateOperationsInput | string | null
+    account?: accountUpdateManyWithoutUserNestedInput
+    logs?: logUpdateManyWithoutUserNestedInput
+    receivedMessages?: messageUpdateManyWithoutReceiverNestedInput
+    participants?: participantUpdateManyWithoutUserNestedInput
+    payments?: paymentUpdateManyWithoutUserNestedInput
+    rrppAssignments?: rrppAssignmentUpdateManyWithoutRrppUserNestedInput
+    session?: sessionUpdateManyWithoutUserNestedInput
+    tickets?: ticketUpdateManyWithoutOwnerNestedInput
+    transferredTickets?: ticketUpdateManyWithoutTransferredFromNestedInput
+    guestsImported?: guestListUpdateManyWithoutImportedByUserNestedInput
+    guestsCheckedIn?: guestListUpdateManyWithoutCheckedInByUserNestedInput
+  }
+
+  export type userUncheckedUpdateWithoutSentMessagesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    username?: NullableStringFieldUpdateOperationsInput | string | null
+    dni?: NullableStringFieldUpdateOperationsInput | string | null
+    birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    image_base64?: NullableStringFieldUpdateOperationsInput | string | null
+    account?: accountUncheckedUpdateManyWithoutUserNestedInput
+    logs?: logUncheckedUpdateManyWithoutUserNestedInput
+    receivedMessages?: messageUncheckedUpdateManyWithoutReceiverNestedInput
+    participants?: participantUncheckedUpdateManyWithoutUserNestedInput
+    payments?: paymentUncheckedUpdateManyWithoutUserNestedInput
+    rrppAssignments?: rrppAssignmentUncheckedUpdateManyWithoutRrppUserNestedInput
+    session?: sessionUncheckedUpdateManyWithoutUserNestedInput
+    tickets?: ticketUncheckedUpdateManyWithoutOwnerNestedInput
+    transferredTickets?: ticketUncheckedUpdateManyWithoutTransferredFromNestedInput
+    guestsImported?: guestListUncheckedUpdateManyWithoutImportedByUserNestedInput
+    guestsCheckedIn?: guestListUncheckedUpdateManyWithoutCheckedInByUserNestedInput
+  }
+
+  export type eventCreateWithoutGuestListInput = {
+    name: string
+    date: Date | string
+    location: string
+    description?: string | null
+    bannerUrl?: string | null
+    status?: $Enums.EventStatus
+    producerId?: number
+    capacityTotal?: number | null
+    isRsvpAllowed?: boolean
+    isSoldOut?: boolean
+    eventGenre?: string | null
+    showRemainingTickets?: boolean
+    createdAt?: Date | string
+    eventArtists?: eventArtistCreateNestedManyWithoutEventInput
+    participants?: participantCreateNestedManyWithoutEventInput
+    payments?: paymentCreateNestedManyWithoutEventInput
+    rrppAssignments?: rrppAssignmentCreateNestedManyWithoutEventInput
+    tickets?: ticketCreateNestedManyWithoutEventInput
+    ticketTypes?: ticketTypeCreateNestedManyWithoutEventInput
+  }
+
+  export type eventUncheckedCreateWithoutGuestListInput = {
+    id?: number
+    name: string
+    date: Date | string
+    location: string
+    description?: string | null
+    bannerUrl?: string | null
+    status?: $Enums.EventStatus
+    producerId?: number
+    capacityTotal?: number | null
+    isRsvpAllowed?: boolean
+    isSoldOut?: boolean
+    eventGenre?: string | null
+    showRemainingTickets?: boolean
+    createdAt?: Date | string
+    eventArtists?: eventArtistUncheckedCreateNestedManyWithoutEventInput
+    participants?: participantUncheckedCreateNestedManyWithoutEventInput
+    payments?: paymentUncheckedCreateNestedManyWithoutEventInput
+    rrppAssignments?: rrppAssignmentUncheckedCreateNestedManyWithoutEventInput
+    tickets?: ticketUncheckedCreateNestedManyWithoutEventInput
+    ticketTypes?: ticketTypeUncheckedCreateNestedManyWithoutEventInput
+  }
+
+  export type eventCreateOrConnectWithoutGuestListInput = {
+    where: eventWhereUniqueInput
+    create: XOR<eventCreateWithoutGuestListInput, eventUncheckedCreateWithoutGuestListInput>
+  }
+
+  export type userCreateWithoutGuestsCheckedInInput = {
+    id: string
+    name: string
+    email: string
+    emailVerified: boolean
+    image?: string | null
+    createdAt: Date | string
+    updatedAt: Date | string
+    username?: string | null
+    dni?: string | null
+    birthDate?: Date | string | null
+    role?: $Enums.Role
+    image_base64?: string | null
+    account?: accountCreateNestedManyWithoutUserInput
+    logs?: logCreateNestedManyWithoutUserInput
+    receivedMessages?: messageCreateNestedManyWithoutReceiverInput
+    sentMessages?: messageCreateNestedManyWithoutSenderInput
+    participants?: participantCreateNestedManyWithoutUserInput
+    payments?: paymentCreateNestedManyWithoutUserInput
+    rrppAssignments?: rrppAssignmentCreateNestedManyWithoutRrppUserInput
+    session?: sessionCreateNestedManyWithoutUserInput
+    tickets?: ticketCreateNestedManyWithoutOwnerInput
+    transferredTickets?: ticketCreateNestedManyWithoutTransferredFromInput
+    guestsImported?: guestListCreateNestedManyWithoutImportedByUserInput
+  }
+
+  export type userUncheckedCreateWithoutGuestsCheckedInInput = {
+    id: string
+    name: string
+    email: string
+    emailVerified: boolean
+    image?: string | null
+    createdAt: Date | string
+    updatedAt: Date | string
+    username?: string | null
+    dni?: string | null
+    birthDate?: Date | string | null
+    role?: $Enums.Role
+    image_base64?: string | null
+    account?: accountUncheckedCreateNestedManyWithoutUserInput
+    logs?: logUncheckedCreateNestedManyWithoutUserInput
+    receivedMessages?: messageUncheckedCreateNestedManyWithoutReceiverInput
+    sentMessages?: messageUncheckedCreateNestedManyWithoutSenderInput
+    participants?: participantUncheckedCreateNestedManyWithoutUserInput
+    payments?: paymentUncheckedCreateNestedManyWithoutUserInput
+    rrppAssignments?: rrppAssignmentUncheckedCreateNestedManyWithoutRrppUserInput
+    session?: sessionUncheckedCreateNestedManyWithoutUserInput
+    tickets?: ticketUncheckedCreateNestedManyWithoutOwnerInput
+    transferredTickets?: ticketUncheckedCreateNestedManyWithoutTransferredFromInput
+    guestsImported?: guestListUncheckedCreateNestedManyWithoutImportedByUserInput
+  }
+
+  export type userCreateOrConnectWithoutGuestsCheckedInInput = {
+    where: userWhereUniqueInput
+    create: XOR<userCreateWithoutGuestsCheckedInInput, userUncheckedCreateWithoutGuestsCheckedInInput>
+  }
+
+  export type userCreateWithoutGuestsImportedInput = {
+    id: string
+    name: string
+    email: string
+    emailVerified: boolean
+    image?: string | null
+    createdAt: Date | string
+    updatedAt: Date | string
+    username?: string | null
+    dni?: string | null
+    birthDate?: Date | string | null
+    role?: $Enums.Role
+    image_base64?: string | null
+    account?: accountCreateNestedManyWithoutUserInput
+    logs?: logCreateNestedManyWithoutUserInput
+    receivedMessages?: messageCreateNestedManyWithoutReceiverInput
+    sentMessages?: messageCreateNestedManyWithoutSenderInput
+    participants?: participantCreateNestedManyWithoutUserInput
+    payments?: paymentCreateNestedManyWithoutUserInput
+    rrppAssignments?: rrppAssignmentCreateNestedManyWithoutRrppUserInput
+    session?: sessionCreateNestedManyWithoutUserInput
+    tickets?: ticketCreateNestedManyWithoutOwnerInput
+    transferredTickets?: ticketCreateNestedManyWithoutTransferredFromInput
+    guestsCheckedIn?: guestListCreateNestedManyWithoutCheckedInByUserInput
+  }
+
+  export type userUncheckedCreateWithoutGuestsImportedInput = {
+    id: string
+    name: string
+    email: string
+    emailVerified: boolean
+    image?: string | null
+    createdAt: Date | string
+    updatedAt: Date | string
+    username?: string | null
+    dni?: string | null
+    birthDate?: Date | string | null
+    role?: $Enums.Role
+    image_base64?: string | null
+    account?: accountUncheckedCreateNestedManyWithoutUserInput
+    logs?: logUncheckedCreateNestedManyWithoutUserInput
+    receivedMessages?: messageUncheckedCreateNestedManyWithoutReceiverInput
+    sentMessages?: messageUncheckedCreateNestedManyWithoutSenderInput
+    participants?: participantUncheckedCreateNestedManyWithoutUserInput
+    payments?: paymentUncheckedCreateNestedManyWithoutUserInput
+    rrppAssignments?: rrppAssignmentUncheckedCreateNestedManyWithoutRrppUserInput
+    session?: sessionUncheckedCreateNestedManyWithoutUserInput
+    tickets?: ticketUncheckedCreateNestedManyWithoutOwnerInput
+    transferredTickets?: ticketUncheckedCreateNestedManyWithoutTransferredFromInput
+    guestsCheckedIn?: guestListUncheckedCreateNestedManyWithoutCheckedInByUserInput
+  }
+
+  export type userCreateOrConnectWithoutGuestsImportedInput = {
+    where: userWhereUniqueInput
+    create: XOR<userCreateWithoutGuestsImportedInput, userUncheckedCreateWithoutGuestsImportedInput>
+  }
+
+  export type eventUpsertWithoutGuestListInput = {
+    update: XOR<eventUpdateWithoutGuestListInput, eventUncheckedUpdateWithoutGuestListInput>
+    create: XOR<eventCreateWithoutGuestListInput, eventUncheckedCreateWithoutGuestListInput>
+    where?: eventWhereInput
+  }
+
+  export type eventUpdateToOneWithWhereWithoutGuestListInput = {
+    where?: eventWhereInput
+    data: XOR<eventUpdateWithoutGuestListInput, eventUncheckedUpdateWithoutGuestListInput>
+  }
+
+  export type eventUpdateWithoutGuestListInput = {
+    name?: StringFieldUpdateOperationsInput | string
+    date?: DateTimeFieldUpdateOperationsInput | Date | string
+    location?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    bannerUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumEventStatusFieldUpdateOperationsInput | $Enums.EventStatus
+    producerId?: IntFieldUpdateOperationsInput | number
+    capacityTotal?: NullableIntFieldUpdateOperationsInput | number | null
+    isRsvpAllowed?: BoolFieldUpdateOperationsInput | boolean
+    isSoldOut?: BoolFieldUpdateOperationsInput | boolean
+    eventGenre?: NullableStringFieldUpdateOperationsInput | string | null
+    showRemainingTickets?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    eventArtists?: eventArtistUpdateManyWithoutEventNestedInput
+    participants?: participantUpdateManyWithoutEventNestedInput
+    payments?: paymentUpdateManyWithoutEventNestedInput
+    rrppAssignments?: rrppAssignmentUpdateManyWithoutEventNestedInput
+    tickets?: ticketUpdateManyWithoutEventNestedInput
+    ticketTypes?: ticketTypeUpdateManyWithoutEventNestedInput
+  }
+
+  export type eventUncheckedUpdateWithoutGuestListInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    name?: StringFieldUpdateOperationsInput | string
+    date?: DateTimeFieldUpdateOperationsInput | Date | string
+    location?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    bannerUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumEventStatusFieldUpdateOperationsInput | $Enums.EventStatus
+    producerId?: IntFieldUpdateOperationsInput | number
+    capacityTotal?: NullableIntFieldUpdateOperationsInput | number | null
+    isRsvpAllowed?: BoolFieldUpdateOperationsInput | boolean
+    isSoldOut?: BoolFieldUpdateOperationsInput | boolean
+    eventGenre?: NullableStringFieldUpdateOperationsInput | string | null
+    showRemainingTickets?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    eventArtists?: eventArtistUncheckedUpdateManyWithoutEventNestedInput
+    participants?: participantUncheckedUpdateManyWithoutEventNestedInput
+    payments?: paymentUncheckedUpdateManyWithoutEventNestedInput
+    rrppAssignments?: rrppAssignmentUncheckedUpdateManyWithoutEventNestedInput
+    tickets?: ticketUncheckedUpdateManyWithoutEventNestedInput
+    ticketTypes?: ticketTypeUncheckedUpdateManyWithoutEventNestedInput
+  }
+
+  export type userUpsertWithoutGuestsCheckedInInput = {
+    update: XOR<userUpdateWithoutGuestsCheckedInInput, userUncheckedUpdateWithoutGuestsCheckedInInput>
+    create: XOR<userCreateWithoutGuestsCheckedInInput, userUncheckedCreateWithoutGuestsCheckedInInput>
+    where?: userWhereInput
+  }
+
+  export type userUpdateToOneWithWhereWithoutGuestsCheckedInInput = {
+    where?: userWhereInput
+    data: XOR<userUpdateWithoutGuestsCheckedInInput, userUncheckedUpdateWithoutGuestsCheckedInInput>
+  }
+
+  export type userUpdateWithoutGuestsCheckedInInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    username?: NullableStringFieldUpdateOperationsInput | string | null
+    dni?: NullableStringFieldUpdateOperationsInput | string | null
+    birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    image_base64?: NullableStringFieldUpdateOperationsInput | string | null
+    account?: accountUpdateManyWithoutUserNestedInput
+    logs?: logUpdateManyWithoutUserNestedInput
+    receivedMessages?: messageUpdateManyWithoutReceiverNestedInput
+    sentMessages?: messageUpdateManyWithoutSenderNestedInput
+    participants?: participantUpdateManyWithoutUserNestedInput
+    payments?: paymentUpdateManyWithoutUserNestedInput
+    rrppAssignments?: rrppAssignmentUpdateManyWithoutRrppUserNestedInput
+    session?: sessionUpdateManyWithoutUserNestedInput
+    tickets?: ticketUpdateManyWithoutOwnerNestedInput
+    transferredTickets?: ticketUpdateManyWithoutTransferredFromNestedInput
+    guestsImported?: guestListUpdateManyWithoutImportedByUserNestedInput
+  }
+
+  export type userUncheckedUpdateWithoutGuestsCheckedInInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    username?: NullableStringFieldUpdateOperationsInput | string | null
+    dni?: NullableStringFieldUpdateOperationsInput | string | null
+    birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    image_base64?: NullableStringFieldUpdateOperationsInput | string | null
+    account?: accountUncheckedUpdateManyWithoutUserNestedInput
+    logs?: logUncheckedUpdateManyWithoutUserNestedInput
+    receivedMessages?: messageUncheckedUpdateManyWithoutReceiverNestedInput
+    sentMessages?: messageUncheckedUpdateManyWithoutSenderNestedInput
+    participants?: participantUncheckedUpdateManyWithoutUserNestedInput
+    payments?: paymentUncheckedUpdateManyWithoutUserNestedInput
+    rrppAssignments?: rrppAssignmentUncheckedUpdateManyWithoutRrppUserNestedInput
+    session?: sessionUncheckedUpdateManyWithoutUserNestedInput
+    tickets?: ticketUncheckedUpdateManyWithoutOwnerNestedInput
+    transferredTickets?: ticketUncheckedUpdateManyWithoutTransferredFromNestedInput
+    guestsImported?: guestListUncheckedUpdateManyWithoutImportedByUserNestedInput
+  }
+
+  export type userUpsertWithoutGuestsImportedInput = {
+    update: XOR<userUpdateWithoutGuestsImportedInput, userUncheckedUpdateWithoutGuestsImportedInput>
+    create: XOR<userCreateWithoutGuestsImportedInput, userUncheckedCreateWithoutGuestsImportedInput>
+    where?: userWhereInput
+  }
+
+  export type userUpdateToOneWithWhereWithoutGuestsImportedInput = {
+    where?: userWhereInput
+    data: XOR<userUpdateWithoutGuestsImportedInput, userUncheckedUpdateWithoutGuestsImportedInput>
+  }
+
+  export type userUpdateWithoutGuestsImportedInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    username?: NullableStringFieldUpdateOperationsInput | string | null
+    dni?: NullableStringFieldUpdateOperationsInput | string | null
+    birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    image_base64?: NullableStringFieldUpdateOperationsInput | string | null
+    account?: accountUpdateManyWithoutUserNestedInput
+    logs?: logUpdateManyWithoutUserNestedInput
+    receivedMessages?: messageUpdateManyWithoutReceiverNestedInput
+    sentMessages?: messageUpdateManyWithoutSenderNestedInput
+    participants?: participantUpdateManyWithoutUserNestedInput
+    payments?: paymentUpdateManyWithoutUserNestedInput
+    rrppAssignments?: rrppAssignmentUpdateManyWithoutRrppUserNestedInput
+    session?: sessionUpdateManyWithoutUserNestedInput
+    tickets?: ticketUpdateManyWithoutOwnerNestedInput
+    transferredTickets?: ticketUpdateManyWithoutTransferredFromNestedInput
+    guestsCheckedIn?: guestListUpdateManyWithoutCheckedInByUserNestedInput
+  }
+
+  export type userUncheckedUpdateWithoutGuestsImportedInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    username?: NullableStringFieldUpdateOperationsInput | string | null
+    dni?: NullableStringFieldUpdateOperationsInput | string | null
+    birthDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    image_base64?: NullableStringFieldUpdateOperationsInput | string | null
+    account?: accountUncheckedUpdateManyWithoutUserNestedInput
+    logs?: logUncheckedUpdateManyWithoutUserNestedInput
+    receivedMessages?: messageUncheckedUpdateManyWithoutReceiverNestedInput
+    sentMessages?: messageUncheckedUpdateManyWithoutSenderNestedInput
+    participants?: participantUncheckedUpdateManyWithoutUserNestedInput
+    payments?: paymentUncheckedUpdateManyWithoutUserNestedInput
+    rrppAssignments?: rrppAssignmentUncheckedUpdateManyWithoutRrppUserNestedInput
+    session?: sessionUncheckedUpdateManyWithoutUserNestedInput
+    tickets?: ticketUncheckedUpdateManyWithoutOwnerNestedInput
+    transferredTickets?: ticketUncheckedUpdateManyWithoutTransferredFromNestedInput
+    guestsCheckedIn?: guestListUncheckedUpdateManyWithoutCheckedInByUserNestedInput
+  }
+
+  export type accountCreateManyUserInput = {
+    id: string
+    accountId: string
+    providerId: string
+    accessToken?: string | null
+    refreshToken?: string | null
+    idToken?: string | null
+    accessTokenExpiresAt?: Date | string | null
+    refreshTokenExpiresAt?: Date | string | null
+    scope?: string | null
+    password?: string | null
+    createdAt: Date | string
+    updatedAt: Date | string
+  }
+
+  export type logCreateManyUserInput = {
+    id?: number
+    action: string
+    timestamp?: Date | string
+    details?: NullableJsonNullValueInput | InputJsonValue
+  }
+
+  export type messageCreateManyReceiverInput = {
+    id?: number
+    senderId: string
+    message: string
+    timestamp?: Date | string
+    readStatus?: boolean
+  }
+
+  export type messageCreateManySenderInput = {
+    id?: number
+    receiverId: string
+    message: string
+    timestamp?: Date | string
+    readStatus?: boolean
+  }
+
+  export type participantCreateManyUserInput = {
+    eventId: number
+    viaRsvp?: boolean
+    qrCode?: string | null
+  }
+
+  export type paymentCreateManyUserInput = {
+    id?: number
+    eventId: number
+    status?: $Enums.PaymentStatus
+    amount: Decimal | DecimalJsLike | number | string
+    currency?: string
+    provider?: string
+    externalReference: string
+    mpPreferenceId?: string | null
+    mpPaymentId?: string | null
+    payerEmail?: string | null
+    payerName?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type rrppAssignmentCreateManyRrppUserInput = {
+    eventId: number
+    commissionRate?: Decimal | DecimalJsLike | number | string
+    freesGranted?: number
+  }
+
+  export type sessionCreateManyUserInput = {
+    id: string
+    expiresAt: Date | string
+    token: string
+    createdAt: Date | string
+    updatedAt: Date | string
+    ipAddress?: string | null
+    userAgent?: string | null
   }
 
   export type ticketCreateManyOwnerInput = {
@@ -26849,186 +29680,38 @@ export namespace Prisma {
     createdAt?: Date | string
   }
 
-  export type participantCreateManyUserInput = {
-    eventId: number
-    viaRsvp?: boolean
-    qrCode?: string | null
-  }
-
-  export type rrppAssignmentCreateManyRrppUserInput = {
-    eventId: number
-    commissionRate?: Decimal | DecimalJsLike | number | string
-    freesGranted?: number
-  }
-
-  export type accountCreateManyUserInput = {
-    id: string
-    accountId: string
-    providerId: string
-    accessToken?: string | null
-    refreshToken?: string | null
-    idToken?: string | null
-    accessTokenExpiresAt?: Date | string | null
-    refreshTokenExpiresAt?: Date | string | null
-    scope?: string | null
-    password?: string | null
-    createdAt: Date | string
-    updatedAt: Date | string
-  }
-
-  export type sessionCreateManyUserInput = {
-    id: string
-    expiresAt: Date | string
-    token: string
-    createdAt: Date | string
-    updatedAt: Date | string
-    ipAddress?: string | null
-    userAgent?: string | null
-  }
-
-  export type logCreateManyUserInput = {
-    id?: number
-    action: string
-    timestamp?: Date | string
-    details?: NullableJsonNullValueInput | InputJsonValue
-  }
-
-  export type messageCreateManySenderInput = {
-    id?: number
-    receiverId: string
-    message: string
-    timestamp?: Date | string
-    readStatus?: boolean
-  }
-
-  export type messageCreateManyReceiverInput = {
-    id?: number
-    senderId: string
-    message: string
-    timestamp?: Date | string
-    readStatus?: boolean
-  }
-
-  export type paymentCreateManyUserInput = {
+  export type guestListCreateManyImportedByUserInput = {
     id?: number
     eventId: number
-    status?: $Enums.PaymentStatus
-    amount: Decimal | DecimalJsLike | number | string
-    currency?: string
-    provider?: string
-    externalReference: string
-    mpPreferenceId?: string | null
-    mpPaymentId?: string | null
-    payerEmail?: string | null
-    payerName?: string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
+    fullName: string
+    normalizedName: string
+    email: string
+    age?: string | null
+    invitedBy?: string | null
+    gender?: string | null
+    status?: $Enums.GuestStatus
+    qrCode: string
+    checkedInAt?: Date | string | null
+    checkedInBy?: string | null
+    importedAt?: Date | string
+    timestamp?: string | null
   }
 
-  export type ticketUpdateWithoutOwnerInput = {
-    qrCode?: StringFieldUpdateOperationsInput | string
-    code?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    event?: eventUpdateOneRequiredWithoutTicketsNestedInput
-    type?: ticketTypeUpdateOneRequiredWithoutTicketsNestedInput
-    transferredFrom?: userUpdateOneWithoutTransferredTicketsNestedInput
-    payment?: paymentUpdateOneWithoutTicketsNestedInput
-  }
-
-  export type ticketUncheckedUpdateWithoutOwnerInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    eventId?: IntFieldUpdateOperationsInput | number
-    typeId?: IntFieldUpdateOperationsInput | number
-    paymentId?: NullableIntFieldUpdateOperationsInput | number | null
-    qrCode?: StringFieldUpdateOperationsInput | string
-    code?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
-    transferredFromId?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type ticketUncheckedUpdateManyWithoutOwnerInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    eventId?: IntFieldUpdateOperationsInput | number
-    typeId?: IntFieldUpdateOperationsInput | number
-    paymentId?: NullableIntFieldUpdateOperationsInput | number | null
-    qrCode?: StringFieldUpdateOperationsInput | string
-    code?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
-    transferredFromId?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type ticketUpdateWithoutTransferredFromInput = {
-    qrCode?: StringFieldUpdateOperationsInput | string
-    code?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    event?: eventUpdateOneRequiredWithoutTicketsNestedInput
-    owner?: userUpdateOneRequiredWithoutTicketsNestedInput
-    type?: ticketTypeUpdateOneRequiredWithoutTicketsNestedInput
-    payment?: paymentUpdateOneWithoutTicketsNestedInput
-  }
-
-  export type ticketUncheckedUpdateWithoutTransferredFromInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    eventId?: IntFieldUpdateOperationsInput | number
-    ownerId?: StringFieldUpdateOperationsInput | string
-    typeId?: IntFieldUpdateOperationsInput | number
-    paymentId?: NullableIntFieldUpdateOperationsInput | number | null
-    qrCode?: StringFieldUpdateOperationsInput | string
-    code?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type ticketUncheckedUpdateManyWithoutTransferredFromInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    eventId?: IntFieldUpdateOperationsInput | number
-    ownerId?: StringFieldUpdateOperationsInput | string
-    typeId?: IntFieldUpdateOperationsInput | number
-    paymentId?: NullableIntFieldUpdateOperationsInput | number | null
-    qrCode?: StringFieldUpdateOperationsInput | string
-    code?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type participantUpdateWithoutUserInput = {
-    viaRsvp?: BoolFieldUpdateOperationsInput | boolean
-    qrCode?: NullableStringFieldUpdateOperationsInput | string | null
-    event?: eventUpdateOneRequiredWithoutParticipantsNestedInput
-  }
-
-  export type participantUncheckedUpdateWithoutUserInput = {
-    eventId?: IntFieldUpdateOperationsInput | number
-    viaRsvp?: BoolFieldUpdateOperationsInput | boolean
-    qrCode?: NullableStringFieldUpdateOperationsInput | string | null
-  }
-
-  export type participantUncheckedUpdateManyWithoutUserInput = {
-    eventId?: IntFieldUpdateOperationsInput | number
-    viaRsvp?: BoolFieldUpdateOperationsInput | boolean
-    qrCode?: NullableStringFieldUpdateOperationsInput | string | null
-  }
-
-  export type rrppAssignmentUpdateWithoutRrppUserInput = {
-    commissionRate?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
-    freesGranted?: IntFieldUpdateOperationsInput | number
-    event?: eventUpdateOneRequiredWithoutRrppAssignmentsNestedInput
-  }
-
-  export type rrppAssignmentUncheckedUpdateWithoutRrppUserInput = {
-    eventId?: IntFieldUpdateOperationsInput | number
-    commissionRate?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
-    freesGranted?: IntFieldUpdateOperationsInput | number
-  }
-
-  export type rrppAssignmentUncheckedUpdateManyWithoutRrppUserInput = {
-    eventId?: IntFieldUpdateOperationsInput | number
-    commissionRate?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
-    freesGranted?: IntFieldUpdateOperationsInput | number
+  export type guestListCreateManyCheckedInByUserInput = {
+    id?: number
+    eventId: number
+    fullName: string
+    normalizedName: string
+    email: string
+    age?: string | null
+    invitedBy?: string | null
+    gender?: string | null
+    status?: $Enums.GuestStatus
+    qrCode: string
+    checkedInAt?: Date | string | null
+    importedAt?: Date | string
+    importedBy: string
+    timestamp?: string | null
   }
 
   export type accountUpdateWithoutUserInput = {
@@ -27076,36 +29759,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
-  export type sessionUpdateWithoutUserInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    token?: StringFieldUpdateOperationsInput | string
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
-    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
-  }
-
-  export type sessionUncheckedUpdateWithoutUserInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    token?: StringFieldUpdateOperationsInput | string
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
-    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
-  }
-
-  export type sessionUncheckedUpdateManyWithoutUserInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    token?: StringFieldUpdateOperationsInput | string
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
-    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
-  }
-
   export type logUpdateWithoutUserInput = {
     action?: StringFieldUpdateOperationsInput | string
     timestamp?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -27124,6 +29777,29 @@ export namespace Prisma {
     action?: StringFieldUpdateOperationsInput | string
     timestamp?: DateTimeFieldUpdateOperationsInput | Date | string
     details?: NullableJsonNullValueInput | InputJsonValue
+  }
+
+  export type messageUpdateWithoutReceiverInput = {
+    message?: StringFieldUpdateOperationsInput | string
+    timestamp?: DateTimeFieldUpdateOperationsInput | Date | string
+    readStatus?: BoolFieldUpdateOperationsInput | boolean
+    sender?: userUpdateOneRequiredWithoutSentMessagesNestedInput
+  }
+
+  export type messageUncheckedUpdateWithoutReceiverInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    senderId?: StringFieldUpdateOperationsInput | string
+    message?: StringFieldUpdateOperationsInput | string
+    timestamp?: DateTimeFieldUpdateOperationsInput | Date | string
+    readStatus?: BoolFieldUpdateOperationsInput | boolean
+  }
+
+  export type messageUncheckedUpdateManyWithoutReceiverInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    senderId?: StringFieldUpdateOperationsInput | string
+    message?: StringFieldUpdateOperationsInput | string
+    timestamp?: DateTimeFieldUpdateOperationsInput | Date | string
+    readStatus?: BoolFieldUpdateOperationsInput | boolean
   }
 
   export type messageUpdateWithoutSenderInput = {
@@ -27149,27 +29825,22 @@ export namespace Prisma {
     readStatus?: BoolFieldUpdateOperationsInput | boolean
   }
 
-  export type messageUpdateWithoutReceiverInput = {
-    message?: StringFieldUpdateOperationsInput | string
-    timestamp?: DateTimeFieldUpdateOperationsInput | Date | string
-    readStatus?: BoolFieldUpdateOperationsInput | boolean
-    sender?: userUpdateOneRequiredWithoutSentMessagesNestedInput
+  export type participantUpdateWithoutUserInput = {
+    viaRsvp?: BoolFieldUpdateOperationsInput | boolean
+    qrCode?: NullableStringFieldUpdateOperationsInput | string | null
+    event?: eventUpdateOneRequiredWithoutParticipantsNestedInput
   }
 
-  export type messageUncheckedUpdateWithoutReceiverInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    senderId?: StringFieldUpdateOperationsInput | string
-    message?: StringFieldUpdateOperationsInput | string
-    timestamp?: DateTimeFieldUpdateOperationsInput | Date | string
-    readStatus?: BoolFieldUpdateOperationsInput | boolean
+  export type participantUncheckedUpdateWithoutUserInput = {
+    eventId?: IntFieldUpdateOperationsInput | number
+    viaRsvp?: BoolFieldUpdateOperationsInput | boolean
+    qrCode?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
-  export type messageUncheckedUpdateManyWithoutReceiverInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    senderId?: StringFieldUpdateOperationsInput | string
-    message?: StringFieldUpdateOperationsInput | string
-    timestamp?: DateTimeFieldUpdateOperationsInput | Date | string
-    readStatus?: BoolFieldUpdateOperationsInput | boolean
+  export type participantUncheckedUpdateManyWithoutUserInput = {
+    eventId?: IntFieldUpdateOperationsInput | number
+    viaRsvp?: BoolFieldUpdateOperationsInput | boolean
+    qrCode?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type paymentUpdateWithoutUserInput = {
@@ -27221,6 +29892,224 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type rrppAssignmentUpdateWithoutRrppUserInput = {
+    commissionRate?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    freesGranted?: IntFieldUpdateOperationsInput | number
+    event?: eventUpdateOneRequiredWithoutRrppAssignmentsNestedInput
+  }
+
+  export type rrppAssignmentUncheckedUpdateWithoutRrppUserInput = {
+    eventId?: IntFieldUpdateOperationsInput | number
+    commissionRate?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    freesGranted?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type rrppAssignmentUncheckedUpdateManyWithoutRrppUserInput = {
+    eventId?: IntFieldUpdateOperationsInput | number
+    commissionRate?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    freesGranted?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type sessionUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    token?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type sessionUncheckedUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    token?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type sessionUncheckedUpdateManyWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    token?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type ticketUpdateWithoutOwnerInput = {
+    qrCode?: StringFieldUpdateOperationsInput | string
+    code?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    event?: eventUpdateOneRequiredWithoutTicketsNestedInput
+    payment?: paymentUpdateOneWithoutTicketsNestedInput
+    transferredFrom?: userUpdateOneWithoutTransferredTicketsNestedInput
+    type?: ticketTypeUpdateOneRequiredWithoutTicketsNestedInput
+  }
+
+  export type ticketUncheckedUpdateWithoutOwnerInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    eventId?: IntFieldUpdateOperationsInput | number
+    typeId?: IntFieldUpdateOperationsInput | number
+    paymentId?: NullableIntFieldUpdateOperationsInput | number | null
+    qrCode?: StringFieldUpdateOperationsInput | string
+    code?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
+    transferredFromId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ticketUncheckedUpdateManyWithoutOwnerInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    eventId?: IntFieldUpdateOperationsInput | number
+    typeId?: IntFieldUpdateOperationsInput | number
+    paymentId?: NullableIntFieldUpdateOperationsInput | number | null
+    qrCode?: StringFieldUpdateOperationsInput | string
+    code?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
+    transferredFromId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ticketUpdateWithoutTransferredFromInput = {
+    qrCode?: StringFieldUpdateOperationsInput | string
+    code?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    event?: eventUpdateOneRequiredWithoutTicketsNestedInput
+    owner?: userUpdateOneRequiredWithoutTicketsNestedInput
+    payment?: paymentUpdateOneWithoutTicketsNestedInput
+    type?: ticketTypeUpdateOneRequiredWithoutTicketsNestedInput
+  }
+
+  export type ticketUncheckedUpdateWithoutTransferredFromInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    eventId?: IntFieldUpdateOperationsInput | number
+    ownerId?: StringFieldUpdateOperationsInput | string
+    typeId?: IntFieldUpdateOperationsInput | number
+    paymentId?: NullableIntFieldUpdateOperationsInput | number | null
+    qrCode?: StringFieldUpdateOperationsInput | string
+    code?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ticketUncheckedUpdateManyWithoutTransferredFromInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    eventId?: IntFieldUpdateOperationsInput | number
+    ownerId?: StringFieldUpdateOperationsInput | string
+    typeId?: IntFieldUpdateOperationsInput | number
+    paymentId?: NullableIntFieldUpdateOperationsInput | number | null
+    qrCode?: StringFieldUpdateOperationsInput | string
+    code?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type guestListUpdateWithoutImportedByUserInput = {
+    fullName?: StringFieldUpdateOperationsInput | string
+    normalizedName?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    age?: NullableStringFieldUpdateOperationsInput | string | null
+    invitedBy?: NullableStringFieldUpdateOperationsInput | string | null
+    gender?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumGuestStatusFieldUpdateOperationsInput | $Enums.GuestStatus
+    qrCode?: StringFieldUpdateOperationsInput | string
+    checkedInAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    importedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    timestamp?: NullableStringFieldUpdateOperationsInput | string | null
+    event?: eventUpdateOneRequiredWithoutGuestListNestedInput
+    checkedInByUser?: userUpdateOneWithoutGuestsCheckedInNestedInput
+  }
+
+  export type guestListUncheckedUpdateWithoutImportedByUserInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    eventId?: IntFieldUpdateOperationsInput | number
+    fullName?: StringFieldUpdateOperationsInput | string
+    normalizedName?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    age?: NullableStringFieldUpdateOperationsInput | string | null
+    invitedBy?: NullableStringFieldUpdateOperationsInput | string | null
+    gender?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumGuestStatusFieldUpdateOperationsInput | $Enums.GuestStatus
+    qrCode?: StringFieldUpdateOperationsInput | string
+    checkedInAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    checkedInBy?: NullableStringFieldUpdateOperationsInput | string | null
+    importedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    timestamp?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type guestListUncheckedUpdateManyWithoutImportedByUserInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    eventId?: IntFieldUpdateOperationsInput | number
+    fullName?: StringFieldUpdateOperationsInput | string
+    normalizedName?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    age?: NullableStringFieldUpdateOperationsInput | string | null
+    invitedBy?: NullableStringFieldUpdateOperationsInput | string | null
+    gender?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumGuestStatusFieldUpdateOperationsInput | $Enums.GuestStatus
+    qrCode?: StringFieldUpdateOperationsInput | string
+    checkedInAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    checkedInBy?: NullableStringFieldUpdateOperationsInput | string | null
+    importedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    timestamp?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type guestListUpdateWithoutCheckedInByUserInput = {
+    fullName?: StringFieldUpdateOperationsInput | string
+    normalizedName?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    age?: NullableStringFieldUpdateOperationsInput | string | null
+    invitedBy?: NullableStringFieldUpdateOperationsInput | string | null
+    gender?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumGuestStatusFieldUpdateOperationsInput | $Enums.GuestStatus
+    qrCode?: StringFieldUpdateOperationsInput | string
+    checkedInAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    importedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    timestamp?: NullableStringFieldUpdateOperationsInput | string | null
+    event?: eventUpdateOneRequiredWithoutGuestListNestedInput
+    importedByUser?: userUpdateOneRequiredWithoutGuestsImportedNestedInput
+  }
+
+  export type guestListUncheckedUpdateWithoutCheckedInByUserInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    eventId?: IntFieldUpdateOperationsInput | number
+    fullName?: StringFieldUpdateOperationsInput | string
+    normalizedName?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    age?: NullableStringFieldUpdateOperationsInput | string | null
+    invitedBy?: NullableStringFieldUpdateOperationsInput | string | null
+    gender?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumGuestStatusFieldUpdateOperationsInput | $Enums.GuestStatus
+    qrCode?: StringFieldUpdateOperationsInput | string
+    checkedInAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    importedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    importedBy?: StringFieldUpdateOperationsInput | string
+    timestamp?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type guestListUncheckedUpdateManyWithoutCheckedInByUserInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    eventId?: IntFieldUpdateOperationsInput | number
+    fullName?: StringFieldUpdateOperationsInput | string
+    normalizedName?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    age?: NullableStringFieldUpdateOperationsInput | string | null
+    invitedBy?: NullableStringFieldUpdateOperationsInput | string | null
+    gender?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumGuestStatusFieldUpdateOperationsInput | $Enums.GuestStatus
+    qrCode?: StringFieldUpdateOperationsInput | string
+    checkedInAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    importedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    importedBy?: StringFieldUpdateOperationsInput | string
+    timestamp?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
   export type ticketCreateManyPaymentInput = {
     id?: number
     eventId: number
@@ -27240,8 +30129,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     event?: eventUpdateOneRequiredWithoutTicketsNestedInput
     owner?: userUpdateOneRequiredWithoutTicketsNestedInput
-    type?: ticketTypeUpdateOneRequiredWithoutTicketsNestedInput
     transferredFrom?: userUpdateOneWithoutTransferredTicketsNestedInput
+    type?: ticketTypeUpdateOneRequiredWithoutTicketsNestedInput
   }
 
   export type ticketUncheckedUpdateWithoutPaymentInput = {
@@ -27268,19 +30157,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
-  export type ticketTypeCreateManyEventInput = {
-    id?: number
-    code: string
-    label: string
-    price: Decimal | DecimalJsLike | number | string
-    stockMax: number
-    stockCurrent: number
-    userMaxPerType?: number
-    scanExpiration?: Date | string | null
-    isVisible?: boolean
-    isDisabled?: boolean
-  }
-
   export type eventArtistCreateManyEventInput = {
     artistId: number
     order?: number | null
@@ -27288,28 +30164,10 @@ export namespace Prisma {
     isHeadliner?: boolean
   }
 
-  export type ticketCreateManyEventInput = {
-    id?: number
-    ownerId: string
-    typeId: number
-    paymentId?: number | null
-    qrCode: string
-    code?: string | null
-    status?: $Enums.TicketStatus
-    transferredFromId?: string | null
-    createdAt?: Date | string
-  }
-
   export type participantCreateManyEventInput = {
     userId: string
     viaRsvp?: boolean
     qrCode?: string | null
-  }
-
-  export type rrppAssignmentCreateManyEventInput = {
-    rrppUserId: string
-    commissionRate?: Decimal | DecimalJsLike | number | string
-    freesGranted?: number
   }
 
   export type paymentCreateManyEventInput = {
@@ -27328,44 +30186,52 @@ export namespace Prisma {
     updatedAt?: Date | string
   }
 
-  export type ticketTypeUpdateWithoutEventInput = {
-    code?: StringFieldUpdateOperationsInput | string
-    label?: StringFieldUpdateOperationsInput | string
-    price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
-    stockMax?: IntFieldUpdateOperationsInput | number
-    stockCurrent?: IntFieldUpdateOperationsInput | number
-    userMaxPerType?: IntFieldUpdateOperationsInput | number
-    scanExpiration?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    isVisible?: BoolFieldUpdateOperationsInput | boolean
-    isDisabled?: BoolFieldUpdateOperationsInput | boolean
-    tickets?: ticketUpdateManyWithoutTypeNestedInput
+  export type rrppAssignmentCreateManyEventInput = {
+    rrppUserId: string
+    commissionRate?: Decimal | DecimalJsLike | number | string
+    freesGranted?: number
   }
 
-  export type ticketTypeUncheckedUpdateWithoutEventInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    code?: StringFieldUpdateOperationsInput | string
-    label?: StringFieldUpdateOperationsInput | string
-    price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
-    stockMax?: IntFieldUpdateOperationsInput | number
-    stockCurrent?: IntFieldUpdateOperationsInput | number
-    userMaxPerType?: IntFieldUpdateOperationsInput | number
-    scanExpiration?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    isVisible?: BoolFieldUpdateOperationsInput | boolean
-    isDisabled?: BoolFieldUpdateOperationsInput | boolean
-    tickets?: ticketUncheckedUpdateManyWithoutTypeNestedInput
+  export type ticketCreateManyEventInput = {
+    id?: number
+    ownerId: string
+    typeId: number
+    paymentId?: number | null
+    qrCode: string
+    code?: string | null
+    status?: $Enums.TicketStatus
+    transferredFromId?: string | null
+    createdAt?: Date | string
   }
 
-  export type ticketTypeUncheckedUpdateManyWithoutEventInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    code?: StringFieldUpdateOperationsInput | string
-    label?: StringFieldUpdateOperationsInput | string
-    price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
-    stockMax?: IntFieldUpdateOperationsInput | number
-    stockCurrent?: IntFieldUpdateOperationsInput | number
-    userMaxPerType?: IntFieldUpdateOperationsInput | number
-    scanExpiration?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    isVisible?: BoolFieldUpdateOperationsInput | boolean
-    isDisabled?: BoolFieldUpdateOperationsInput | boolean
+  export type ticketTypeCreateManyEventInput = {
+    id?: number
+    code: string
+    label: string
+    price: Decimal | DecimalJsLike | number | string
+    stockMax: number
+    stockCurrent: number
+    userMaxPerType?: number
+    scanExpiration?: Date | string | null
+    isVisible?: boolean
+    isDisabled?: boolean
+  }
+
+  export type guestListCreateManyEventInput = {
+    id?: number
+    fullName: string
+    normalizedName: string
+    email: string
+    age?: string | null
+    invitedBy?: string | null
+    gender?: string | null
+    status?: $Enums.GuestStatus
+    qrCode: string
+    checkedInAt?: Date | string | null
+    checkedInBy?: string | null
+    importedAt?: Date | string
+    importedBy: string
+    timestamp?: string | null
   }
 
   export type eventArtistUpdateWithoutEventInput = {
@@ -27389,41 +30255,6 @@ export namespace Prisma {
     isHeadliner?: BoolFieldUpdateOperationsInput | boolean
   }
 
-  export type ticketUpdateWithoutEventInput = {
-    qrCode?: StringFieldUpdateOperationsInput | string
-    code?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    owner?: userUpdateOneRequiredWithoutTicketsNestedInput
-    type?: ticketTypeUpdateOneRequiredWithoutTicketsNestedInput
-    transferredFrom?: userUpdateOneWithoutTransferredTicketsNestedInput
-    payment?: paymentUpdateOneWithoutTicketsNestedInput
-  }
-
-  export type ticketUncheckedUpdateWithoutEventInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    ownerId?: StringFieldUpdateOperationsInput | string
-    typeId?: IntFieldUpdateOperationsInput | number
-    paymentId?: NullableIntFieldUpdateOperationsInput | number | null
-    qrCode?: StringFieldUpdateOperationsInput | string
-    code?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
-    transferredFromId?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type ticketUncheckedUpdateManyWithoutEventInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    ownerId?: StringFieldUpdateOperationsInput | string
-    typeId?: IntFieldUpdateOperationsInput | number
-    paymentId?: NullableIntFieldUpdateOperationsInput | number | null
-    qrCode?: StringFieldUpdateOperationsInput | string
-    code?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
-    transferredFromId?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
   export type participantUpdateWithoutEventInput = {
     viaRsvp?: BoolFieldUpdateOperationsInput | boolean
     qrCode?: NullableStringFieldUpdateOperationsInput | string | null
@@ -27440,24 +30271,6 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     viaRsvp?: BoolFieldUpdateOperationsInput | boolean
     qrCode?: NullableStringFieldUpdateOperationsInput | string | null
-  }
-
-  export type rrppAssignmentUpdateWithoutEventInput = {
-    commissionRate?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
-    freesGranted?: IntFieldUpdateOperationsInput | number
-    rrppUser?: userUpdateOneRequiredWithoutRrppAssignmentsNestedInput
-  }
-
-  export type rrppAssignmentUncheckedUpdateWithoutEventInput = {
-    rrppUserId?: StringFieldUpdateOperationsInput | string
-    commissionRate?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
-    freesGranted?: IntFieldUpdateOperationsInput | number
-  }
-
-  export type rrppAssignmentUncheckedUpdateManyWithoutEventInput = {
-    rrppUserId?: StringFieldUpdateOperationsInput | string
-    commissionRate?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
-    freesGranted?: IntFieldUpdateOperationsInput | number
   }
 
   export type paymentUpdateWithoutEventInput = {
@@ -27509,6 +30322,149 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type rrppAssignmentUpdateWithoutEventInput = {
+    commissionRate?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    freesGranted?: IntFieldUpdateOperationsInput | number
+    rrppUser?: userUpdateOneRequiredWithoutRrppAssignmentsNestedInput
+  }
+
+  export type rrppAssignmentUncheckedUpdateWithoutEventInput = {
+    rrppUserId?: StringFieldUpdateOperationsInput | string
+    commissionRate?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    freesGranted?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type rrppAssignmentUncheckedUpdateManyWithoutEventInput = {
+    rrppUserId?: StringFieldUpdateOperationsInput | string
+    commissionRate?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    freesGranted?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type ticketUpdateWithoutEventInput = {
+    qrCode?: StringFieldUpdateOperationsInput | string
+    code?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    owner?: userUpdateOneRequiredWithoutTicketsNestedInput
+    payment?: paymentUpdateOneWithoutTicketsNestedInput
+    transferredFrom?: userUpdateOneWithoutTransferredTicketsNestedInput
+    type?: ticketTypeUpdateOneRequiredWithoutTicketsNestedInput
+  }
+
+  export type ticketUncheckedUpdateWithoutEventInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    ownerId?: StringFieldUpdateOperationsInput | string
+    typeId?: IntFieldUpdateOperationsInput | number
+    paymentId?: NullableIntFieldUpdateOperationsInput | number | null
+    qrCode?: StringFieldUpdateOperationsInput | string
+    code?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
+    transferredFromId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ticketUncheckedUpdateManyWithoutEventInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    ownerId?: StringFieldUpdateOperationsInput | string
+    typeId?: IntFieldUpdateOperationsInput | number
+    paymentId?: NullableIntFieldUpdateOperationsInput | number | null
+    qrCode?: StringFieldUpdateOperationsInput | string
+    code?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumTicketStatusFieldUpdateOperationsInput | $Enums.TicketStatus
+    transferredFromId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ticketTypeUpdateWithoutEventInput = {
+    code?: StringFieldUpdateOperationsInput | string
+    label?: StringFieldUpdateOperationsInput | string
+    price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    stockMax?: IntFieldUpdateOperationsInput | number
+    stockCurrent?: IntFieldUpdateOperationsInput | number
+    userMaxPerType?: IntFieldUpdateOperationsInput | number
+    scanExpiration?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isVisible?: BoolFieldUpdateOperationsInput | boolean
+    isDisabled?: BoolFieldUpdateOperationsInput | boolean
+    tickets?: ticketUpdateManyWithoutTypeNestedInput
+  }
+
+  export type ticketTypeUncheckedUpdateWithoutEventInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    code?: StringFieldUpdateOperationsInput | string
+    label?: StringFieldUpdateOperationsInput | string
+    price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    stockMax?: IntFieldUpdateOperationsInput | number
+    stockCurrent?: IntFieldUpdateOperationsInput | number
+    userMaxPerType?: IntFieldUpdateOperationsInput | number
+    scanExpiration?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isVisible?: BoolFieldUpdateOperationsInput | boolean
+    isDisabled?: BoolFieldUpdateOperationsInput | boolean
+    tickets?: ticketUncheckedUpdateManyWithoutTypeNestedInput
+  }
+
+  export type ticketTypeUncheckedUpdateManyWithoutEventInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    code?: StringFieldUpdateOperationsInput | string
+    label?: StringFieldUpdateOperationsInput | string
+    price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    stockMax?: IntFieldUpdateOperationsInput | number
+    stockCurrent?: IntFieldUpdateOperationsInput | number
+    userMaxPerType?: IntFieldUpdateOperationsInput | number
+    scanExpiration?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isVisible?: BoolFieldUpdateOperationsInput | boolean
+    isDisabled?: BoolFieldUpdateOperationsInput | boolean
+  }
+
+  export type guestListUpdateWithoutEventInput = {
+    fullName?: StringFieldUpdateOperationsInput | string
+    normalizedName?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    age?: NullableStringFieldUpdateOperationsInput | string | null
+    invitedBy?: NullableStringFieldUpdateOperationsInput | string | null
+    gender?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumGuestStatusFieldUpdateOperationsInput | $Enums.GuestStatus
+    qrCode?: StringFieldUpdateOperationsInput | string
+    checkedInAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    importedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    timestamp?: NullableStringFieldUpdateOperationsInput | string | null
+    checkedInByUser?: userUpdateOneWithoutGuestsCheckedInNestedInput
+    importedByUser?: userUpdateOneRequiredWithoutGuestsImportedNestedInput
+  }
+
+  export type guestListUncheckedUpdateWithoutEventInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    fullName?: StringFieldUpdateOperationsInput | string
+    normalizedName?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    age?: NullableStringFieldUpdateOperationsInput | string | null
+    invitedBy?: NullableStringFieldUpdateOperationsInput | string | null
+    gender?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumGuestStatusFieldUpdateOperationsInput | $Enums.GuestStatus
+    qrCode?: StringFieldUpdateOperationsInput | string
+    checkedInAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    checkedInBy?: NullableStringFieldUpdateOperationsInput | string | null
+    importedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    importedBy?: StringFieldUpdateOperationsInput | string
+    timestamp?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type guestListUncheckedUpdateManyWithoutEventInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    fullName?: StringFieldUpdateOperationsInput | string
+    normalizedName?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    age?: NullableStringFieldUpdateOperationsInput | string | null
+    invitedBy?: NullableStringFieldUpdateOperationsInput | string | null
+    gender?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumGuestStatusFieldUpdateOperationsInput | $Enums.GuestStatus
+    qrCode?: StringFieldUpdateOperationsInput | string
+    checkedInAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    checkedInBy?: NullableStringFieldUpdateOperationsInput | string | null
+    importedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    importedBy?: StringFieldUpdateOperationsInput | string
+    timestamp?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
   export type eventArtistCreateManyArtistInput = {
     eventId: number
     order?: number | null
@@ -27556,8 +30512,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     event?: eventUpdateOneRequiredWithoutTicketsNestedInput
     owner?: userUpdateOneRequiredWithoutTicketsNestedInput
-    transferredFrom?: userUpdateOneWithoutTransferredTicketsNestedInput
     payment?: paymentUpdateOneWithoutTicketsNestedInput
+    transferredFrom?: userUpdateOneWithoutTransferredTicketsNestedInput
   }
 
   export type ticketUncheckedUpdateWithoutTypeInput = {

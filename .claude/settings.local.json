@@ -32,7 +32,9 @@
       "Bash(ls:*)",
       "Bash(dir \"c:\\Users\\patri\\Dev\\main\\NoTrip\\tckt\\web-app\\app\\generated\\prisma\")",
       "Bash(findstr:*)",
-      "Bash(powershell:*)"
+      "Bash(powershell:*)",
+      "Bash(dir \"app\\(public)\")",
+      "Bash(dir:*)"
     ],
     "deny": []
   },

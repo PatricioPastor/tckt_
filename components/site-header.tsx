@@ -22,7 +22,7 @@ export function SiteHeader({user}: SiteHeaderProps) {
   const router = useRouter();
   const showTickets = () => {
     if (!user) {
-      router.push("/login?tab=signup");
+      router.push("/login");
       return;
     }
     router.push("/tickets");

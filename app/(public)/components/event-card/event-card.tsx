@@ -11,16 +11,17 @@ interface EventCardProps {
     imageUrl: string;
     eventId: number;
     status?: string;
+    isSoldOut?: boolean;
 }
 
-export const EventCard = ({ artists, date, labelName, location, imageUrl, eventId, status }: EventCardProps) => {
+export const EventCard = ({ artists, date, labelName, location, imageUrl, eventId, status, isSoldOut }: EventCardProps) => {
     const router = useRouter();
-    
+
     const formatDate = (date: string) => {
         const eventDate = new Date(date);
-        const options: Intl.DateTimeFormatOptions = { 
+        const options: Intl.DateTimeFormatOptions = {
             weekday: 'short',
-            day: 'numeric', 
+            day: 'numeric',
             month: 'short'
         };
         return eventDate.toLocaleDateString('es-AR', options);
@@ -28,14 +29,15 @@ export const EventCard = ({ artists, date, labelName, location, imageUrl, eventI
 
     const formatTime = (date: string) => {
         const eventDate = new Date(date);
-        return eventDate.toLocaleTimeString('es-AR', { 
-            hour: '2-digit', 
+        return eventDate.toLocaleTimeString('es-AR', {
+            hour: '2-digit',
             minute: '2-digit',
-            hour12: false 
+            hour12: false
         });
     };
 
     const handleClick = () => {
+        // Siempre ir a la página de detalle del evento
         router.push(`/events/${eventId}`);
     };
 
@@ -61,7 +63,11 @@ export const EventCard = ({ artists, date, labelName, location, imageUrl, eventI
                         <h3 className="text-white font-medium text-base leading-tight truncate">
                             {labelName}
                         </h3>
-                        {status && (
+                        {isSoldOut ? (
+                            <Badge className="ml-2 bg-red-950/50 text-red-400 border-red-900 text-xs">
+                                AGOTADO
+                            </Badge>
+                        ) : status && (
                             <Badge className="ml-2 bg-neutral-800 text-neutral-300 border-neutral-700 text-xs">
                                 {status}
                             </Badge>

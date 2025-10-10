@@ -153,13 +153,13 @@ exports.Prisma.UserScalarFieldEnum = {
   email: 'email',
   emailVerified: 'emailVerified',
   image: 'image',
-  imageBase64: 'imageBase64',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   username: 'username',
   dni: 'dni',
   birthDate: 'birthDate',
-  role: 'role'
+  role: 'role',
+  image_base64: 'image_base64'
 };
 
 exports.Prisma.VerificationScalarFieldEnum = {
@@ -199,6 +199,7 @@ exports.Prisma.EventScalarFieldEnum = {
   producerId: 'producerId',
   capacityTotal: 'capacityTotal',
   isRsvpAllowed: 'isRsvpAllowed',
+  isSoldOut: 'isSoldOut',
   eventGenre: 'eventGenre',
   showRemainingTickets: 'showRemainingTickets',
   createdAt: 'createdAt'
@@ -278,6 +279,24 @@ exports.Prisma.MessageScalarFieldEnum = {
   readStatus: 'readStatus'
 };
 
+exports.Prisma.GuestListScalarFieldEnum = {
+  id: 'id',
+  eventId: 'eventId',
+  fullName: 'fullName',
+  normalizedName: 'normalizedName',
+  email: 'email',
+  age: 'age',
+  invitedBy: 'invitedBy',
+  gender: 'gender',
+  status: 'status',
+  qrCode: 'qrCode',
+  checkedInAt: 'checkedInAt',
+  checkedInBy: 'checkedInBy',
+  importedAt: 'importedAt',
+  importedBy: 'importedBy',
+  timestamp: 'timestamp'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -334,6 +353,12 @@ exports.TicketStatus = exports.$Enums.TicketStatus = {
   refunded: 'refunded'
 };
 
+exports.GuestStatus = exports.$Enums.GuestStatus = {
+  invited: 'invited',
+  checked_in: 'checked_in',
+  no_show: 'no_show'
+};
+
 exports.Prisma.ModelName = {
   account: 'account',
   session: 'session',
@@ -348,7 +373,8 @@ exports.Prisma.ModelName = {
   rrppAssignment: 'rrppAssignment',
   participant: 'participant',
   log: 'log',
-  message: 'message'
+  message: 'message',
+  guestList: 'guestList'
 };
 
 /**

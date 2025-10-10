@@ -20,22 +20,12 @@ export async function GET() {
     
     const events = await prisma.event.findMany({
       where: whereClause,
-      select: {
-        id: true,
-        name: true,
-        date: true,
-        location: true,
-        bannerUrl: true,
+      include: {
         eventArtists: {
-          select: {
-            artist: {
-              select: {
-                name: true,
-              },
-            },
+          include: {
+            artist: true,
           },
         },
-        eventGenre: true,
       },
     });
 
@@ -56,6 +46,7 @@ export async function GET() {
       location: event.location,
       imageUrl: event.bannerUrl,
       name: event.name,
+      isSoldOut: (event).isSoldOut ?? false,
     }));
 
     return NextResponse.json(

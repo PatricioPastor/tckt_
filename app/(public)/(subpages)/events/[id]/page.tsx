@@ -6,6 +6,7 @@ import Image from "next/image";
 
 import { useEventStore } from "@/lib/store/event-store";
 import { useCartStore } from "@/lib/store/cart-store";
+import { useUserStore } from "@/lib/store/user-store";
 import { cn } from "@/lib/utils";
 import { type EventWithDetails, type CartItem } from "@/lib/types";
 
@@ -32,6 +33,7 @@ export default function EventDetailPage() {
     useEventStore();
 
   const { items, getTotal, setEventId } = useCartStore();
+  const { user } = useUserStore();
 
   const [showCartSummary, setShowCartSummary] = useState(false);
 
@@ -50,8 +52,27 @@ export default function EventDetailPage() {
   }, [id, fetchEventById, clearSelected, setEventId]);
 
   const handleBuy = () => {
+    // Si el evento está agotado, redirigir a door-sale
+    if (selectedEvent?.isSoldOut) {
+      router.push(`/door-sale?eventId=${selectedEvent.id}`);
+      return;
+    }
     if (!hasItems) return;
     router.push("/checkout");
+  };
+
+  const handleViewTickets = () => {
+    // Si está logueado, ir a /tickets
+    // Si no está logueado, ir a /login
+    if (user) {
+      router.push("/tickets");
+    } else {
+      router.push("/login");
+    }
+  };
+
+  const handleDoorSale = () => {
+    router.push(`/door-sale?eventId=${selectedEvent?.id}`);
   };
 
   const scrollToTickets = () => {
@@ -83,7 +104,7 @@ export default function EventDetailPage() {
     );
   }
 
-  const { name, date, location, description, bannerUrl, ticketTypes, eventArtists } =
+  const { name, date, location, description, bannerUrl, ticketTypes, eventArtists, isSoldOut } =
     selectedEvent;
   const artists = eventArtists?.map((ea) => ea.artist.name) ?? [];
 
@@ -149,12 +170,37 @@ export default function EventDetailPage() {
           {artists.length > 0 && (
             <p className="mt-1 text-sm text-white/90">{artists.join(" • ")}</p>
           )}
-          <button
-            onClick={scrollToTickets}
-            className="mt-3 inline-flex items-center rounded-full bg-white/10 px-4 py-2 text-sm text-white backdrop-blur-sm transition-colors hover:bg-white/20"
-          >
-            Ver tickets
-          </button>
+          <div className="mt-3 inline-flex items-center gap-2 flex-wrap">
+            {isSoldOut && (
+              <span className="rounded-full bg-red-950/50 px-4 py-2 text-sm text-red-400 border border-red-900">
+                AGOTADO
+              </span>
+            )}
+
+            {isSoldOut ? (
+              <>
+                <button
+                  onClick={handleViewTickets}
+                  className="rounded-full bg-white/10 px-4 py-2 text-sm text-white backdrop-blur-sm transition-colors hover:bg-white/20"
+                >
+                  Ver Tickets
+                </button>
+                <button
+                  onClick={handleDoorSale}
+                  className="rounded-full bg-white px-4 py-2 text-sm text-black transition-colors hover:bg-neutral-200 font-medium"
+                >
+                  Comprar en Puerta
+                </button>
+              </>
+            ) : (
+              <button
+                onClick={scrollToTickets}
+                className="rounded-full bg-white/10 px-4 py-2 text-sm text-white backdrop-blur-sm transition-colors hover:bg-white/20"
+              >
+                Ver tickets
+              </button>
+            )}
+          </div>
         </div>
       </div>
 

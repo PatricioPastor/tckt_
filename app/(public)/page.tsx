@@ -164,11 +164,26 @@ export default function HomePage() {
 
   const handleBuy = () => {
     if (!current) return;
+    // Si el evento está agotado, ir a door-sale
+    if (current.isSoldOut) {
+      router.push(`/door-sale?eventId=${current.id}`);
+      return;
+    }
+    // Si no está logueado, ir al login
     if (!user) {
       router.push('/login?tab=signup');
       return;
     }
     router.push(`/events/${current.id}`);
+  };
+
+  const handleViewTickets = () => {
+    if (!current) return;
+    if (user) {
+      router.push('/tickets');
+    } else {
+      router.push('/login');
+    }
   };
 
   const go = (next: number) => {
@@ -278,9 +293,16 @@ export default function HomePage() {
 
         <div className="absolute inset-x-0 bottom-[140px] z-20 px-4">
           <div className="mx-auto max-w-lg">
-            <p className="mb-2 text-sm font-medium text-white/70">
-              {current.dateIso ? formatRelativeDate(current.dateIso) : current.date} • {current.location}
-            </p>
+            <div className="mb-3 flex items-center gap-2">
+              <p className="text-sm font-medium text-white/70">
+                {current.dateIso ? formatRelativeDate(current.dateIso) : current.date} • {current.location}
+              </p>
+              {current.isSoldOut && (
+                <span className="rounded-full bg-red-950/50 px-3 py-1 text-xs font-medium text-red-400 border border-red-900">
+                  AGOTADO
+                </span>
+              )}
+            </div>
             <h1 className="mb-2 text-3xl font-semibold leading-tight tracking-tight text-white">
               {current.name}
             </h1>
@@ -321,13 +343,23 @@ export default function HomePage() {
 
         {/* CTA EMBEBIDO SOBRE LA IMAGEN */}
         <div className="absolute inset-x-0 bottom-0 z-30">
-          <CtaButtons
-            primaryAction={handleBuy}
-            secondaryAction={handleShare}
-            primaryActionText="Comprar ahora"
-            secondaryActionText="Compartir"
-            className="pb-6"
-          />
+          {current.isSoldOut ? (
+            <CtaButtons
+              primaryAction={handleBuy}
+              secondaryAction={handleViewTickets}
+              primaryActionText="Comprar en Puerta"
+              secondaryActionText="Mis Tickets"
+              className="pb-6"
+            />
+          ) : (
+            <CtaButtons
+              primaryAction={handleBuy}
+              secondaryAction={handleShare}
+              primaryActionText="Comprar ahora"
+              secondaryActionText="Compartir"
+              className="pb-6"
+            />
+          )}
         </div>
       </div>
     </div>
