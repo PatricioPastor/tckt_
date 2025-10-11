@@ -42,7 +42,7 @@ export async function PATCH(request: Request) {
         username: true,
         role: true,
         image: true,
-        imageBase64: true,
+        image_base64: true,
         dni: true,
         birthDate: true,
       },
