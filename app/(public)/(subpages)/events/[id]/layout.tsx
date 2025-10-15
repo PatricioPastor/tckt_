@@ -1,6 +1,5 @@
-import prisma from "@/lib/prisma";
 import { Metadata } from "next";
-
+import { getEventForMetadata } from "@/lib/data/events";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -9,18 +8,19 @@ type Props = {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
+  const eventId = parseInt(id, 10);
+
+  // Validate ID
+  if (isNaN(eventId) || eventId <= 0) {
+    return {
+      title: "Evento no encontrado | tckt_",
+      description: "El evento que buscás no existe o ya no está disponible.",
+    };
+  }
 
   try {
-    const event = await prisma.event.findUnique({
-      where: { id: parseInt(id) },
-      include: {
-        eventArtists: {
-          include: {
-            artist: true,
-          },
-        },
-      },
-    });
+    // Use cached query specifically for metadata
+    const event = await getEventForMetadata(eventId);
 
     if (!event) {
       return {
@@ -33,11 +33,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const description = event.description || `${event.name} - ${artists || "Evento en vivo"}`;
     const title = `${event.name} | tckt_`;
 
-    // URL del evento
-    const eventUrl = `https://www.tckt.fun/events/${event.id}`;
-
-    // Imagen del evento (usa bannerUrl si existe, sino una imagen por defecto)
-    const imageUrl = event.bannerUrl || "https://www.tckt.fun/background.jpg";
+    // Base URL from env
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://www.tckt.fun";
+    const eventUrl = `${baseUrl}/events/${event.id}`;
+    const imageUrl = event.bannerUrl || `${baseUrl}/background.png`;
 
     return {
       title,
@@ -64,9 +63,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         description,
         images: [imageUrl],
       },
+      alternates: {
+        canonical: eventUrl,
+      },
     };
   } catch (error) {
-    console.error("Error generating metadata:", error);
+    console.error("[Metadata Error]", error);
     return {
       title: "tckt_",
       description: "Plataforma de venta de tickets",

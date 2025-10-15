@@ -3,15 +3,22 @@
 
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { User } from "@/lib/store/user-store";
 import { Ticket01 } from "@untitledui/icons";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
+// Flexible user type that accepts both session user and store user
+type FlexibleUser = {
+  id: string;
+  name?: string | null;
+  email?: string | null;
+  image?: string | null;
+  [key: string]: any; // Allow additional properties
+};
 
 interface SiteHeaderProps {
-  user: User | null;
+  user: FlexibleUser | null;
 }
 
 function LogoMono() {

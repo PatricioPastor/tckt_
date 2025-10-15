@@ -32,7 +32,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
   const { data: session, isPending } = authClient.useSession();
 
   useEffect(() => {
-    if (session?.user) router.replace("/tickets");
+    if (session?.user) router.replace("/");
   }, [session, router]);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -63,10 +63,10 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
           email,
           password,
           name: `${firstName} ${lastName}`.trim(),
-          callbackURL: "/events/1",
+          callbackURL: "/",
         },
         {
-          onSuccess: () => router.push("/events/1"),
+          onSuccess: () => router.push("/"),
           onError: (ctx) => {
             setError(ctx.error.message || "Error al crear cuenta");
             setIsLoading(false);

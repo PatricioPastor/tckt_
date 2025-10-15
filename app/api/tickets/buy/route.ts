@@ -58,7 +58,8 @@ export async function POST(req: NextRequest) {
           ticketTypes: {
             select: {
               id: true, code: true, label: true,
-              price: true, stockCurrent: true, userMaxPerType: true, isDisabled: true
+              price: true, stockCurrent: true, userMaxPerType: true, 
+              minPurchaseQuantity: true, isDisabled: true
             }
           }
         }
@@ -91,6 +92,11 @@ export async function POST(req: NextRequest) {
         // Validar que el ticket no esté deshabilitado
         if (tt.isDisabled) {
           throw new Error(`Ticket type ${tt.label} is currently disabled and cannot be purchased`)
+        }
+
+        // Validar cantidad mínima de compra (combos)
+        if (sel.quantity < tt.minPurchaseQuantity) {
+          throw new Error(`${tt.label} requires a minimum purchase of ${tt.minPurchaseQuantity} tickets`)
         }
 
         // Límite por usuario (contando existentes)

@@ -127,7 +127,9 @@ export default function CheckoutPage() {
           setIsProcessing(false);
           return;
         }
-        // router.push("/tickets");
+        // Éxito: el carrito ya se limpió en checkoutFree
+        toast.success("¡Tickets obtenidos exitosamente!");
+        router.push("/tickets");
         return;
       }
 
@@ -178,16 +180,20 @@ export default function CheckoutPage() {
 
   const handleFreeCheckout = async () => {
     setError(null);
+    setIsProcessing(true);
     try {
       const r = await checkoutFree(sendEmail);
       if (r.success) {
+        toast.success("¡Tickets obtenidos exitosamente!");
         router.push("/tickets");
       } else {
         setError(r.error || "Error al obtener tickets gratuitos");
+        setIsProcessing(false);
       }
     } catch (e) {
       console.error(e);
       setError(e instanceof Error ? e.message : "Error inesperado");
+      setIsProcessing(false);
     }
   };
 

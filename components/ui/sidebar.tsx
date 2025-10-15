@@ -25,7 +25,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { Avatar, AvatarFallback, AvatarImage } from "./avatar"
-import { User } from "@/lib/store/user-store"
 
 const SIDEBAR_COOKIE_NAME = "sidebar_state"
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7
@@ -261,7 +260,7 @@ function SidebarTrigger({
   onClick,
   ...props
 }: React.ComponentProps<typeof Button> & {
-  user: User | null
+  user: { id: string; name?: string | null; email?: string | null; image?: string | null; [key: string]: any } | null
 
 }) {
   const { toggleSidebar } = useSidebar()

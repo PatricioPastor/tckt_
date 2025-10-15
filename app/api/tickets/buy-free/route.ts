@@ -29,7 +29,15 @@ export async function POST(req: NextRequest) {
     const result:any = await prisma.$transaction(async (tx:any) => {
       const event = await tx.event.findUnique({ 
         where: { id: eventId }, 
-        include: { ticketTypes: true } 
+        include: { 
+          ticketTypes: {
+            select: {
+              id: true, code: true, label: true, price: true, 
+              stockCurrent: true, userMaxPerType: true, 
+              minPurchaseQuantity: true, isDisabled: true
+            }
+          }
+        } 
       });
       if (!event) throw new Error('Event not found');
 
@@ -42,6 +50,11 @@ export async function POST(req: NextRequest) {
         // Validar que el ticket no esté deshabilitado
         if (tt.isDisabled) {
           throw new Error(`Ticket type ${tt.label} is currently disabled and cannot be acquired`);
+        }
+
+        // Validar cantidad mínima de compra (combos)
+        if (sel.quantity < tt.minPurchaseQuantity) {
+          throw new Error(`${tt.label} requires a minimum purchase of ${tt.minPurchaseQuantity} tickets`);
         }
 
         // Ensure it's actually a free ticket

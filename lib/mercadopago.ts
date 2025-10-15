@@ -97,7 +97,7 @@ export async function createPaymentPreference(data: PaymentPreferenceData) {
 
       // BACK URLS - URLs de retorno
       back_urls: {
-        success: `${baseUrl}/tickets`,            // back_urls ✓ - Redirige a tickets
+        success: `${baseUrl}/payment/success`,    // back_urls ✓ - Limpia carrito y redirige a tickets
         failure: `${baseUrl}/payment/failure`,
         pending: `${baseUrl}/payment/pending`,
         ...data.back_urls,

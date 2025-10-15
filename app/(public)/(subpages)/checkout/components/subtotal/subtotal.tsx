@@ -53,7 +53,7 @@ export const Subtotal = () => {
             value={appFee}
           />
           <Row
-            label={`Comisión MercadoPago (~${(MP_FEE_RATE * 100).toFixed(1)}%)`}
+            label={`Comisión MercadoPago (${(MP_FEE_RATE * 100).toFixed(1)}%)`}
             value={estimatedMpFee}
           />
 
