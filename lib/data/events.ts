@@ -38,7 +38,7 @@ export const getPublishedEvents = cache(async (): Promise<EventCardData[]> => {
     name: event.name,
     date: event.date.toISOString(),
     location: event.location,
-    imageUrl: event.bannerUrl || '/background.png',
+    imageUrl: event.bannerUrl || '/background.jpeg',
     labelName: event.eventGenre || 'NO LABEL',
     artists: event.eventArtists.map((ea) => ea.artist.name),
     isSoldOut: event.isSoldOut ?? false,

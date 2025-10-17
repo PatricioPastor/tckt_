@@ -34,7 +34,8 @@
       "Bash(findstr:*)",
       "Bash(powershell:*)",
       "Bash(dir \"app\\(public)\")",
-      "Bash(dir:*)"
+      "Bash(dir:*)",
+      "Bash(bunx tsx:*)"
     ],
     "deny": []
   },

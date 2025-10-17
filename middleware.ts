@@ -9,11 +9,13 @@ export async function middleware(request: NextRequest) {
   const authRoutes = ["/login", "/signup"];
 
   // 🌐 Rutas públicas (no requieren autenticación)
-  const publicRoutes = ["/"]; // Solo la home es pública
+  const publicRoutes = [
+    "/",
+    "/events", // Permitir ver eventos sin login (guest browsing)
+  ];
 
   // 🔐 Rutas protegidas (requieren autenticación)
   const protectedRoutes = [
-    "/events",
     "/checkout",
     "/payment",
     "/dashboard",
@@ -49,7 +51,10 @@ export async function middleware(request: NextRequest) {
 
   // 4️⃣ Rutas protegidas sin autenticación → redirigir a login (tab signup)
   if (!sessionCookie && matchesRoute(protectedRoutes)) {
-    return NextResponse.redirect(new URL("/login?tab=signup", request.url));
+    const loginUrl = new URL("/login?tab=signup", request.url);
+    // Preservar la URL original para redirigir después del login
+    loginUrl.searchParams.set("redirectTo", pathname + request.nextUrl.search);
+    return NextResponse.redirect(loginUrl);
   }
 
   // 5️⃣ Todo lo demás → permitir

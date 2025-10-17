@@ -85,6 +85,18 @@ const cartStore = (
         }
 
         try {
+          // Obtener referido si existe
+          let referredByRrppId: number | undefined
+          try {
+            const referralStorage = localStorage.getItem('referral-storage')
+            if (referralStorage) {
+              const parsed = JSON.parse(referralStorage)
+              referredByRrppId = parsed?.state?.referralInfo?.rrppId
+            }
+          } catch (e) {
+            console.warn('Could not read referral from storage', e)
+          }
+
           const res = await fetch('/api/tickets/buy', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -92,7 +104,8 @@ const cartStore = (
               eventId,
               selections: items
                 .filter(i => i.price > 0)
-                .map(i => ({ code: i.code, quantity: i.quantity }))
+                .map(i => ({ code: i.code, quantity: i.quantity })),
+              referredByRrppId
             })
           })
 
@@ -120,13 +133,26 @@ const cartStore = (
         }
 
         try {
+          // Obtener referido si existe
+          let referredByRrppId: number | undefined
+          try {
+            const referralStorage = localStorage.getItem('referral-storage')
+            if (referralStorage) {
+              const parsed = JSON.parse(referralStorage)
+              referredByRrppId = parsed?.state?.referralInfo?.rrppId
+            }
+          } catch (e) {
+            console.warn('Could not read referral from storage', e)
+          }
+
           const res = await fetch('/api/tickets/buy-free', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               eventId,
               sendEmail,
-              selections: freeItems.map(i => ({ code: i.code, quantity: i.quantity }))
+              selections: freeItems.map(i => ({ code: i.code, quantity: i.quantity })),
+              referredByRrppId
             })
           })
 

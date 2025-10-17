@@ -162,7 +162,7 @@ export function EventCarousel({ events, isLoggedIn }: EventCarouselProps) {
       <div className="absolute inset-0 z-10">
         <div className="relative h-full w-full">
           <Image
-            src={current.imageUrl || "/background.png"}
+            src={current.imageUrl || "/background.jpeg"}
             alt={current.labelName || "Evento"}
             fill
             className="object-cover"

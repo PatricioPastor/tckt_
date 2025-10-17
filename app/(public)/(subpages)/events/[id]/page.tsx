@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { getEventById } from "@/lib/data/events";
 import { EventDetailClient } from "./components/event-detail-client";
 import { CartInitializer } from "./components/cart-initializer";
+import { ReferralHandler } from "./components/referral-handler";
 
 // ISR: Revalidate every 60 seconds
 export const revalidate = 60;
@@ -36,6 +37,7 @@ export default async function EventDetailPage({ params }: Props) {
   return (
     <>
       <CartInitializer eventId={eventId} />
+      <ReferralHandler eventId={eventId} />
       <EventDetailClient event={event} isLoggedIn={!!session?.user} />
     </>
   );

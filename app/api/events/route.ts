@@ -34,7 +34,7 @@ export async function GET() {
       date: event.date.toISOString(), // Consistent ISO string
       labelName: event.eventGenre || 'NO LABEL',
       location: event.location,
-      imageUrl: event.bannerUrl || '/background.jpg', // Fallback
+      imageUrl: event.bannerUrl || '/background.jpeg', // Fallback
       name: event.name,
       isSoldOut: event.isSoldOut ?? false,
     }));

@@ -148,7 +148,58 @@
   opacity: 0;
 }
 
-/* Smooth scroll behavior */
+/* Native App Feel - Prevent overscroll bounce */
 html {
   scroll-behavior: smooth;
+  overscroll-behavior-y: none; /* Prevents vertical bounce/rubber-band effect */
+  overscroll-behavior-x: none; /* Prevents horizontal bounce */
+  height: 100%;
+  width: 100%;
+}
+
+body {
+  overscroll-behavior-y: none;
+  overscroll-behavior-x: none;
+  height: 100%;
+  width: 100%;
+  position: relative;
+  /* Prevent momentum scrolling issues on iOS */
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Main app container - this is where scroll should happen */
+#__next {
+  height: 100%;
+  width: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: none;
+  /* Smooth momentum scrolling on iOS */
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Preserve pull-to-refresh on specific scrollable containers when desired */
+.allow-pull-refresh {
+  overscroll-behavior-y: auto;
+}
+
+/* Additional mobile optimizations for native feel */
+@media (max-width: 768px) {
+  /* Prevent text selection on tap (like native apps) - optional */
+  * {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+  }
+
+  /* Allow selection only on inputs and text areas */
+  input, textarea, [contenteditable="true"] {
+    -webkit-touch-callout: default;
+    -webkit-user-select: auto;
+    user-select: auto;
+  }
+
+  /* Smooth scrolling momentum */
+  #__next {
+    -webkit-overflow-scrolling: touch;
+  }
 }

@@ -29,9 +29,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Forbidden - Only user role can buy' }, { status: 403 })
   }
 
-  const { eventId, selections } = await req.json() as {
+  const { eventId, selections, referredByRrppId } = await req.json() as {
     eventId: number
     selections: Array<{ code: string; quantity: number }>
+    referredByRrppId?: number
   }
 
   if (!eventId || !Array.isArray(selections) || selections.length === 0) {
@@ -80,6 +81,7 @@ export async function POST(req: NextRequest) {
         qrCode: string
         code: string
         status: TicketStatus
+        referredByRrppId?: number
         createdAt: Date
       }> = []
       const paymentItems: Array<{ id: string; title: string; quantity: number; unit_price: number }> = []
@@ -144,6 +146,7 @@ export async function POST(req: NextRequest) {
             qrCode,
             code: qrData,
             status: 'pending',
+            referredByRrppId: referredByRrppId || undefined,
             createdAt: new Date()
           })
         }
@@ -166,6 +169,7 @@ export async function POST(req: NextRequest) {
             externalReference,
             payerEmail: userInfo.email,
             payerName: userInfo.name,
+            referredByRrppId: referredByRrppId || null,
           }
         });
       }

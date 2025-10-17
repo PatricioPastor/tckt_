@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Forbidden - Only user role can acquire tickets' }, { status: 403 });
   }
 
-  const { eventId, selections, sendEmail = false } = await req.json(); 
+  const { eventId, selections, sendEmail = false, referredByRrppId } = await req.json();
   if (!eventId || !selections?.length) return NextResponse.json({ error: 'Invalid request' }, { status: 400 });
 
   try {
@@ -81,6 +81,7 @@ export async function POST(req: NextRequest) {
             qrCode,
             code: qrData,
             status: 'paid' as TicketStatus, // Free tickets are immediately "paid"
+            referredByRrppId: referredByRrppId || null,
             createdAt: new Date(),
           });
         }

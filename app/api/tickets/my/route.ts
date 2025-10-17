@@ -29,9 +29,20 @@ export async function GET(req: NextRequest) {
     whereClause = { ownerId: session.user.id };
   } else if (role === 'rrpp' || role === 'qr_scanner') {
     // For RRPP or scanner roles, show tickets for their assigned events
-    
+    // First, get the producer_member records for this user
+    const producerMembers = await prisma.producerMember.findMany({
+      where: {
+        userId: session.user.id,
+        isActive: true
+      },
+      select: { id: true },
+    });
+
+    const producerMemberIds = producerMembers.map(pm => pm.id);
+
+    // Then get events assigned to these producer members
     const assignedEvents = await prisma.rrppAssignment.findMany({
-      where: { rrppUserId: session.user.id },
+      where: { producerMemberId: { in: producerMemberIds } },
       select: { eventId: true },
     });
     whereClause = { eventId: { in: assignedEvents.map(a => a.eventId) } };

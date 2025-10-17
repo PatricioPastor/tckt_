@@ -12,6 +12,8 @@ import { Subtotal } from "./components/subtotal/subtotal";
 import { SlideToConfirm } from "@/components/ui/slide-to-confirm";
 import { BackHeader } from "@/components/back-header/back-header";
 import { toast } from "sonner";
+import { ReferralBadge } from "@/components/referral-badge/referral-badge";
+import { useReferralStore } from "@/lib/store/referral-store";
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -19,6 +21,7 @@ export default function CheckoutPage() {
   const { user } = useUserStore();
   const { data: session, isPending } = authClient.useSession();
   const isHydrated = useHydration();
+  const { hasReferral, getReferralId } = useReferralStore();
 
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [showSlideConfirm, setShowSlideConfirm] = useState(false);
@@ -216,6 +219,7 @@ export default function CheckoutPage() {
 
       <div className="mx-auto max-w-2xl px-4 py-6">
         <div className="space-y-8">
+          {hasReferral() && <ReferralBadge showClose />}
           <ItemsCart />
           <Subtotal />
         </div>

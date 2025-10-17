@@ -3,13 +3,13 @@
 import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { 
-  Calendar, 
-  Share06, 
-  Map01, 
-  MarkerPin01, 
-  ChevronLeft, 
-  ShoppingCart02 
+import {
+  Calendar,
+  Share06,
+  Map01,
+  MarkerPin01,
+  ChevronLeft,
+  ShoppingCart02
 } from "@untitledui/icons";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -18,6 +18,7 @@ import type { EventWithDetails } from "@/lib/types/event.types";
 import { TicketCard } from "./ticket/ticket-card";
 import { Description } from "./description/description";
 import { toast } from "sonner";
+import { ReferralBadge } from "@/components/referral-badge/referral-badge";
 
 type EventDetailClientProps = {
   event: EventWithDetails;
@@ -71,7 +72,7 @@ export function EventDetailClient({ event, isLoggedIn }: EventDetailClientProps)
       {/* HERO */}
       <div className="relative h-80 w-full sm:h-96">
         <Image
-          src={bannerUrl || "/background.png"}
+          src={bannerUrl || "/background.jpeg"}
           alt={name}
           fill
           className="object-cover"
@@ -254,6 +255,9 @@ export function EventDetailClient({ event, isLoggedIn }: EventDetailClientProps)
 
       {/* BODY */}
       <div className="relative space-y-8 px-4 pb-28 pt-6">
+        {/* Referral Badge */}
+        <ReferralBadge />
+
         {/* Info chips */}
         <div className="flex flex-wrap gap-4 text-neutral-300">
           <span className="inline-flex items-center gap-2 text-sm">

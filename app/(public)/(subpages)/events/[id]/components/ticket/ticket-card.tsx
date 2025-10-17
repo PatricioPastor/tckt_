@@ -37,6 +37,10 @@ export function TicketCard({ ticketType }: { ticketType: TicketType }) {
   const inc = () => {
     if (isDisabled || isOutOfStock) return;
 
+    // Determinar el incremento según el minPurchaseQuantity
+    const increment = ticketType.minPurchaseQuantity || 1;
+    const newQuantity = quantity === 0 ? increment : quantity + increment;
+
     // Si estamos en 0 y hay un mínimo, agregamos directamente el mínimo
     if (quantity === 0 && ticketType.minPurchaseQuantity > 1) {
       // Validar que el mínimo no exceda el máximo por usuario
@@ -44,7 +48,7 @@ export function TicketCard({ ticketType }: { ticketType: TicketType }) {
         toast.error(`Este combo requiere ${ticketType.minPurchaseQuantity} tickets pero el máximo por usuario es ${ticketType.userMaxPerType}`);
         return;
       }
-      
+
       // Validar stock disponible
       if (ticketType.minPurchaseQuantity > ticketType.stockCurrent) {
         toast.error(`Este combo requiere ${ticketType.minPurchaseQuantity} tickets pero solo hay ${ticketType.stockCurrent} disponibles`);
@@ -57,37 +61,37 @@ export function TicketCard({ ticketType }: { ticketType: TicketType }) {
         Number(ticketType.price),
         ticketType.stockCurrent
       );
-      if (ticketType.minPurchaseQuantity > 1) {
-        toast.success(`Agregaste ${ticketType.minPurchaseQuantity} tickets (mínimo requerido)`);
-      }
+      toast.success(`Agregaste ${ticketType.minPurchaseQuantity} tickets (mínimo requerido)`);
       return;
     }
 
     // Validar máximo por usuario
-    if (quantity >= ticketType.userMaxPerType) {
+    if (newQuantity > ticketType.userMaxPerType) {
       toast.error(`Máximo permitido: ${ticketType.userMaxPerType} tickets por usuario`);
       return;
     }
 
     // Validar stock disponible
-    if (quantity >= ticketType.stockCurrent) {
+    if (newQuantity > ticketType.stockCurrent) {
       toast.error("No hay más stock disponible");
       return;
     }
 
     updateQuantity(
       ticketType.code,
-      quantity + 1,
+      newQuantity,
       Number(ticketType.price),
       ticketType.stockCurrent
     );
   };
   const dec = () => {
     if (!disabledDec && !isDisabled) {
-      const newQuantity = quantity - 1;
+      // Determinar el decremento según el minPurchaseQuantity
+      const decrement = ticketType.minPurchaseQuantity || 1;
+      const newQuantity = quantity - decrement;
+
       // Si baja por debajo del mínimo, poner en 0
-      if (newQuantity > 0 && newQuantity < ticketType.minPurchaseQuantity) {
-        toast.warning(`Este ticket requiere un mínimo de ${ticketType.minPurchaseQuantity} unidades`);
+      if (newQuantity < ticketType.minPurchaseQuantity) {
         updateQuantity(
           ticketType.code,
           0,

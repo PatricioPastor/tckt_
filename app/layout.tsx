@@ -29,6 +29,18 @@ export const metadata: Metadata = {
   creator: "tckt_",
   publisher: "tckt_",
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'),
+  viewport: {
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 5,
+    userScalable: true,
+    viewportFit: 'cover', // Para PWA/notch devices
+  },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'tckt_',
+  },
   openGraph: {
     title: "tckt_ - Tus eventos, tus entradas",
     description: "Plataforma de venta de entradas para eventos. Comprá tus tickets de forma rápida y segura.",
@@ -79,13 +91,14 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          {/* <UserProvider> */}
-            {  children}
-          {/* </UserProvider> */}
-          <Toaster theme="dark"  position="top-center" />
+          <div id="__next">
+            {/* <UserProvider> */}
+              {children}
+            {/* </UserProvider> */}
+          </div>
+          <Toaster theme="dark" position="top-center" />
           <Analytics />
           <SpeedInsights />
-          
         </ThemeProvider>
       </body>
     </html>

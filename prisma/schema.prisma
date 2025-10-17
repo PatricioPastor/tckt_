@@ -38,31 +38,31 @@ model session {
 }
 
 model user {
-  id                 String           @id
-  name               String
-  email              String           @unique
-  emailVerified      Boolean
-  image              String?
-  createdAt          DateTime
-  updatedAt          DateTime
-  username           String?          @unique
-  dni                String?
-  birthDate          DateTime?
-  role               Role             @default(user)
-  image_base64       String?
-  account            account[]
-  guestsCheckedIn    guestList[]
-  guestsImported     guestList[]      @relation("guestListImporter")
-  logs               log[]
-  receivedMessages   message[]        @relation("messagesToUser_receiverId")
-  sentMessages       message[]        @relation("messagesToUser_senderId")
-  participants       participant[]
-  payments           payment[]
-  producer           producer?
-  rrppAssignments    rrppAssignment[]
-  session            session[]
-  tickets            ticket[]         @relation("ticketsToUser_ownerId")
-  transferredTickets ticket[]         @relation("ticketsToUser_transferredFromId")
+  id                        String            @id
+  name                      String
+  email                     String            @unique
+  emailVerified             Boolean
+  image                     String?
+  createdAt                 DateTime
+  updatedAt                 DateTime
+  username                  String?           @unique
+  dni                       String?
+  birthDate                 DateTime?
+  role                      Role              @default(user)
+  image_base64              String?
+  account                   account[]
+  guestsCheckedIn           guestList[]
+  guestsImported            guestList[]       @relation("guestListImporter")
+  logs                      log[]
+  receivedMessages          message[]         @relation("messagesToUser_receiverId")
+  sentMessages              message[]         @relation("messagesToUser_senderId")
+  participants              participant[]
+  payments                  payment[]
+  producerMemberships       producerMember[]  @relation("producerMemberToUser")
+  invitedProducerMembers    producerMember[]  @relation("producerMemberInvitedBy")
+  session                   session[]
+  tickets                   ticket[]          @relation("ticketsToUser_ownerId")
+  transferredTickets        ticket[]          @relation("ticketsToUser_transferredFromId")
 }
 
 model verification {
@@ -75,22 +75,24 @@ model verification {
 }
 
 model payment {
-  id                Int           @id @default(autoincrement())
-  userId            String        @map("user_id")
-  eventId           Int           @map("event_id")
-  status            PaymentStatus @default(pending)
-  amount            Decimal       @db.Decimal(12, 2)
-  currency          String        @default("ARS")
-  provider          String        @default("mercadopago")
-  externalReference String        @unique @map("external_reference")
-  mpPreferenceId    String?       @map("mp_preference_id")
-  mpPaymentId       String?       @unique @map("mp_payment_id")
-  payerEmail        String?       @map("payer_email")
-  payerName         String?       @map("payer_name")
-  createdAt         DateTime      @default(now()) @map("created_at")
-  updatedAt         DateTime      @updatedAt @map("updated_at")
-  event             event         @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  user              user          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                Int             @id @default(autoincrement())
+  userId            String          @map("user_id")
+  eventId           Int             @map("event_id")
+  status            PaymentStatus   @default(pending)
+  amount            Decimal         @db.Decimal(12, 2)
+  currency          String          @default("ARS")
+  provider          String          @default("mercadopago")
+  externalReference String          @unique @map("external_reference")
+  mpPreferenceId    String?         @map("mp_preference_id")
+  mpPaymentId       String?         @unique @map("mp_payment_id")
+  payerEmail        String?         @map("payer_email")
+  payerName         String?         @map("payer_name")
+  referredByRrppId  Int?            @map("referred_by_rrpp_id")
+  createdAt         DateTime        @default(now()) @map("created_at")
+  updatedAt         DateTime        @updatedAt @map("updated_at")
+  event             event           @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user              user            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  referredByRrpp    producerMember? @relation("paymentReferredBy", fields: [referredByRrppId], references: [id], onDelete: SetNull)
   tickets           ticket[]
 }
 
@@ -162,32 +164,34 @@ model ticketType {
 }
 
 model ticket {
-  id                Int          @id @default(autoincrement())
-  eventId           Int          @map("event_id")
-  ownerId           String       @map("owner_id")
-  typeId            Int          @map("type_id")
-  paymentId         Int?         @map("payment_id")
-  qrCode            String       @unique @map("qr_code")
-  code              String?      @unique
-  status            TicketStatus @default(pending)
-  transferredFromId String?      @map("transferred_from_id")
-  createdAt         DateTime     @default(now()) @map("created_at")
-  event             event        @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  owner             user         @relation("ticketsToUser_ownerId", fields: [ownerId], references: [id])
-  payment           payment?     @relation(fields: [paymentId], references: [id])
-  transferredFrom   user?        @relation("ticketsToUser_transferredFromId", fields: [transferredFromId], references: [id])
-  type              ticketType   @relation(fields: [typeId], references: [id], onDelete: Cascade)
+  id                Int             @id @default(autoincrement())
+  eventId           Int             @map("event_id")
+  ownerId           String          @map("owner_id")
+  typeId            Int             @map("type_id")
+  paymentId         Int?            @map("payment_id")
+  qrCode            String          @unique @map("qr_code")
+  code              String?         @unique
+  status            TicketStatus    @default(pending)
+  transferredFromId String?         @map("transferred_from_id")
+  referredByRrppId  Int?            @map("referred_by_rrpp_id")
+  createdAt         DateTime        @default(now()) @map("created_at")
+  event             event           @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  owner             user            @relation("ticketsToUser_ownerId", fields: [ownerId], references: [id])
+  payment           payment?        @relation(fields: [paymentId], references: [id])
+  transferredFrom   user?           @relation("ticketsToUser_transferredFromId", fields: [transferredFromId], references: [id])
+  type              ticketType      @relation(fields: [typeId], references: [id], onDelete: Cascade)
+  referredByRrpp    producerMember? @relation("ticketReferredBy", fields: [referredByRrppId], references: [id], onDelete: SetNull)
 }
 
 model rrppAssignment {
-  rrppUserId     String  @map("rrpp_user_id")
-  eventId        Int     @map("event_id")
-  commissionRate Decimal @default(0.10) @map("commission_rate")
-  freesGranted   Int     @default(0) @map("frees_granted")
-  event          event   @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  rrppUser       user    @relation(fields: [rrppUserId], references: [id], onDelete: Cascade)
+  producerMemberId Int            @map("producer_member_id")
+  eventId          Int            @map("event_id")
+  commissionRate   Decimal        @default(0.10) @map("commission_rate") @db.Decimal(5, 4)
+  freesGranted     Int            @default(0) @map("frees_granted")
+  event            event          @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  producerMember   producerMember @relation(fields: [producerMemberId], references: [id], onDelete: Cascade)
 
-  @@id([rrppUserId, eventId])
+  @@id([producerMemberId, eventId])
   @@map("rrpp_assignment")
 }
 
@@ -247,24 +251,47 @@ model guestList {
   @@map("guest_list")
 }
 
+model producerMember {
+  id              Int                 @id @default(autoincrement())
+  producerId      Int                 @map("producer_id")
+  userId          String              @map("user_id")
+  role            ProducerMemberRole
+  permissions     Json?
+  canCreateEvents Boolean             @default(true) @map("can_create_events")
+  canEditEvents   Boolean             @default(true) @map("can_edit_events")
+  canManageMoney  Boolean             @default(false) @map("can_manage_money")
+  canManageTeam   Boolean             @default(false) @map("can_manage_team")
+  invitedBy       String?             @map("invited_by")
+  joinedAt        DateTime            @default(now()) @map("joined_at")
+  isActive        Boolean             @default(true) @map("is_active")
+  referralCode    String?             @unique @map("referral_code")
+  producer        producer            @relation(fields: [producerId], references: [id], onDelete: Cascade)
+  user            user                @relation("producerMemberToUser", fields: [userId], references: [id], onDelete: Cascade)
+  invitedByUser   user?               @relation("producerMemberInvitedBy", fields: [invitedBy], references: [id], onDelete: SetNull)
+  rrppAssignments rrppAssignment[]
+  referredTickets ticket[]            @relation("ticketReferredBy")
+  referredPayments payment[]          @relation("paymentReferredBy")
+
+  @@unique([producerId, userId])
+  @@map("producer_member")
+}
+
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model producer {
-  id              Int      @id @default(autoincrement())
-  user_id         String   @unique
+  id              Int              @id @default(autoincrement())
   company_name    String?
-  commission_rate Decimal  @default(0.15) @db.Decimal(5, 4)
+  commission_rate Decimal          @default(0.15) @db.Decimal(5, 4)
   bank_account    String?
   tax_id          String?
   address         String?
   phone           String?
-  is_active       Boolean  @default(true)
-  created_at      DateTime @default(now())
+  is_active       Boolean          @default(true)
+  created_at      DateTime         @default(now())
   updated_at      DateTime
   event           event[]
-  user            user     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  members         producerMember[]
 
   @@index([is_active])
-  @@index([user_id])
 }
 
 enum GuestStatus {
@@ -302,4 +329,15 @@ enum PaymentStatus {
   cancelled
   refunded
   in_process
+}
+
+enum ProducerMemberRole {
+  owner
+  admin
+  manager
+  rrpp
+  editor
+  financial
+  qr_scanner
+  viewer
 }

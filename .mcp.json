@@ -5,7 +5,7 @@
             "args": [
                 "-y",
                 "@modelcontextprotocol/server-postgres",
-                "postgresql://neondb_owner:npg_DG7ioRbVXu1J@ep-cold-math-acrgmlvj-pooler.sa-east-1.aws.neon.tech/production?sslmode=require&channel_binding=require"
+                "postgresql://neondb_owner:npg_DG7ioRbVXu1J@ep-dawn-mouse-acbun26d-pooler.sa-east-1.aws.neon.tech/production?sslmode=require&channel_binding=require"
             ],
             "disabled": false
         },

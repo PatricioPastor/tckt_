@@ -36,7 +36,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     // Base URL from env
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://www.tckt.fun";
     const eventUrl = `${baseUrl}/events/${event.id}`;
-    const imageUrl = event.bannerUrl || `${baseUrl}/background.png`;
+    const imageUrl = event.bannerUrl || `${baseUrl}/background.jpeg`;
 
     return {
       title,
