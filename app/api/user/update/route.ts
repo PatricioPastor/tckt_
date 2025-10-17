@@ -31,10 +31,19 @@ export async function PATCH(request: Request) {
     if (validatedData.birthDate) {
       updateData.birthDate = validatedData.birthDate;
     }
+    let image_base64: string | null = null;
+    if(validatedData.imageBase64){
+      image_base64 = validatedData.imageBase64;
+      delete validatedData.imageBase64 
+    }
+    
 
     const updatedUser = await prisma.user.update({
       where: { id: session.user.id },
-      data: updateData,
+      data: {
+        ...updateData,
+        image_base64,
+      },
       select: {
         id: true,
         name: true,

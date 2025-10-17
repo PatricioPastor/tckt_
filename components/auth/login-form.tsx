@@ -95,10 +95,10 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
   };
 
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="flex h-full w-full bg-background">
       {/* Left Side - Form */}
-      <div className="flex w-full items-center justify-center p-8 lg:w-1/2">
-        <div className="w-full space-y-8">
+      <div className="flex w-full items-center justify-center p-8 lg:w-1/2 overflow-y-auto">
+        <div className="w-full max-w-md space-y-6 py-8">
           {/* Logo */}
           <div className="flex justify-center">
             <Image src="/logo.png" alt="tckt logo" width={120} height={28} className="h-auto w-[120px]" />

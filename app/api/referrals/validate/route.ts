@@ -14,10 +14,13 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Buscar el producerMember con ese código de referido
-    const rrpp = await prisma.producerMember.findUnique({
+    // Buscar el producerMember con ese código de referido (case-insensitive)
+    const rrpp = await prisma.producerMember.findFirst({
       where: {
-        referralCode: code.toUpperCase(),
+        referralCode: {
+          equals: code,
+          mode: 'insensitive',
+        },
       },
       include: {
         user: {
