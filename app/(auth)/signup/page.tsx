@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { FormEvent, Suspense, useEffect, useMemo, useState } from "react";
+import { FormEvent, Suspense, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -47,14 +47,6 @@ function SignupPageContent() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
-  const { data: session } = authClient.useSession();
-
-  useEffect(() => {
-    if (session?.user) {
-      router.replace(redirectTo);
-    }
-  }, [redirectTo, router, session]);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
