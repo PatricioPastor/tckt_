@@ -35,7 +35,10 @@
       "Bash(powershell:*)",
       "Bash(dir \"app\\(public)\")",
       "Bash(dir:*)",
-      "Bash(bunx tsx:*)"
+      "Bash(bunx tsx:*)",
+      "Bash(bun add:*)",
+      "Bash(\"c:\\Users\\patri\\Dev\\main\\NoTrip\\tckt\\web-app\\lib\\email.ts\")",
+      "Bash(bunx prettier:*)"
     ],
     "deny": []
   },

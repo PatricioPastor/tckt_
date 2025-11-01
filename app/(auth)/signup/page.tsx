@@ -145,10 +145,10 @@ function SignupPageContent() {
             </CardHeader>
 
             <CardContent className="grid gap-4">
-              <Button type="button" variant="outline" className="w-full" disabled={isSubmitting} onClick={handleGoogleRegister}>
+              {/* <Button type="button" variant="outline" className="w-full" disabled={isSubmitting} onClick={handleGoogleRegister}>
                 <GoogleGlyph className="mr-2 h-4 w-4" />
                 Registrarse con Google
-              </Button>
+              </Button> */}
 
               <div className="grid gap-2 min-[360px]:grid-cols-2">
                 <div className="grid gap-1.5">

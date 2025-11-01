@@ -127,10 +127,10 @@ function LoginPageContent() {
             </CardHeader>
 
             <CardContent className="grid gap-4">
-              <Button type="button" variant="outline" className="w-full" disabled={isSubmitting} onClick={handleGoogleLogin}>
+              {/* <Button type="button" variant="outline" className="w-full" disabled={isSubmitting} onClick={handleGoogleLogin}>
                 <GoogleGlyph className="mr-2 h-4 w-4" />
                 Iniciar sesion con Google
-              </Button>
+              </Button> */}
 
               <div className="grid gap-2">
                 <Label htmlFor="email">Correo electronico</Label>
@@ -147,7 +147,12 @@ function LoginPageContent() {
               </div>
 
               <div className="grid gap-2">
-                <Label htmlFor="password">Contrasena</Label>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="password">Contrasena</Label>
+                  <Link href="/forgot-password" className="text-xs text-muted-foreground hover:text-primary underline-offset-4 hover:underline">
+                    ¿Olvidaste tu contraseña?
+                  </Link>
+                </div>
                 <Input
                   id="password"
                   type="password"

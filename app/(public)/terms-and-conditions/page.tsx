@@ -9,7 +9,7 @@ export default function TermsAndConditionsPage() {
         <header className="space-y-4 text-center">
           <p className="text-xs uppercase tracking-[0.4em] text-muted-foreground">Legal</p>
           <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">Términos y Condiciones de Uso</h1>
-          <p className="text-sm text-muted-foreground">Última actualización: [Fecha de publicación]</p>
+          <p className="text-sm text-muted-foreground">Última actualización: 20/08/2025 13:21</p>
         </header>
 
         <section className={sectionClass}>

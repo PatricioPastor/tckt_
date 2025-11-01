@@ -1,201 +1,202 @@
-import { Resend } from 'resend';
+import nodemailer from "nodemailer";
 
-// Initialize Resend only if API key is available
-let resend: Resend | null = null;
-if (process.env.RESEND_API_KEY) {
-  resend = new Resend(process.env.RESEND_API_KEY);
+// Create reusable transporter object using SMTP transport
+const transporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST,
+  port: parseInt(process.env.SMTP_PORT || "465"),
+  secure: process.env.SMTP_SECURE === "true", // true for 465, false for other ports
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASSWORD,
+  },
+});
+
+interface SendEmailParams {
+  to: string;
+  subject: string;
+  html?: string;
+  text?: string;
 }
 
-export interface TicketEmailData {
-  userEmail: string;
-  userName: string;
-  eventName: string;
-  eventDate: string;
-  eventLocation: string;
-  tickets: {
-    id: number;
-    name: string;
-    code: string;
-    qrCode: string; // base64 QR code
-  }[];
-  totalAmount: number;
-  orderReference: string;
-}
-
-/**
- * Sends ticket confirmation email with QR codes
- */
-export async function sendTicketConfirmationEmail(data: TicketEmailData) {
+export async function sendEmail({ to, subject, html, text }: SendEmailParams) {
   try {
-    if (!resend) {
-      console.warn('Resend not configured, skipping email sending');
-      return {
-        success: false,
-        error: 'Email service not configured'
-      };
-    }
+    const info = await transporter.sendMail({
+      from: `"${process.env.SMTP_FROM_NAME}" <${process.env.SMTP_FROM}>`,
+      to,
+      subject,
+      text,
+      html,
+    });
 
-    // Create email HTML template
-    const emailHtml = createTicketEmailTemplate(data);
-    
-    const emailData = {
-      from: 'NoTrip <noreply@notrip.com>', // Update with your domain
-      to: [data.userEmail],
-      subject: `🎫 Tus tickets para ${data.eventName}`,
-      html: emailHtml,
-      // Attach QR codes as images if needed
-      attachments: data.tickets.map(ticket => ({
-        filename: `ticket-${ticket.id}.png`,
-        content: ticket.qrCode.split(',')[1], // Remove data:image/png;base64,
-        type: 'image/png',
-        disposition: 'inline',
-        content_id: `qr-${ticket.id}`,
-      })),
-    };
-
-    const result = await resend.emails.send(emailData);
-    
-    return {
-      success: true,
-      data: result
-    };
+    console.log("Message sent: %s", info.messageId);
+    return { success: true, messageId: info.messageId };
   } catch (error) {
-    console.error('Email sending error:', error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Failed to send email'
-    };
+    console.error("Error sending email:", error);
+    throw error;
   }
 }
 
-/**
- * Creates HTML template for ticket confirmation email
- */
-function createTicketEmailTemplate(data: TicketEmailData): string {
-  return `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <meta charset="utf-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Confirmación de tickets - NoTrip</title>
-      <style>
-        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; background-color: #f4f4f4; margin: 0; padding: 20px; }
-        .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 0 20px rgba(0,0,0,0.1); }
-        .header { background: linear-gradient(135deg, #000000, #333333); color: white; padding: 30px; text-align: center; }
-        .content { padding: 30px; }
-        .ticket { border: 2px dashed #ddd; border-radius: 10px; padding: 20px; margin: 20px 0; background: #f9f9f9; }
-        .qr-code { text-align: center; margin: 15px 0; }
-        .qr-code img { border-radius: 8px; }
-        .footer { background: #f8f8f8; padding: 20px; text-align: center; color: #666; font-size: 12px; }
-        .total { background: #000; color: white; padding: 15px; border-radius: 8px; text-align: center; font-weight: bold; font-size: 18px; }
-        .event-info { background: #f0f8ff; padding: 20px; border-radius: 8px; margin: 20px 0; }
-        .ticket-type { font-weight: bold; font-size: 16px; color: #000; margin-bottom: 10px; }
-        .ticket-code { font-family: monospace; background: #eee; padding: 5px 10px; border-radius: 4px; font-size: 12px; }
-      </style>
-    </head>
-    <body>
-      <div class="container">
-        <div class="header">
-          <h1>🎫 ¡Tickets confirmados!</h1>
-          <p>Tu compra se ha procesado exitosamente</p>
-        </div>
-        
-        <div class="content">
-          <p>Hola <strong>${data.userName}</strong>,</p>
-          
-          <p>¡Excelente! Tu compra se ha confirmado. Ya tienes tus tickets para el evento.</p>
-          
-          <div class="event-info">
-            <h2>📅 Detalles del evento</h2>
-            <p><strong>Evento:</strong> ${data.eventName}</p>
-            <p><strong>Fecha:</strong> ${data.eventDate}</p>
-            <p><strong>Lugar:</strong> ${data.eventLocation}</p>
-            <p><strong>Referencia:</strong> ${data.orderReference}</p>
-          </div>
-          
-          <div class="total">
-            Total pagado: $${data.totalAmount.toLocaleString()}
-          </div>
-          
-          <h2>🎟️ Tus tickets</h2>
-          <p>Presenta estos códigos QR en la entrada del evento:</p>
-          
-          ${data.tickets.map(ticket => `
-            <div class="ticket">
-              <div class="ticket-type">Ticket ${ticket.name.toUpperCase()}</div>
-              <div class="qr-code">
-                <img src="cid:qr-${ticket.id}" alt="QR Code" width="150" height="150">
-              </div>
-              <div class="ticket-code">Código: ${ticket.code}</div>
-            </div>
-          `).join('')}
-          
-          <div style="background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 8px; margin: 20px 0;">
-            <h3>📱 Instrucciones importantes:</h3>
-            <ul>
-              <li>Guarda este email y/o descarga la imagen del QR</li>
-              <li>Presenta el QR en tu celular o impreso en la entrada</li>
-              <li>Llega con tiempo para evitar colas</li>
-              <li>Cada ticket solo puede usarse una vez</li>
-            </ul>
-          </div>
-        </div>
-        
-        <div class="footer">
-          <p>¡Que disfrutes el evento! 🎉</p>
-          <p>Este email fue enviado por NoTrip • <a href="mailto:support@notrip.com">Soporte</a></p>
-        </div>
-      </div>
-    </body>
-    </html>
+// Template para email de reset de contraseña
+export function getPasswordResetEmailTemplate(url: string, userName?: string) {
+  const html = `
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Restablecer Contraseña - tckt_</title>
+  <meta name="color-scheme" content="light dark">
+  <meta name="supported-color-schemes" content="light dark">
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f5f5f5; color: #333333;">
+  <table role="presentation" style="width: 100%; border-collapse: collapse; background-color: #f5f5f5;">
+    <tr>
+      <td align="center" style="padding: 40px 20px;">
+        <table role="presentation" style="width: 100%; max-width: 600px; border-collapse: collapse; background-color: #ffffff; border: 1px solid #e0e0e0; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+
+          <!-- Header -->
+          <tr>
+            <td align="center" style="padding: 40px 40px 20px 40px; background-color: #000000; border-radius: 8px 8px 0 0;">
+              <h1 style="margin: 0; font-size: 32px; font-weight: 700; color: #ffffff; letter-spacing: -0.02em;">
+                tckt_
+              </h1>
+              <p style="margin: 8px 0 0 0; font-size: 14px; color: #a0a0a0;">
+                Tu plataforma de eventos y entradas
+              </p>
+            </td>
+          </tr>
+
+          <!-- Content -->
+          <tr>
+            <td style="padding: 40px 40px 40px 40px;">
+              <table role="presentation" style="width: 100%; border-collapse: collapse;">
+                <tr>
+                  <td style="padding: 0 0 24px 0;">
+                    <h2 style="margin: 0; font-size: 24px; font-weight: 600; color: #000000; line-height: 1.3;">
+                      Solicitud de restablecimiento de contraseña
+                    </h2>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td style="padding: 0 0 20px 0;">
+                    <p style="margin: 0; font-size: 16px; line-height: 1.6; color: #333333;">
+                      ${userName ? `Hola <strong>${userName}</strong>,` : "Hola,"}
+                    </p>
+                    <p style="margin: 12px 0 0 0; font-size: 16px; line-height: 1.6; color: #333333;">
+                      Recibimos una solicitud para restablecer la contraseña de tu cuenta en tckt_. Si fuiste tu quien lo solicitó, puedes restablecer tu contraseña haciendo clic en el botón de abajo.
+                    </p>
+                  </td>
+                </tr>
+
+                <!-- CTA Button -->
+                <tr>
+                  <td style="padding: 0 0 32px 0;" align="center">
+                    <table role="presentation" style="border-collapse: collapse;">
+                      <tr>
+                        <td align="center" style="border-radius: 6px; background-color: #000000;">
+                          <a href="${url}" target="_blank" rel="noopener noreferrer" style="display: inline-block; padding: 16px 40px; font-size: 16px; font-weight: 600; color: #ffffff; text-decoration: none; border-radius: 6px;">
+                            Restablecer mi contraseña
+                          </a>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td style="padding: 0 0 16px 0;">
+                    <p style="margin: 0; font-size: 14px; line-height: 1.5; color: #666666;">
+                      Si el botón no funciona, copia y pega este enlace en tu navegador:
+                    </p>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td style="padding: 0 0 32px 0;">
+                    <div style="margin: 0; font-size: 13px; line-height: 1.5; color: #0066cc; word-break: break-all; background-color: #f5f5f5; padding: 12px; border-radius: 4px; border: 1px solid #e0e0e0;">
+                      <a href="${url}" target="_blank" rel="noopener noreferrer" style="color: #0066cc; text-decoration: underline;">${url}</a>
+                    </div>
+                  </td>
+                </tr>
+
+                <!-- Security Notice -->
+                <tr>
+                  <td style="padding: 24px 0 0 0; border-top: 1px solid #e0e0e0;">
+                    <p style="margin: 0 0 12px 0; font-size: 14px; line-height: 1.5; color: #333333;">
+                      <strong>Información importante de seguridad:</strong>
+                    </p>
+                    <ul style="margin: 0; padding-left: 20px; font-size: 14px; line-height: 1.6; color: #666666;">
+                      <li style="margin-bottom: 8px;">Este enlace es válido por 1 hora desde el momento de la solicitud</li>
+                      <li style="margin-bottom: 8px;">Si no solicitaste restablecer tu contraseña, ignora este correo</li>
+                      <li style="margin-bottom: 8px;">Tu contraseña actual seguirá siendo válida hasta que completes el proceso</li>
+                      <li>Nunca compartas este enlace con otras personas</li>
+                    </ul>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td style="padding: 24px 0 0 0;">
+                    <p style="margin: 0; font-size: 14px; line-height: 1.5; color: #666666;">
+                      Si tienes alguna pregunta o necesitas ayuda, no dudes en contactarnos respondiendo a este correo.
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="padding: 24px 40px; border-top: 1px solid #e0e0e0; background-color: #f9f9f9;">
+              <p style="margin: 0; font-size: 12px; line-height: 1.5; color: #999999; text-align: center;">
+                © ${new Date().getFullYear()} tckt_. Todos los derechos reservados.
+              </p>
+              <p style="margin: 8px 0 0 0; font-size: 12px; line-height: 1.5; color: #999999; text-align: center;">
+                Este es un correo electrónico automático, por favor no respondas a esta dirección.
+              </p>
+            </td>
+          </tr>
+        </table>
+
+        <!-- Footer text outside card -->
+        <table role="presentation" style="width: 100%; max-width: 600px; margin-top: 20px;">
+          <tr>
+            <td align="center">
+              <p style="margin: 0; font-size: 12px; line-height: 1.5; color: #999999;">
+                Has recibido este correo porque se solicitó un restablecimiento de contraseña para tu cuenta en tckt_.
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
   `;
-}
 
-/**
- * Sends payment failure notification email
- */
-export async function sendPaymentFailureEmail(userEmail: string, userName: string, eventName: string, orderReference: string) {
-  try {
-    if (!resend) {
-      console.warn('Resend not configured, skipping failure email sending');
-      return {
-        success: false,
-        error: 'Email service not configured'
-      };
-    }
+  const text = `
+Solicitud de restablecimiento de contraseña - tckt_
 
-    const emailData = {
-      from: 'NoTrip <noreply@notrip.com>',
-      to: [userEmail],
-      subject: `❌ Problema con tu pago - ${eventName}`,
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-          <div style="background: #fee; border: 1px solid #fcc; padding: 20px; border-radius: 8px;">
-            <h2>❌ Pago no procesado</h2>
-            <p>Hola <strong>${userName}</strong>,</p>
-            <p>No pudimos procesar tu pago para <strong>${eventName}</strong>.</p>
-            <p><strong>Referencia:</strong> ${orderReference}</p>
-            <p>Tus tickets han sido liberados y puedes intentar comprar nuevamente.</p>
-            <a href="${process.env.NEXT_PUBLIC_BASE_URL}/events" style="background: #000; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block; margin-top: 10px;">
-              Intentar nuevamente
-            </a>
-          </div>
-        </div>
-      `,
-    };
+${userName ? `Hola ${userName},` : "Hola,"}
 
-    const result = await resend.emails.send(emailData);
-    
-    return {
-      success: true,
-      data: result
-    };
-  } catch (error) {
-    console.error('Email sending error:', error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Failed to send email'
-    };
-  }
+Recibimos una solicitud para restablecer la contraseña de tu cuenta en tckt_. Si fuiste tu quien lo solicitó, puedes restablecer tu contraseña usando el siguiente enlace:
+
+${url}
+
+INFORMACIÓN IMPORTANTE DE SEGURIDAD:
+- Este enlace es válido por 1 hora desde el momento de la solicitud
+- Si no solicitaste restablecer tu contraseña, ignora este correo
+- Tu contraseña actual seguirá siendo válida hasta que completes el proceso
+- Nunca compartas este enlace con otras personas
+
+Si tienes alguna pregunta o necesitas ayuda, no dudes en contactarnos respondiendo a este correo.
+
+© ${new Date().getFullYear()} tckt_. Todos los derechos reservados.
+
+Has recibido este correo porque se solicitó un restablecimiento de contraseña para tu cuenta en tckt_.
+  `;
+
+  return { html, text };
 }

@@ -36,7 +36,13 @@ export async function middleware(request: NextRequest) {
   };
 
   // 1️⃣ Si el usuario ya está autenticado y va a login/signup → redirigir a home
-  if (sessionCookie && authRoutes.includes(pathname)) {
+  // PERO: permitir que el flujo OAuth se complete (Better Auth puede necesitar procesar el callback)
+  // Si hay parámetros de OAuth (code, state) en la URL, permitir que continúe
+  const hasOAuthParams = request.nextUrl.searchParams.has("code") ||
+                         request.nextUrl.searchParams.has("state") ||
+                         request.nextUrl.searchParams.has("error");
+
+  if (sessionCookie && authRoutes.includes(pathname) && !hasOAuthParams) {
     return NextResponse.redirect(new URL("/home", request.url));
   }
 
