@@ -1,12 +1,13 @@
 "use client";
 
+import { Suspense } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { XCircle } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { TcktLogo } from "@/components/tckt-logo";
 
-export default function DoorSaleFailurePage() {
+function DoorSaleFailureContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const eventId = searchParams.get("collection_id") || searchParams.get("eventId");
@@ -59,5 +60,13 @@ export default function DoorSaleFailurePage() {
         </CardFooter>
       </Card>
     </div>
+  );
+}
+
+export default function DoorSaleFailurePage() {
+  return (
+    <Suspense fallback={<div className="flex min-h-screen items-center justify-center bg-black">Cargando...</div>}>
+      <DoorSaleFailureContent />
+    </Suspense>
   );
 }

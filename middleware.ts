@@ -22,6 +22,7 @@ export async function middleware(request: NextRequest) {
     "/admin",
     "/scanner",
     "/tickets",
+    "/home",
   ];
 
   // 🚫 Si accede a /not_found → redirigir a /login
@@ -36,7 +37,7 @@ export async function middleware(request: NextRequest) {
 
   // 1️⃣ Si el usuario ya está autenticado y va a login/signup → redirigir a home
   if (sessionCookie && authRoutes.includes(pathname)) {
-    return NextResponse.redirect(new URL("/", request.url));
+    return NextResponse.redirect(new URL("/home", request.url));
   }
 
   // 2️⃣ Rutas públicas → acceso libre

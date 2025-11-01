@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft } from "@untitledui/icons";
 
-export default function PaymentRedirectPage() {
+function PaymentRedirectContent() {
   const router = useRouter();
   const sp = useSearchParams();
   const rawTo = sp.get("to") || "";
@@ -67,5 +67,13 @@ export default function PaymentRedirectPage() {
         <p className="mt-6 text-center text-[11px] text-neutral-500">Tip: si no se abrió, tu navegador puede estar bloqueando pop-ups.</p>
       </main>
     </div>
+  );
+}
+
+export default function PaymentRedirectPage() {
+  return (
+    <Suspense fallback={<div className="flex min-h-screen items-center justify-center bg-[#0B0B0B]">Cargando...</div>}>
+      <PaymentRedirectContent />
+    </Suspense>
   );
 }

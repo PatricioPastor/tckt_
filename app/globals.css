@@ -151,31 +151,28 @@
 /* Native App Feel - Prevent overscroll bounce */
 html {
   scroll-behavior: smooth;
-  overscroll-behavior-y: none; /* Prevents vertical bounce/rubber-band effect */
-  overscroll-behavior-x: none; /* Prevents horizontal bounce */
+  overscroll-behavior: none;
   height: 100%;
   width: 100%;
+  background-color: #050505;
 }
 
 body {
-  overscroll-behavior-y: none;
-  overscroll-behavior-x: none;
   height: 100%;
   width: 100%;
-  position: relative;
-  /* Prevent momentum scrolling issues on iOS */
-  -webkit-overflow-scrolling: touch;
+  background-color: #050505;
+  overscroll-behavior: none;
+  overflow: hidden;
 }
 
 /* Main app container - this is where scroll should happen */
 #__next {
-  height: 100%;
+  min-height: 100dvh;
   width: 100%;
-  overflow-y: auto;
-  overflow-x: hidden;
-  overscroll-behavior: none;
-  /* Smooth momentum scrolling on iOS */
-  -webkit-overflow-scrolling: touch;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background-color: #050505;
 }
 
 /* Preserve pull-to-refresh on specific scrollable containers when desired */
@@ -196,10 +193,5 @@ body {
     -webkit-touch-callout: default;
     -webkit-user-select: auto;
     user-select: auto;
-  }
-
-  /* Smooth scrolling momentum */
-  #__next {
-    -webkit-overflow-scrolling: touch;
   }
 }

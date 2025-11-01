@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,7 +8,7 @@ import { Separator } from "@/components/ui/separator";
 import { Loader2, Ticket, Minus, Plus } from "lucide-react";
 import { TcktLogo } from "@/components/tckt-logo";
 
-export default function DoorSalePage() {
+function DoorSalePageContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const eventId = searchParams.get("eventId");
@@ -263,5 +263,13 @@ export default function DoorSalePage() {
         </CardFooter>
       </Card>
     </div>
+  );
+}
+
+export default function DoorSalePage() {
+  return (
+    <Suspense fallback={<div className="flex min-h-screen items-center justify-center bg-black">Cargando...</div>}>
+      <DoorSalePageContent />
+    </Suspense>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { CheckCircle, Clock, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -18,7 +18,7 @@ interface PaymentStatus {
   error?: string;
 }
 
-export default function PaymentConfirmPage() {
+function PaymentConfirmContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [paymentStatus, setPaymentStatus] = useState<PaymentStatus>({ status: 'pending' });
@@ -202,5 +202,13 @@ export default function PaymentConfirmPage() {
 
       </div>
     </div>
+  );
+}
+
+export default function PaymentConfirmPage() {
+  return (
+    <Suspense fallback={<div className="flex min-h-screen items-center justify-center bg-[#0B0B0B]">Cargando...</div>}>
+      <PaymentConfirmContent />
+    </Suspense>
   );
 }

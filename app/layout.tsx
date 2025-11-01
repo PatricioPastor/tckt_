@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
@@ -18,6 +18,14 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+  userScalable: true,
+  viewportFit: 'cover', // Para PWA/notch devices
+};
+
 export const metadata: Metadata = {
   title: {
     default: "tckt_ - Tus eventos, tus entradas",
@@ -29,13 +37,6 @@ export const metadata: Metadata = {
   creator: "tckt_",
   publisher: "tckt_",
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'),
-  viewport: {
-    width: 'device-width',
-    initialScale: 1,
-    maximumScale: 5,
-    userScalable: true,
-    viewportFit: 'cover', // Para PWA/notch devices
-  },
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
