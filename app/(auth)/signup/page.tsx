@@ -99,7 +99,11 @@ function SignupPageContent() {
         callbackURL: redirectTo,
         fetchOptions: {
           onSuccess: () => {
-            router.push(redirectTo);
+            if(redirectTo){
+              router.push(redirectTo);
+            }else{
+              router.push("/home");
+            }
           },
           onError: (ctx) => {
             setErrorMessage(ctx.error.message ?? "Fallo el registro con Google.");

@@ -85,6 +85,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
       fetchOptions:{
         onSuccess: () => {
           setIsLoading(false)
+          router.push("/home")
         },
         onError: (ctx) => {
           setError(ctx.error.message)
