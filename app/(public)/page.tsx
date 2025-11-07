@@ -3,7 +3,7 @@ import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { getPublishedEvents } from "@/lib/data/events";
 import { SiteHeader } from "@/components/site-header";
-import { EventCarousel } from "./components/event-carousel";
+import { EventSearch } from "./components/event-search";
 import { MobileOnlyGuard } from "./components/mobile-only-guard";
 
 export const metadata: Metadata = {
@@ -52,10 +52,20 @@ export default async function HomePage() {
 
   return (
     <MobileOnlyGuard>
-      <div className="absolute left-0 right-0 top-0 z-30">
+      <div className="min-h-screen w-full bg-black text-white">
         <SiteHeader user={session?.user ?? null} />
+        <main className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 pb-12 pt-6">
+          <div className="space-y-2">
+            <p className="text-xs uppercase tracking-[0.4em] text-neutral-500">Cartelera</p>
+            <h1 className="text-2xl font-semibold text-white">Encontrá tu próximo evento</h1>
+            <p className="text-sm text-neutral-400">
+              Explorá la agenda completa, filtrá por ciudad o artista y comprá en segundos.
+            </p>
+          </div>
+
+          <EventSearch events={events} />
+        </main>
       </div>
-      <EventCarousel events={events} isLoggedIn={!!session?.user} />
     </MobileOnlyGuard>
   );
 }
